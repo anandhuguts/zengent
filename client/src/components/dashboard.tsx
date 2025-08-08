@@ -154,12 +154,24 @@ export default function Dashboard({ analysisData }: DashboardProps) {
         body: JSON.stringify(analysisData),
       });
       
-      if (response.ok) {
-        const result = await response.json();
-        setAiAnalysis(result);
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('AI analysis failed:', response.status, errorData);
+        throw new Error(`Server error: ${response.status}`);
       }
+      
+      const result = await response.json();
+      setAiAnalysis(result);
     } catch (error) {
       console.error('Failed to generate AI analysis:', error);
+      // Show user-friendly error message
+      setAiAnalysis({
+        projectOverview: "Unable to generate AI analysis at this time. Please try again later.",
+        architectureInsights: [],
+        moduleInsights: {},
+        suggestions: [],
+        qualityScore: 0
+      });
     } finally {
       setIsLoadingAI(false);
     }

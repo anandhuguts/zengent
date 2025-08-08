@@ -8,6 +8,7 @@ import ReactFlow, {
   useEdgesState,
   ConnectionMode,
   Position,
+  Handle,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -36,6 +37,7 @@ const nodeTypes = {
     
     return (
       <div className={`${colors.bg} ${colors.border} border-2 rounded-xl shadow-lg min-w-[140px] max-w-[200px]`}>
+        <Handle type="target" position={Position.Top} id="target" />
         <div className="p-3">
           <div className={`font-bold text-sm ${colors.text} text-center mb-1`}>
             {data.label}
@@ -58,11 +60,13 @@ const nodeTypes = {
             </div>
           )}
         </div>
+        <Handle type="source" position={Position.Bottom} id="source" />
       </div>
     );
   },
   class: ({ data }: { data: any }) => (
     <div className="bg-white border-2 border-gray-800 shadow-lg min-w-[250px]">
+      <Handle type="target" position={Position.Top} id="target" />
       {/* Class Header */}
       <div className="bg-gray-800 text-white p-3 text-center font-bold">
         {data.label}
@@ -101,10 +105,12 @@ const nodeTypes = {
           )}
         </div>
       )}
+      <Handle type="source" position={Position.Bottom} id="source" />
     </div>
   ),
   controller: ({ data }: { data: any }) => (
     <div className="bg-blue-100 border-2 border-primary rounded-lg p-4 min-w-[150px]">
+      <Handle type="target" position={Position.Top} id="target" />
       <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -112,10 +118,12 @@ const nodeTypes = {
       </div>
       <div className="font-medium text-sm text-primary text-center">{data.label}</div>
       <div className="text-xs text-gray-600 text-center">{data.annotations?.[0]}</div>
+      <Handle type="source" position={Position.Bottom} id="source" />
     </div>
   ),
   service: ({ data }: { data: any }) => (
     <div className="bg-green-100 border-2 border-accent rounded-lg p-4 min-w-[150px]">
+      <Handle type="target" position={Position.Top} id="target" />
       <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center mx-auto mb-2">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
@@ -123,10 +131,12 @@ const nodeTypes = {
       </div>
       <div className="font-medium text-sm text-accent text-center">{data.label}</div>
       <div className="text-xs text-gray-600 text-center">{data.annotations?.[0]}</div>
+      <Handle type="source" position={Position.Bottom} id="source" />
     </div>
   ),
   repository: ({ data }: { data: any }) => (
     <div className="bg-purple-100 border-2 border-purple-600 rounded-lg p-4 min-w-[150px]">
+      <Handle type="target" position={Position.Top} id="target" />
       <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
@@ -134,10 +144,12 @@ const nodeTypes = {
       </div>
       <div className="font-medium text-sm text-purple-600 text-center">{data.label}</div>
       <div className="text-xs text-gray-600 text-center">{data.annotations?.[0]}</div>
+      <Handle type="source" position={Position.Bottom} id="source" />
     </div>
   ),
   entity: ({ data }: { data: any }) => (
     <div className="bg-orange-100 border-2 border-orange-600 rounded-lg p-4 min-w-[150px]">
+      <Handle type="target" position={Position.Top} id="target" />
       <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-2">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -145,6 +157,7 @@ const nodeTypes = {
       </div>
       <div className="font-medium text-sm text-orange-600 text-center">{data.label}</div>
       <div className="text-xs text-gray-600 text-center">{data.annotations?.[0]}</div>
+      <Handle type="source" position={Position.Bottom} id="source" />
     </div>
   ),
 };
@@ -240,6 +253,8 @@ function generateFlowDiagram(analysisData: AnalysisData, nodes: Node[], edges: E
           id: `${rel.from}-${rel.to}-${index}`,
           source: rel.from,
           target: rel.to,
+          sourceHandle: 'source',
+          targetHandle: 'target',
           type: 'smoothstep',
           animated: rel.type === 'calls',
           label: rel.method || rel.type,
@@ -306,6 +321,8 @@ function generateComponentDiagram(analysisData: AnalysisData, nodes: Node[], edg
         id: `${rel.from}-${rel.to}-${index}`,
         source: rel.from,
         target: rel.to,
+        sourceHandle: 'source',
+        targetHandle: 'target',
         type: rel.type === 'extends' || rel.type === 'implements' ? 'straight' : 'smoothstep',
         animated: rel.type === 'calls',
         label: rel.type,
@@ -365,6 +382,8 @@ function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: 
         id: `${rel.from}-${rel.to}-${index}`,
         source: rel.from,
         target: rel.to,
+        sourceHandle: 'source',
+        targetHandle: 'target',
         type: 'smoothstep',
         label: rel.type,
         style: getEdgeStyle(rel.type),
@@ -410,6 +429,8 @@ function generateSequenceDiagram(analysisData: AnalysisData, nodes: Node[], edge
           id: `${rel.from}-${rel.to}-${index}`,
           source: rel.from,
           target: rel.to,
+          sourceHandle: 'source',
+          targetHandle: 'target',
           type: 'straight',
           animated: true,
           label: rel.method,
@@ -447,6 +468,8 @@ function generateERDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edg
             id: `${entity.name}-${field.targetEntity}-${fieldIndex}`,
             source: entity.name,
             target: field.targetEntity,
+            sourceHandle: 'source',
+            targetHandle: 'target',
             type: 'smoothstep',
             label: field.relationship,
             style: { strokeWidth: 2 },
