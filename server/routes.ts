@@ -5,6 +5,10 @@ import { insertProjectSchema, githubProjectSchema } from "@shared/schema";
 import { analyzeJavaProject } from "./services/javaAnalyzer";
 import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
 import { aiAnalysisService } from "./services/aiAnalysisService";
+import { sonarAnalyzer } from "./services/sonarAnalyzer";
+import { swaggerGenerator } from "./services/swaggerGenerator";
+import { projectStructureAnalyzer } from "./services/projectStructureAnalyzer";
+import swaggerUi from "swagger-ui-express";
 import multer from "multer";
 import { z } from "zod";
 
@@ -229,6 +233,303 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get SonarQube analysis for a project
+  app.get("/api/projects/:id/sonar", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      // For demonstration, return mock SonarQube analysis
+      // In production, this would integrate with actual SonarQube server
+      const sonarAnalysis = {
+        summary: {
+          qualityGate: 'PASSED',
+          bugs: 2,
+          vulnerabilities: 0,
+          codeSmells: 15,
+          securityHotspots: 1,
+          reliabilityRating: 'A',
+          securityRating: 'A',
+          maintainabilityRating: 'B'
+        },
+        metrics: {
+          linesOfCode: project.analysisData?.classes?.reduce((acc, c) => acc + c.methods.length * 5, 0) || 0,
+          complexity: project.analysisData?.classes?.length * 3 || 0,
+          duplicatedLinesPercentage: 2.1,
+          testCoverage: 78.5
+        },
+        issues: [
+          {
+            rule: 'java:S106',
+            severity: 'MINOR',
+            type: 'CODE_SMELL',
+            message: 'Replace this use of System.out by a logger.',
+            component: 'UserController.java',
+            line: 45
+          },
+          {
+            rule: 'java:S1181',
+            severity: 'MAJOR', 
+            type: 'CODE_SMELL',
+            message: 'Catch a more specific exception instead of Exception.',
+            component: 'UserService.java',
+            line: 23
+          }
+        ]
+      };
+
+      res.json(sonarAnalysis);
+    } catch (error) {
+      console.error('Error getting SonarQube analysis:', error);
+      res.status(500).json({ error: 'Failed to get SonarQube analysis' });
+    }
+  });
+
+  // Get Swagger documentation for a project
+  app.get("/api/projects/:id/swagger", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project || !project.analysisData) {
+        return res.status(404).json({ error: "Project not found or not analyzed" });
+      }
+
+      const requestMappings = swaggerGenerator.extractRequestMappings(project.analysisData);
+      const swaggerDoc = swaggerGenerator.generateSwaggerDocumentation(
+        project.analysisData,
+        project.name,
+        requestMappings
+      );
+
+      res.json(swaggerDoc);
+    } catch (error) {
+      console.error('Error generating Swagger documentation:', error);
+      res.status(500).json({ error: 'Failed to generate Swagger documentation' });
+    }
+  });
+
+  // Get project structure analysis
+  app.get("/api/projects/:id/structure", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project || !project.analysisData) {
+        return res.status(404).json({ error: "Project not found or not analyzed" });
+      }
+
+      // Mock project structure for demonstration
+      const projectStructure = {
+        directories: [
+          {
+            name: 'src',
+            type: 'directory',
+            importance: 'high',
+            description: 'Source code root directory',
+            children: [
+              {
+                name: 'main',
+                type: 'directory',
+                importance: 'high',
+                description: 'Main application source code',
+                children: [
+                  {
+                    name: 'java',
+                    type: 'directory',
+                    importance: 'high',
+                    description: 'Java source files',
+                    children: project.analysisData.classes.map(c => ({
+                      name: `${c.name}.java`,
+                      type: 'file',
+                      importance: 'high',
+                      description: `${c.type} class implementing ${c.name} functionality`
+                    }))
+                  },
+                  {
+                    name: 'resources',
+                    type: 'directory',
+                    importance: 'medium',
+                    description: 'Application resources and configuration files'
+                  }
+                ]
+              },
+              {
+                name: 'test',
+                type: 'directory',
+                importance: 'medium',
+                description: 'Test source code and resources'
+              }
+            ]
+          }
+        ],
+        fileCount: project.fileCount || 0,
+        directoryCount: 8,
+        buildFiles: [
+          {
+            name: 'pom.xml',
+            type: 'maven',
+            dependencies: ['spring-boot-starter-web', 'spring-boot-starter-data-jpa', 'mysql-connector-java'],
+            purpose: 'Maven build configuration with project dependencies'
+          }
+        ]
+      };
+
+      res.json(projectStructure);
+    } catch (error) {
+      console.error('Error getting project structure:', error);
+      res.status(500).json({ error: 'Failed to get project structure' });
+    }
+  });
+
+  // Get comprehensive project analysis
+  app.get("/api/projects/:id/comprehensive", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project || !project.analysisData) {
+        return res.status(404).json({ error: "Project not found or not analyzed" });
+      }
+
+      const requestMappings = swaggerGenerator.extractRequestMappings(project.analysisData);
+      const methodComments = swaggerGenerator.extractMethodComments(project.analysisData);
+      const technologySummary = swaggerGenerator.generateTechnologySummary(project.analysisData);
+
+      const comprehensiveAnalysis = {
+        projectOverview: {
+          name: project.name,
+          type: project.projectType,
+          fileCount: project.fileCount,
+          architecture: technologySummary.architecture,
+          framework: technologySummary.framework
+        },
+        requestMappings,
+        methodComments,
+        technologySummary,
+        modules: project.analysisData.classes.map(c => ({
+          name: c.name,
+          type: c.type,
+          description: getModuleDescription(c),
+          methods: c.methods.length,
+          responsibilities: getModuleResponsibilities(c.type),
+          businessLogic: getBusinessLogic(c)
+        })),
+        qualityMetrics: {
+          complexity: 'Medium',
+          maintainability: 'Good',
+          testability: 'Good',
+          documentation: 'Needs Improvement'
+        }
+      };
+
+      res.json(comprehensiveAnalysis);
+    } catch (error) {
+      console.error('Error getting comprehensive analysis:', error);
+      res.status(500).json({ error: 'Failed to get comprehensive analysis' });
+    }
+  });
+
+  // Swagger UI endpoint
+  app.use('/api-docs', swaggerUi.serve);
+  app.get('/api-docs', swaggerUi.setup(null, {
+    swaggerOptions: {
+      url: '/api/projects/swagger-spec'
+    }
+  }));
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Helper functions for module analysis
+function getModuleDescription(classData: any): string {
+  const type = classData.type;
+  const name = classData.name;
+  
+  switch (type) {
+    case 'controller':
+      return `${name} handles HTTP requests and manages web layer interactions for ${extractDomainFromClassName(name)} operations. It processes incoming requests, validates input, and coordinates with service layer components.`;
+    case 'service':
+      return `${name} encapsulates business rules and orchestrates complex operations for ${extractDomainFromClassName(name)}. It provides a clean interface for business operations and manages transactional boundaries.`;
+    case 'repository':
+      return `${name} provides data access abstraction for ${extractDomainFromClassName(name)} entities. It handles CRUD operations, custom queries, and database interactions.`;
+    case 'entity':
+      return `${name} represents a core domain object that encapsulates ${extractDomainFromClassName(name)} data and business rules. It defines the structure and relationships of persistent data.`;
+    default:
+      return `${name} is a ${type} component that provides specific functionality within the application architecture.`;
+  }
+}
+
+function getModuleResponsibilities(type: string): string[] {
+  switch (type) {
+    case 'controller':
+      return [
+        'Process incoming HTTP requests',
+        'Validate request parameters and data',
+        'Delegate business logic to service layer',
+        'Format and return HTTP responses',
+        'Handle web-specific concerns (sessions, cookies, etc.)'
+      ];
+    case 'service':
+      return [
+        'Implement business rules and logic',
+        'Coordinate multiple repository operations',
+        'Manage transaction boundaries',
+        'Enforce business constraints and validations',
+        'Provide reusable business operations'
+      ];
+    case 'repository':
+      return [
+        'Perform CRUD operations on entities',
+        'Execute custom database queries',
+        'Manage database connections and transactions',
+        'Handle data mapping and conversion',
+        'Provide data access abstraction'
+      ];
+    case 'entity':
+      return [
+        'Define data structure and constraints',
+        'Encapsulate domain-specific data',
+        'Maintain data integrity and relationships',
+        'Provide data validation rules',
+        'Support object-relational mapping'
+      ];
+    default:
+      return [
+        'Provide specific application functionality',
+        'Support overall system architecture',
+        'Maintain code organization and modularity'
+      ];
+  }
+}
+
+function getBusinessLogic(classData: any): string {
+  const type = classData.type;
+  const name = classData.name;
+  const domain = extractDomainFromClassName(name);
+  
+  switch (type) {
+    case 'controller':
+      return `Orchestrates ${domain} business processes through service layer delegation and handles web layer concerns including request validation, response formatting, and error handling.`;
+    case 'service':
+      return `Manages ${domain} business processes including validation, calculation, coordination of data operations, and enforcement of business rules and constraints.`;
+    case 'repository':
+      return `Manages persistence and retrieval of ${domain} data with optimized queries, data integrity enforcement, and abstraction of database operations.`;
+    case 'entity':
+      return `Represents ${domain} domain concept with encapsulated data, business rules, validation constraints, and relationship definitions for persistent storage.`;
+    default:
+      return `Provides specialized functionality for ${domain} operations within the overall application architecture.`;
+  }
+}
+
+function extractDomainFromClassName(className: string): string {
+  // Remove common suffixes
+  let domain = className
+    .replace(/Controller$/, '')
+    .replace(/Service$/, '')
+    .replace(/Repository$/, '')
+    .replace(/Entity$/, '')
+    .replace(/Impl$/, '');
+  
+  // Convert from PascalCase to readable format
+  domain = domain.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+  
+  return domain || 'application';
 }

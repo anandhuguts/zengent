@@ -120,8 +120,8 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <GitBranch className="text-xl" />
               <div>
-                <h2 className="text-lg font-medium">Multi-Language Architecture Analyzer - Zengent AI</h2>
-                <p className="text-blue-200 text-sm">Intelligent code analysis for enterprise applications</p>
+                <h2 className="text-lg font-medium">Project Analysis Document Generator - Zengent AI</h2>
+                <p className="text-blue-200 text-sm">Comprehensive project analysis and documentation platform</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">

@@ -1,0 +1,642 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  Code, 
+  Database, 
+  Settings, 
+  FileText, 
+  Users, 
+  GitBranch,
+  FolderTree,
+  Bug,
+  Shield,
+  FileCode,
+  Activity,
+  Layers,
+  BookOpen,
+  Target,
+  Zap
+} from "lucide-react";
+import { type Project } from "@shared/schema";
+
+interface ComprehensiveAnalysisProps {
+  project: Project;
+}
+
+export default function ComprehensiveAnalysis({ project }: ComprehensiveAnalysisProps) {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+
+  const { data: sonarData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'sonar'],
+    enabled: !!project.id,
+  });
+
+  const { data: swaggerData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'swagger'],
+    enabled: !!project.id,
+  });
+
+  const { data: structureData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'structure'],
+    enabled: !!project.id,
+  });
+
+  const { data: comprehensiveData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'comprehensive'],
+    enabled: !!project.id,
+  });
+
+  const toggleSection = (section: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(section)) {
+      newExpanded.delete(section);
+    } else {
+      newExpanded.add(section);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'BLOCKER': return 'bg-red-100 text-red-800';
+      case 'CRITICAL': return 'bg-red-100 text-red-800';
+      case 'MAJOR': return 'bg-orange-100 text-orange-800';
+      case 'MINOR': return 'bg-yellow-100 text-yellow-800';
+      case 'INFO': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getHttpMethodColor = (method: string) => {
+    switch (method.toUpperCase()) {
+      case 'GET': return 'bg-green-100 text-green-800';
+      case 'POST': return 'bg-blue-100 text-blue-800';
+      case 'PUT': return 'bg-yellow-100 text-yellow-800';
+      case 'DELETE': return 'bg-red-100 text-red-800';
+      case 'PATCH': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const renderProjectStructure = (directories: any[], level = 0) => {
+    return directories.map((item, index) => (
+      <div key={index} className={`ml-${level * 4}`}>
+        <div className="flex items-center space-x-2 py-1">
+          {item.type === 'directory' ? (
+            <FolderTree className="w-4 h-4 text-blue-500" />
+          ) : (
+            <FileCode className="w-4 h-4 text-gray-500" />
+          )}
+          <span className={`text-sm ${item.importance === 'high' ? 'font-semibold' : ''}`}>
+            {item.name}
+          </span>
+          <Badge variant="outline" className="text-xs">
+            {item.importance}
+          </Badge>
+        </div>
+        {item.description && (
+          <div className={`ml-6 text-xs text-gray-600 mb-2`}>
+            {item.description}
+          </div>
+        )}
+        {item.children && renderProjectStructure(item.children, level + 1)}
+      </div>
+    ));
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <BookOpen className="w-5 h-5" />
+            <span>Comprehensive Project Analysis</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="sonar">Code Quality</TabsTrigger>
+              <TabsTrigger value="api">API Docs</TabsTrigger>
+              <TabsTrigger value="structure">Structure</TabsTrigger>
+              <TabsTrigger value="modules">Modules</TabsTrigger>
+              <TabsTrigger value="technology">Technology</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
+              {comprehensiveData && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <FileCode className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                      <div className="text-2xl font-bold">{comprehensiveData.projectOverview.fileCount}</div>
+                      <div className="text-sm text-gray-600">Source Files</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <Layers className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                      <div className="text-2xl font-bold">{comprehensiveData.modules?.length || 0}</div>
+                      <div className="text-sm text-gray-600">Modules</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <Target className="w-8 h-8 mx-auto mb-2 text-purple-500" />
+                      <div className="text-2xl font-bold">{comprehensiveData.requestMappings?.length || 0}</div>
+                      <div className="text-sm text-gray-600">API Endpoints</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <Activity className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                      <div className="text-2xl font-bold">{comprehensiveData.qualityMetrics?.complexity || 'N/A'}</div>
+                      <div className="text-sm text-gray-600">Complexity</div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {comprehensiveData && (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Architecture</h4>
+                        <p className="text-sm text-gray-600">{comprehensiveData.projectOverview.architecture}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Framework</h4>
+                        <Badge variant="secondary">{comprehensiveData.projectOverview.framework}</Badge>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Quality Metrics</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          <Badge variant="outline">Maintainability: {comprehensiveData.qualityMetrics.maintainability}</Badge>
+                          <Badge variant="outline">Testability: {comprehensiveData.qualityMetrics.testability}</Badge>
+                          <Badge variant="outline">Documentation: {comprehensiveData.qualityMetrics.documentation}</Badge>
+                          <Badge variant="outline">Complexity: {comprehensiveData.qualityMetrics.complexity}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="sonar" className="space-y-6">
+              {sonarData && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <Bug className="w-8 h-8 mx-auto mb-2 text-red-500" />
+                        <div className="text-2xl font-bold text-red-600">{sonarData.summary.bugs}</div>
+                        <div className="text-sm text-gray-600">Bugs</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <Shield className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+                        <div className="text-2xl font-bold text-orange-600">{sonarData.summary.vulnerabilities}</div>
+                        <div className="text-sm text-gray-600">Vulnerabilities</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <Code className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
+                        <div className="text-2xl font-bold text-yellow-600">{sonarData.summary.codeSmells}</div>
+                        <div className="text-sm text-gray-600">Code Smells</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4 text-center">
+                        <Zap className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                        <div className="text-2xl font-bold text-green-600">{sonarData.summary.qualityGate}</div>
+                        <div className="text-sm text-gray-600">Quality Gate</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Quality Metrics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-sm text-gray-600">Lines of Code</div>
+                          <div className="text-xl font-semibold">{sonarData.metrics.linesOfCode.toLocaleString()}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">Complexity</div>
+                          <div className="text-xl font-semibold">{sonarData.metrics.complexity}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">Test Coverage</div>
+                          <div className="text-xl font-semibold">{sonarData.metrics.testCoverage}%</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Issues Found</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {sonarData.issues.map((issue: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <Badge className={getSeverityColor(issue.severity)}>
+                                  {issue.severity}
+                                </Badge>
+                                <Badge variant="outline">{issue.type.replace('_', ' ')}</Badge>
+                              </div>
+                              <span className="text-sm text-gray-500">Line {issue.line}</span>
+                            </div>
+                            <div className="text-sm font-medium mb-1">{issue.message}</div>
+                            <div className="text-xs text-gray-600">
+                              {issue.component} • Rule: {issue.rule}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="api" className="space-y-6">
+              {comprehensiveData?.requestMappings && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>API Endpoints</CardTitle>
+                    <div className="text-sm text-gray-600">
+                      Complete list of REST API endpoints with detailed information
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {comprehensiveData.requestMappings.map((mapping: any, index: number) => (
+                        <Card key={index} className="border-l-4 border-l-blue-200">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-3">
+                                <Badge className={getHttpMethodColor(mapping.httpMethod)}>
+                                  {mapping.httpMethod}
+                                </Badge>
+                                <code className="bg-gray-100 px-2 py-1 rounded text-sm">
+                                  {mapping.endpoint}
+                                </code>
+                              </div>
+                              <Badge variant="outline">{mapping.controllerClass}</Badge>
+                            </div>
+                            <div className="space-y-2">
+                              <div>
+                                <span className="text-sm font-medium">Description: </span>
+                                <span className="text-sm text-gray-600">{mapping.description}</span>
+                              </div>
+                              <div>
+                                <span className="text-sm font-medium">Controller Method: </span>
+                                <code className="text-sm bg-gray-100 px-1 rounded">{mapping.controllerMethod}</code>
+                              </div>
+                              {mapping.serviceCalled && (
+                                <div>
+                                  <span className="text-sm font-medium">Service Called: </span>
+                                  <code className="text-sm bg-gray-100 px-1 rounded">{mapping.serviceCalled}</code>
+                                </div>
+                              )}
+                              {mapping.parameters && mapping.parameters.length > 0 && (
+                                <div>
+                                  <span className="text-sm font-medium">Parameters: </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {mapping.parameters.map((param: any, pIndex: number) => (
+                                      <Badge key={pIndex} variant="secondary" className="text-xs">
+                                        {param.name}: {param.type}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {comprehensiveData?.methodComments && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Method Documentation</CardTitle>
+                    <div className="text-sm text-gray-600">
+                      JavaDoc comments and method descriptions
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {comprehensiveData.methodComments.map((comment: any, index: number) => (
+                        <Collapsible key={index}>
+                          <CollapsibleTrigger asChild>
+                            <div className="flex items-center justify-between p-3 border rounded cursor-pointer hover:bg-gray-50">
+                              <div className="flex items-center space-x-2">
+                                <Code className="w-4 h-4" />
+                                <span className="font-medium">{comment.className}.{comment.methodName}()</span>
+                              </div>
+                              <ChevronDown className="w-4 h-4" />
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-3 border-t bg-gray-50">
+                              <div className="space-y-2">
+                                <div>
+                                  <span className="text-sm font-medium">Description: </span>
+                                  <span className="text-sm text-gray-600">{comment.javadoc}</span>
+                                </div>
+                                <div>
+                                  <span className="text-sm font-medium">Return Type: </span>
+                                  <code className="text-sm bg-white px-1 rounded">{comment.returnType}</code>
+                                </div>
+                                {comment.parameters && comment.parameters.length > 0 && (
+                                  <div>
+                                    <span className="text-sm font-medium">Parameters: </span>
+                                    <div className="mt-1 space-y-1">
+                                      {comment.parameters.map((param: any, pIndex: number) => (
+                                        <div key={pIndex} className="text-sm">
+                                          <code className="bg-white px-1 rounded">{param.name}: {param.type}</code>
+                                          <span className="text-gray-600 ml-2">{param.description}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="structure" className="space-y-6">
+              {structureData && (
+                <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Project Structure Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">{structureData.fileCount}</div>
+                          <div className="text-sm text-gray-600">Total Files</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{structureData.directoryCount}</div>
+                          <div className="text-sm text-gray-600">Directories</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">{structureData.buildFiles?.length || 0}</div>
+                          <div className="text-sm text-gray-600">Build Files</div>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-semibold mb-3">Directory Structure</h4>
+                        <div className="space-y-1">
+                          {renderProjectStructure(structureData.directories)}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {structureData.buildFiles && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Build Configuration</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {structureData.buildFiles.map((buildFile: any, index: number) => (
+                            <div key={index} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className="font-semibold">{buildFile.name}</h4>
+                                <Badge variant="secondary">{buildFile.type.toUpperCase()}</Badge>
+                              </div>
+                              <div className="text-sm text-gray-600 mb-3">{buildFile.purpose}</div>
+                              <div>
+                                <span className="text-sm font-medium">Dependencies: </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {buildFile.dependencies?.map((dep: string, depIndex: number) => (
+                                    <Badge key={depIndex} variant="outline" className="text-xs">
+                                      {dep}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="modules" className="space-y-6">
+              {comprehensiveData?.modules && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Module Analysis</CardTitle>
+                    <div className="text-sm text-gray-600">
+                      Detailed analysis of each project module and its functionality
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {comprehensiveData.modules.map((module: any, index: number) => (
+                        <Card key={index} className="border-l-4 border-l-blue-200">
+                          <Collapsible>
+                            <CollapsibleTrigger asChild>
+                              <CardHeader className="cursor-pointer hover:bg-gray-50">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                                      {module.type === 'controller' && <Users className="w-4 h-4 text-blue-600" />}
+                                      {module.type === 'service' && <Settings className="w-4 h-4 text-green-600" />}
+                                      {module.type === 'repository' && <Database className="w-4 h-4 text-orange-600" />}
+                                      {module.type === 'entity' && <FileText className="w-4 h-4 text-purple-600" />}
+                                    </div>
+                                    <div>
+                                      <CardTitle className="text-lg">{module.name}</CardTitle>
+                                      <Badge variant="outline" className="text-xs">
+                                        {module.type.toUpperCase()}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <ChevronDown className="w-5 h-5" />
+                                </div>
+                              </CardHeader>
+                            </CollapsibleTrigger>
+                            
+                            <CollapsibleContent>
+                              <CardContent className="pt-0">
+                                <div className="space-y-4">
+                                  <div>
+                                    <h4 className="font-semibold text-sm mb-2">Description</h4>
+                                    <p className="text-sm text-gray-600">{module.description}</p>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="font-semibold text-sm mb-2">Responsibilities</h4>
+                                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                      {module.responsibilities?.map((responsibility: string, rIndex: number) => (
+                                        <li key={rIndex}>{responsibility}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="font-semibold text-sm mb-2">Business Logic</h4>
+                                    <p className="text-sm text-gray-600">{module.businessLogic}</p>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <h4 className="font-semibold text-sm mb-2">Methods</h4>
+                                      <div className="text-lg font-semibold text-blue-600">{module.methods}</div>
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold text-sm mb-2">Type</h4>
+                                      <Badge variant="secondary">{module.type}</Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="technology" className="space-y-6">
+              {comprehensiveData?.technologySummary && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Technology Stack Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Architecture & Patterns</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-sm font-medium">Architecture: </span>
+                            <span className="text-sm text-gray-600">{comprehensiveData.technologySummary.architecture}</span>
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium">Framework: </span>
+                            <span className="text-sm text-gray-600">{comprehensiveData.technologySummary.framework}</span>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <span className="text-sm font-medium">Design Patterns: </span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {comprehensiveData.technologySummary.patterns?.map((pattern: string, index: number) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {pattern}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Dependencies</h4>
+                        <div className="space-y-2">
+                          {comprehensiveData.technologySummary.dependencies?.map((dep: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-2 border rounded">
+                              <div>
+                                <span className="text-sm font-medium">{dep.name}</span>
+                                {dep.version && <span className="text-xs text-gray-500 ml-2">v{dep.version}</span>}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Badge variant="outline" className="text-xs">{dep.scope}</Badge>
+                                <span className="text-xs text-gray-600">{dep.description}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-3">Build & Runtime</h4>
+                          <div className="space-y-2 text-sm">
+                            <div><span className="font-medium">Build Tool:</span> {comprehensiveData.technologySummary.buildTool}</div>
+                            <div><span className="font-medium">Java Version:</span> {comprehensiveData.technologySummary.javaVersion}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-3">Testing & Security</h4>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-medium">Testing: </span>
+                              <div className="flex flex-wrap gap-1">
+                                {comprehensiveData.technologySummary.testingFrameworks?.map((framework: string, index: number) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {framework}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium">Security: </span>
+                              <div className="flex flex-wrap gap-1">
+                                {comprehensiveData.technologySummary.securityFrameworks?.map((framework: string, index: number) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {framework}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

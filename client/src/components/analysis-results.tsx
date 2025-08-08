@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { type Project, type AnalysisData } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DiagramCanvas from "@/components/diagram-canvas";
+import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import { pdfExportService } from "@/services/pdfExportService";
 import { 
   FolderOpen, 
@@ -39,6 +41,27 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
   const [isExporting, setIsExporting] = useState(false);
   const analysisData = project.analysisData as AnalysisData | null;
 
+  // Fetch comprehensive analysis data
+  const { data: sonarData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'sonar'],
+    enabled: !!project.id,
+  });
+
+  const { data: swaggerData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'swagger'],
+    enabled: !!project.id,
+  });
+
+  const { data: structureData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'structure'],
+    enabled: !!project.id,
+  });
+
+  const { data: comprehensiveData } = useQuery({
+    queryKey: ['/api/projects', project.id, 'comprehensive'],
+    enabled: !!project.id,
+  });
+
   const handlePDFExport = async () => {
     if (!analysisData) return;
     
@@ -47,7 +70,11 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
       await pdfExportService.exportProjectAnalysis({
         project,
         analysisData,
-        includeAllDiagrams: true
+        includeAllDiagrams: true,
+        sonarAnalysis: sonarData,
+        swaggerData,
+        comprehensiveData,
+        structureData
       });
     } catch (error) {
       console.error('PDF export failed:', error);
@@ -459,6 +486,17 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
           </Card>
         </div>
       </div>
+
+      {/* Comprehensive Analysis Section */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-2 mb-6">
+            <FileText className="w-6 h-6 text-blue-600" />
+            <h3 className="text-xl font-semibold">Comprehensive Project Analysis</h3>
+          </div>
+          <ComprehensiveAnalysis project={project} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
