@@ -116,11 +116,11 @@ export default function Home() {
 
       {/* Zensar Banner */}
       <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
-        <div className="relative w-[70%]">
+        <div className="relative w-[70%] h-[70vw] max-h-96">
           <img 
             src={topBanner} 
             alt="Zengent AI Agents" 
-            className="w-full h-24 object-cover rounded-lg shadow-md"
+            className="w-full h-full object-cover rounded-lg shadow-md"
           />
           <div className="absolute top-2 left-6 flex items-center space-x-3">
             <img 
