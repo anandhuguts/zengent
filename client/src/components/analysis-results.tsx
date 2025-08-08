@@ -171,9 +171,33 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             </div>
           </div>
 
-          <TabsContent value={activeDiagram} className="mt-0">
+          <TabsContent value="flow" className="mt-0">
             <DiagramCanvas 
-              type={activeDiagram} 
+              type="flow" 
+              analysisData={analysisData} 
+            />
+          </TabsContent>
+          <TabsContent value="component" className="mt-0">
+            <DiagramCanvas 
+              type="component" 
+              analysisData={analysisData} 
+            />
+          </TabsContent>
+          <TabsContent value="class" className="mt-0">
+            <DiagramCanvas 
+              type="class" 
+              analysisData={analysisData} 
+            />
+          </TabsContent>
+          <TabsContent value="sequence" className="mt-0">
+            <DiagramCanvas 
+              type="sequence" 
+              analysisData={analysisData} 
+            />
+          </TabsContent>
+          <TabsContent value="er" className="mt-0">
+            <DiagramCanvas 
+              type="er" 
               analysisData={analysisData} 
             />
           </TabsContent>

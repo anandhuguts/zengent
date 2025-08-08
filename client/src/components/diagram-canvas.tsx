@@ -9,6 +9,8 @@ import ReactFlow, {
   ConnectionMode,
   Position,
   Handle,
+  MarkerType,
+  BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -263,7 +265,7 @@ function generateFlowDiagram(analysisData: AnalysisData, nodes: Node[], edges: E
             stroke: rel.type === 'calls' ? '#10b981' : '#3b82f6'
           },
           markerEnd: {
-            type: 'arrowclosed',
+            type: MarkerType.ArrowClosed,
             color: rel.type === 'calls' ? '#10b981' : '#3b82f6',
           },
         });
@@ -328,7 +330,7 @@ function generateComponentDiagram(analysisData: AnalysisData, nodes: Node[], edg
         label: rel.type,
         style: getEdgeStyle(rel.type),
         markerEnd: {
-          type: 'arrowclosed',
+          type: MarkerType.ArrowClosed,
           color: getEdgeStyle(rel.type).stroke,
         },
       });
@@ -388,7 +390,7 @@ function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: 
         label: rel.type,
         style: getEdgeStyle(rel.type),
         markerEnd: {
-          type: 'arrowclosed',
+          type: MarkerType.ArrowClosed,
           color: getEdgeStyle(rel.type).stroke,
         },
       });
@@ -499,7 +501,7 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
   }, [diagramNodes, diagramEdges, setNodes, setEdges]);
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-[600px] border border-gray-200 rounded-lg overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -516,7 +518,7 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
         zoomOnDoubleClick={false}
       >
         <Background 
-          variant="dots" 
+          variant={BackgroundVariant.Dots} 
           gap={20} 
           size={1} 
           color="#e5e7eb"
