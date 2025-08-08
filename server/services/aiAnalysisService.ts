@@ -1,4 +1,5 @@
 import { type AnalysisData } from '@shared/schema';
+import OpenAI from 'openai';
 
 interface JavaClass {
   name: string;
@@ -37,38 +38,33 @@ interface AIInsight {
 interface AIAnalysisResult {
   projectOverview: string;
   architectureInsights: string[];
-  moduleInsights: Map<string, AIInsight>;
+  moduleInsights: Record<string, AIInsight>;
   suggestions: string[];
   qualityScore: number;
 }
 
 export class AIAnalysisService {
-  private mistralEndpoint: string = 'http://localhost:11434'; // Ollama default endpoint
-  private isOllamaAvailable: boolean = false;
+  private openai: OpenAI;
 
   constructor() {
-    this.checkOllamaAvailability();
-  }
-
-  private async checkOllamaAvailability(): Promise<void> {
-    try {
-      const response = await fetch(`${this.mistralEndpoint}/api/tags`);
-      this.isOllamaAvailable = response.ok;
-    } catch (error) {
-      this.isOllamaAvailable = false;
-    }
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
   }
 
   async analyzeProject(analysisData: AnalysisData): Promise<AIAnalysisResult> {
-    const moduleInsights = new Map<string, AIInsight>();
+    console.log('Starting AI analysis with OpenAI...');
+    
+    const moduleInsights: Record<string, AIInsight> = {};
     
     // Generate project overview
     const projectOverview = await this.generateProjectOverview(analysisData);
     
-    // Analyze each module/class
-    for (const javaClass of analysisData.classes) {
+    // Analyze key modules (limit to first 5 to manage API costs)
+    const keyClasses = analysisData.classes.slice(0, 5);
+    for (const javaClass of keyClasses) {
       const insight = await this.analyzeModule(javaClass, analysisData);
-      moduleInsights.set(javaClass.name, insight);
+      moduleInsights[javaClass.name] = insight;
     }
     
     // Generate architecture insights
@@ -92,111 +88,137 @@ export class AIAnalysisService {
   private async generateProjectOverview(analysisData: AnalysisData): Promise<string> {
     const prompt = this.buildProjectOverviewPrompt(analysisData);
     
-    if (this.isOllamaAvailable) {
-      return await this.queryOllama(prompt);
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert Java architect analyzing project structure. Provide clear, concise insights about the project's architecture, patterns, and overall design."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+
+      return response.choices[0].message.content || this.generateRuleBasedOverview(analysisData);
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      return this.generateRuleBasedOverview(analysisData);
     }
-    
-    // Fallback to rule-based analysis
-    return this.generateRuleBasedOverview(analysisData);
   }
 
   private async analyzeModule(javaClass: JavaClass, context: AnalysisData): Promise<AIInsight> {
     const prompt = this.buildModuleAnalysisPrompt(javaClass, context);
     
-    let content: string;
-    if (this.isOllamaAvailable) {
-      content = await this.queryOllama(prompt);
-    } else {
-      content = this.generateRuleBasedModuleAnalysis(javaClass);
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert Java developer analyzing individual classes. Provide specific insights about the class's role, responsibilities, and potential improvements."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0].message.content || `Analysis for ${javaClass.name}`;
+      
+      return {
+        id: `${javaClass.name}-analysis`,
+        type: this.determineInsightType(javaClass),
+        title: `${javaClass.name} Analysis`,
+        content,
+        confidence: 0.85,
+        tags: this.extractTags(javaClass),
+        relatedComponents: this.findRelatedComponents(javaClass, context)
+      };
+    } catch (error) {
+      console.error('OpenAI API error for module analysis:', error);
+      return this.generateRuleBasedModuleInsight(javaClass, context);
     }
-    
-    return {
-      id: `module_${javaClass.name}`,
-      type: 'module_description',
-      title: `Analysis: ${javaClass.name}`,
-      content,
-      confidence: this.isOllamaAvailable ? 0.8 : 0.6,
-      tags: this.extractTags(javaClass),
-      relatedComponents: this.findRelatedComponents(javaClass, context)
-    };
   }
 
   private async generateArchitectureInsights(analysisData: AnalysisData): Promise<string[]> {
-    const insights: string[] = [];
-    
-    // Analyze Spring architecture patterns
-    const springPatterns = this.analyzeSpringPatterns(analysisData);
-    insights.push(...springPatterns);
-    
-    // Analyze data flow patterns
-    const dataFlowPatterns = this.analyzeDataFlowPatterns(analysisData);
-    insights.push(...dataFlowPatterns);
-    
-    // Analyze dependency patterns
-    const dependencyPatterns = this.analyzeDependencyPatterns(analysisData);
-    insights.push(...dependencyPatterns);
-    
-    return insights;
+    try {
+      const prompt = `Analyze this Java project architecture and provide 3-5 key architectural insights:
+
+Classes breakdown:
+- Controllers: ${analysisData.classes.filter(c => c.type === 'controller').length}
+- Services: ${analysisData.classes.filter(c => c.type === 'service').length}
+- Repositories: ${analysisData.classes.filter(c => c.type === 'repository').length}
+- Entities: ${analysisData.entities.length}
+
+Please provide specific insights about architecture patterns, design quality, and structural observations.`;
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert software architect. Provide 3-5 specific, actionable insights about the project architecture. Each insight should be a single sentence."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 400,
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0].message.content || '';
+      return content.split('\n').filter(line => line.trim().length > 0).slice(0, 5);
+    } catch (error) {
+      console.error('OpenAI API error for architecture insights:', error);
+      return this.generateRuleBasedArchitectureInsights(analysisData);
+    }
   }
 
   private async generateSuggestions(analysisData: AnalysisData): Promise<string[]> {
-    const suggestions: string[] = [];
-    
-    // Check for common anti-patterns
-    if (this.hasCircularDependencies(analysisData)) {
-      suggestions.push("Consider breaking circular dependencies to improve maintainability");
-    }
-    
-    // Check for missing layers
-    const hasControllers = analysisData.classes.some(c => c.type === 'controller');
-    const hasServices = analysisData.classes.some(c => c.type === 'service');
-    const hasRepositories = analysisData.classes.some(c => c.type === 'repository');
-    
-    if (hasControllers && !hasServices) {
-      suggestions.push("Consider adding a service layer to separate business logic from controllers");
-    }
-    
-    if (hasServices && !hasRepositories) {
-      suggestions.push("Consider adding repository layer for better data access abstraction");
-    }
-    
-    // Check for large classes
-    const largeClasses = analysisData.classes.filter(c => c.methods.length > 20);
-    if (largeClasses.length > 0) {
-      suggestions.push(`Consider refactoring large classes: ${largeClasses.map(c => c.name).join(', ')}`);
-    }
-    
-    return suggestions;
-  }
-
-  private async queryOllama(prompt: string): Promise<string> {
     try {
-      const response = await fetch(`${this.mistralEndpoint}/api/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'mistral:7b',
-          prompt,
-          stream: false,
-          options: {
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 500
+      const prompt = `Review this Java project and provide 3-5 specific improvement suggestions:
+
+Project structure:
+- Total classes: ${analysisData.classes.length}
+- Controllers: ${analysisData.classes.filter(c => c.type === 'controller').length}
+- Services: ${analysisData.classes.filter(c => c.type === 'service').length}
+- Repositories: ${analysisData.classes.filter(c => c.type === 'repository').length}
+- Entities: ${analysisData.entities.length}
+
+Provide actionable suggestions for code quality, architecture, and best practices.`;
+
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: "You are a senior Java developer providing code review feedback. Give specific, actionable suggestions for improvement."
+          },
+          {
+            role: "user",
+            content: prompt
           }
-        }),
+        ],
+        max_tokens: 400,
+        temperature: 0.7,
       });
-      
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      return data.response || 'Analysis completed.';
+
+      const content = response.choices[0].message.content || '';
+      return content.split('\n').filter(line => line.trim().length > 0).slice(0, 5);
     } catch (error) {
-      console.error('Error querying Ollama:', error);
-      return 'AI analysis unavailable. Using rule-based analysis.';
+      console.error('OpenAI API error for suggestions:', error);
+      return this.generateRuleBasedSuggestions(analysisData);
     }
   }
 
@@ -220,103 +242,57 @@ Project Statistics:
 Key Classes:
 ${analysisData.classes.slice(0, 5).map(c => `- ${c.name} (${c.type}): ${c.methods.length} methods`).join('\n')}
 
-Please provide:
-1. A brief description of what this application does
-2. The architectural pattern used (MVC, layered, etc.)
-3. Key technologies and frameworks identified
-4. Overall code organization assessment
-
-Keep the response concise and focused on architectural insights.`;
+Please provide a detailed overview of the project's architecture, main patterns used, and overall design quality.`;
   }
 
   private buildModuleAnalysisPrompt(javaClass: JavaClass, context: AnalysisData): string {
-    const relatedClasses = context.relationships
-      .filter(r => r.from === javaClass.name || r.to === javaClass.name)
-      .map(r => r.from === javaClass.name ? r.to : r.from);
+    const relatedClasses = this.findRelatedComponents(javaClass, context);
     
-    return `Analyze this Java class and provide insights:
+    return `Analyze this Java class in detail:
 
 Class: ${javaClass.name}
+Package: ${javaClass.package}
 Type: ${javaClass.type}
 Annotations: ${javaClass.annotations.join(', ')}
 Methods: ${javaClass.methods.length}
 Fields: ${javaClass.fields.length}
 
 Key Methods:
-${javaClass.methods.slice(0, 3).map((m: any) => `- ${m.name}(${m.parameters.map((p: any) => p.type).join(', ')}): ${m.returnType}`).join('\n')}
+${javaClass.methods.slice(0, 3).map(m => `- ${m.name}(${m.parameters.join(', ')}): ${m.returnType}`).join('\n')}
 
 Related Classes: ${relatedClasses.slice(0, 3).join(', ')}
 
-Please provide:
-1. Purpose and responsibility of this class
-2. Role in the overall architecture
-3. Key functionality provided
-4. Potential improvements or concerns
-
-Keep the response concise and technical.`;
+Please provide specific insights about this class's role, responsibilities, design patterns used, and potential improvements.`;
   }
 
   private generateRuleBasedOverview(analysisData: AnalysisData): string {
-    const hasSpring = analysisData.classes.some(c => 
+    const controllerCount = analysisData.classes.filter(c => c.type === 'controller').length;
+    const serviceCount = analysisData.classes.filter(c => c.type === 'service').length;
+    const repositoryCount = analysisData.classes.filter(c => c.type === 'repository').length;
+    
+    const hasSpringFramework = analysisData.classes.some(c => 
       c.annotations.some(a => a.includes('Controller') || a.includes('Service') || a.includes('Repository'))
     );
     
     const hasJPA = analysisData.entities.length > 0;
-    const hasRestAPI = analysisData.classes.some(c => 
-      c.annotations.some((a: any) => a.includes('RestController'))
-    );
     
     let overview = `This appears to be a Java application with ${analysisData.classes.length} classes. `;
     
-    if (hasSpring) {
-      overview += "The project uses Spring Framework with a layered architecture. ";
+    if (hasSpringFramework) {
+      overview += `The project uses Spring Framework with ${controllerCount} controllers, ${serviceCount} services, and ${repositoryCount} repositories, following a layered architecture pattern. `;
     }
     
     if (hasJPA) {
       overview += `It includes ${analysisData.entities.length} JPA entities for data persistence. `;
     }
     
-    if (hasRestAPI) {
-      overview += "The application exposes REST APIs through Spring controllers. ";
-    }
-    
-    overview += `The codebase shows ${analysisData.relationships.length} relationships between components, indicating a well-structured modular design.`;
+    overview += `The codebase demonstrates ${analysisData.relationships.length} inter-class relationships, indicating a well-connected system.`;
     
     return overview;
   }
 
-  private generateRuleBasedModuleAnalysis(javaClass: JavaClass): string {
-    let analysis = `${javaClass.name} is a ${javaClass.type} class`;
-    
-    if (javaClass.annotations.length > 0) {
-      analysis += ` annotated with ${javaClass.annotations.join(', ')}`;
-    }
-    
-    analysis += `. It contains ${javaClass.methods.length} methods and ${javaClass.fields.length} fields. `;
-    
-    switch (javaClass.type) {
-      case 'controller':
-        analysis += "This controller handles HTTP requests and manages the presentation layer.";
-        break;
-      case 'service':
-        analysis += "This service contains business logic and coordinates between controllers and repositories.";
-        break;
-      case 'repository':
-        analysis += "This repository manages data access and persistence operations.";
-        break;
-      case 'entity':
-        analysis += "This entity represents a data model mapped to database tables.";
-        break;
-      default:
-        analysis += "This class provides core functionality to the application.";
-    }
-    
-    return analysis;
-  }
-
-  private analyzeSpringPatterns(analysisData: AnalysisData): string[] {
+  private generateRuleBasedArchitectureInsights(analysisData: AnalysisData): string[] {
     const insights: string[] = [];
-    
     const controllers = analysisData.classes.filter(c => c.type === 'controller');
     const services = analysisData.classes.filter(c => c.type === 'service');
     const repositories = analysisData.classes.filter(c => c.type === 'repository');
@@ -326,149 +302,134 @@ Keep the response concise and technical.`;
     }
     
     const hasRestControllers = controllers.some(c => 
-      c.annotations.some((a: any) => a.includes('RestController'))
+      c.annotations.some(a => a.includes('RestController'))
     );
     if (hasRestControllers) {
       insights.push("RESTful API architecture implemented with Spring REST controllers");
     }
     
-    const hasDependencyInjection = analysisData.relationships.some(r => r.type === 'injects');
-    if (hasDependencyInjection) {
-      insights.push("Dependency injection pattern properly implemented");
+    if (analysisData.entities.length > 0) {
+      insights.push("Data persistence layer implemented using JPA entities");
+    }
+    
+    if (analysisData.relationships.length > analysisData.classes.length * 1.5) {
+      insights.push("High coupling detected - consider reducing inter-class dependencies");
     }
     
     return insights;
   }
 
-  private analyzeDataFlowPatterns(analysisData: AnalysisData): string[] {
-    const insights: string[] = [];
+  private generateRuleBasedSuggestions(analysisData: AnalysisData): string[] {
+    const suggestions: string[] = [];
     
-    // Check for typical Spring data flow
-    const hasControllerToService = analysisData.relationships.some(r => 
-      r.type === 'calls' && 
-      analysisData.classes.find(c => c.name === r.from)?.type === 'controller' &&
-      analysisData.classes.find(c => c.name === r.to)?.type === 'service'
-    );
+    const hasControllers = analysisData.classes.some(c => c.type === 'controller');
+    const hasServices = analysisData.classes.some(c => c.type === 'service');
+    const hasRepositories = analysisData.classes.some(c => c.type === 'repository');
     
-    if (hasControllerToService) {
-      insights.push("Standard MVC data flow: Controllers → Services → Repositories");
+    if (hasControllers && !hasServices) {
+      suggestions.push("Consider adding a service layer to separate business logic from controllers");
     }
     
-    return insights;
+    if (hasServices && !hasRepositories) {
+      suggestions.push("Consider adding repository layer for better data access abstraction");
+    }
+    
+    const largeClasses = analysisData.classes.filter(c => c.methods.length > 20);
+    if (largeClasses.length > 0) {
+      suggestions.push(`Consider refactoring large classes: ${largeClasses.map(c => c.name).join(', ')}`);
+    }
+    
+    return suggestions;
   }
 
-  private analyzeDependencyPatterns(analysisData: AnalysisData): string[] {
-    const insights: string[] = [];
+  private generateRuleBasedModuleInsight(javaClass: JavaClass, context: AnalysisData): AIInsight {
+    let content = `${javaClass.name} is a ${javaClass.type} class in the ${javaClass.package} package. `;
     
-    // Calculate dependency metrics
-    const dependencyCount = new Map<string, number>();
-    analysisData.relationships.forEach(rel => {
-      dependencyCount.set(rel.from, (dependencyCount.get(rel.from) || 0) + 1);
-    });
-    
-    const highDependencyClasses = Array.from(dependencyCount.entries())
-      .filter(([_, count]) => count > 5)
-      .map(([className, _]) => className);
-    
-    if (highDependencyClasses.length > 0) {
-      insights.push(`High-dependency classes detected: ${highDependencyClasses.join(', ')}`);
+    if (javaClass.annotations.length > 0) {
+      content += `It uses annotations: ${javaClass.annotations.join(', ')}. `;
     }
     
-    return insights;
+    content += `This class contains ${javaClass.methods.length} methods and ${javaClass.fields.length} fields.`;
+    
+    return {
+      id: `${javaClass.name}-analysis`,
+      type: this.determineInsightType(javaClass),
+      title: `${javaClass.name} Analysis`,
+      content,
+      confidence: 0.7,
+      tags: this.extractTags(javaClass),
+      relatedComponents: this.findRelatedComponents(javaClass, context)
+    };
+  }
+
+  private determineInsightType(javaClass: JavaClass): AIInsight['type'] {
+    if (javaClass.type === 'controller' || javaClass.type === 'service') {
+      return 'module_description';
+    }
+    return 'function_description';
   }
 
   private extractTags(javaClass: JavaClass): string[] {
     const tags: string[] = [javaClass.type];
     
-    // Add framework tags
-    if (javaClass.annotations.some((a: any) => a.includes('Controller'))) {
+    if (javaClass.annotations.some(a => a.includes('Controller'))) {
       tags.push('web-layer');
     }
-    if (javaClass.annotations.some((a: any) => a.includes('Service'))) {
+    if (javaClass.annotations.some(a => a.includes('Service'))) {
       tags.push('business-logic');
     }
-    if (javaClass.annotations.some((a: any) => a.includes('Repository'))) {
+    if (javaClass.annotations.some(a => a.includes('Repository'))) {
       tags.push('data-access');
     }
-    if (javaClass.annotations.some((a: any) => a.includes('Entity'))) {
+    if (javaClass.annotations.some(a => a.includes('Entity'))) {
       tags.push('data-model');
-    }
-    
-    // Add complexity tags
-    if (javaClass.methods.length > 10) {
-      tags.push('complex');
-    }
-    if (javaClass.methods.length < 3) {
-      tags.push('simple');
     }
     
     return tags;
   }
 
   private findRelatedComponents(javaClass: JavaClass, context: AnalysisData): string[] {
-    return context.relationships
-      .filter(r => r.from === javaClass.name || r.to === javaClass.name)
-      .map(r => r.from === javaClass.name ? r.to : r.from)
-      .slice(0, 5); // Limit to 5 most related components
-  }
-
-  private hasCircularDependencies(analysisData: AnalysisData): boolean {
-    // Simple cycle detection
-    const graph = new Map<string, string[]>();
+    const related: string[] = [];
     
-    analysisData.relationships.forEach(rel => {
-      if (!graph.has(rel.from)) {
-        graph.set(rel.from, []);
+    // Find classes that this class depends on or that depend on it
+    context.relationships.forEach(rel => {
+      if (rel.from === javaClass.name && !related.includes(rel.to)) {
+        related.push(rel.to);
       }
-      graph.get(rel.from)!.push(rel.to);
+      if (rel.to === javaClass.name && !related.includes(rel.from)) {
+        related.push(rel.from);
+      }
     });
     
-    const visited = new Set<string>();
-    const recursionStack = new Set<string>();
-    
-    function hasCycle(node: string): boolean {
-      if (recursionStack.has(node)) return true;
-      if (visited.has(node)) return false;
-      
-      visited.add(node);
-      recursionStack.add(node);
-      
-      const neighbors = graph.get(node) || [];
-      for (const neighbor of neighbors) {
-        if (hasCycle(neighbor)) return true;
-      }
-      
-      recursionStack.delete(node);
-      return false;
-    }
-    
-    for (const node of Array.from(graph.keys())) {
-      if (hasCycle(node)) return true;
-    }
-    
-    return false;
+    return related.slice(0, 5);
   }
 
   private calculateQualityScore(analysisData: AnalysisData): number {
-    let score = 70; // Base score
+    let score = 50; // Base score
     
-    // Bonus for good architecture
-    const hasLayers = ['controller', 'service', 'repository'].every(type =>
-      analysisData.classes.some(c => c.type === type)
-    );
-    if (hasLayers) score += 15;
+    // Architecture completeness
+    const hasControllers = analysisData.classes.some(c => c.type === 'controller');
+    const hasServices = analysisData.classes.some(c => c.type === 'service');
+    const hasRepositories = analysisData.classes.some(c => c.type === 'repository');
     
-    // Bonus for entities
-    if (analysisData.entities.length > 0) score += 10;
+    if (hasControllers && hasServices && hasRepositories) {
+      score += 20; // Good layered architecture
+    }
     
-    // Penalty for large classes
-    const largeClasses = analysisData.classes.filter(c => c.methods.length > 20);
-    score -= largeClasses.length * 5;
+    // Class size distribution
+    const averageMethodsPerClass = analysisData.classes.reduce((sum, c) => sum + c.methods.length, 0) / analysisData.classes.length;
+    if (averageMethodsPerClass <= 15) {
+      score += 15; // Reasonable class sizes
+    }
     
-    // Penalty for circular dependencies
-    if (this.hasCircularDependencies(analysisData)) score -= 15;
+    // Annotation usage (Spring patterns)
+    const annotatedClasses = analysisData.classes.filter(c => c.annotations.length > 0).length;
+    const annotationRatio = annotatedClasses / analysisData.classes.length;
+    if (annotationRatio > 0.7) {
+      score += 15; // Good use of annotations
+    }
     
-    return Math.max(0, Math.min(100, score));
+    return Math.min(100, Math.max(0, score));
   }
 }
 
