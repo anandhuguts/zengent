@@ -119,6 +119,14 @@ export const AnalysisDataSchema = z.object({
   }),
   aiAnalysis: z.object({
     projectOverview: z.string(),
+    projectDetails: z.object({
+      projectDescription: z.string(),
+      businessProblem: z.string(),
+      keyObjective: z.string(),
+      functionalitySummary: z.string(),
+      implementedFeatures: z.array(z.string()),
+      modulesServices: z.array(z.string()),
+    }),
     architectureInsights: z.array(z.string()),
     moduleInsights: z.record(z.string(), z.object({
       id: z.string(),

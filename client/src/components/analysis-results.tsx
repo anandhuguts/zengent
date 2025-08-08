@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DiagramCanvas from "@/components/diagram-canvas";
+import { pdfExportService } from "@/services/pdfExportService";
 import { 
   FolderOpen, 
   Download, 
@@ -35,7 +36,26 @@ interface AnalysisResultsProps {
 
 export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResultsProps) {
   const [activeDiagram, setActiveDiagram] = useState<DiagramType>('flow');
+  const [isExporting, setIsExporting] = useState(false);
   const analysisData = project.analysisData as AnalysisData | null;
+
+  const handlePDFExport = async () => {
+    if (!analysisData) return;
+    
+    setIsExporting(true);
+    try {
+      await pdfExportService.exportProjectAnalysis({
+        project,
+        analysisData,
+        includeAllDiagrams: true
+      });
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      alert('PDF export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (!analysisData) {
     return (
@@ -75,8 +95,15 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
-                <Download className="w-4 h-4" />
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={handlePDFExport}
+                disabled={isExporting}
+                className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {isExporting ? 'Generating PDF...' : 'Export PDF Report'}
               </Button>
               <Button variant="ghost" size="sm">
                 <Share2 className="w-4 h-4" />
