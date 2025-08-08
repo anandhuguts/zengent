@@ -4,8 +4,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { type Project } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileArchive, FolderOpen, ChartGantt, Table, Database } from "lucide-react";
+import { Upload, FileArchive, FolderOpen, ChartGantt, Table, Database, Github } from "lucide-react";
+import GithubInput from "@/components/github-input";
 
 interface UploadSectionProps {
   onFileUploaded: (project: Project) => void;
@@ -93,50 +95,73 @@ export default function UploadSection({ onFileUploaded }: UploadSectionProps) {
         </CardContent>
       </Card>
 
-      {/* Upload Area */}
+      {/* Input Methods Tabs */}
       <Card>
-        <CardContent className="p-8">
-          <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-              dragActive
-                ? 'border-primary bg-blue-50'
-                : 'border-gray-300 hover:border-primary'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="space-y-4">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <FileArchive className="text-3xl text-gray-400 w-12 h-12" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  Drop your Java project ZIP file here
-                </h3>
-                <p className="text-muted-foreground mb-4">or click to browse and select a file</p>
-                <Button disabled={uploadMutation.isPending}>
-                  <FolderOpen className="mr-2 w-4 h-4" />
-                  Browse Files
-                </Button>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>Supported: .zip files containing Java source code</p>
-                <p>Maximum file size: 50MB</p>
-              </div>
-            </div>
+        <Tabs defaultValue="upload" className="w-full">
+          <div className="border-b border-border">
+            <TabsList className="h-auto p-0 bg-transparent w-full justify-start">
+              <TabsTrigger value="upload" className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                <Upload className="w-4 h-4" />
+                <span>Upload ZIP File</span>
+              </TabsTrigger>
+              <TabsTrigger value="github" className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                <Github className="w-4 h-4" />
+                <span>GitHub Repository</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".zip"
-            onChange={handleFileInput}
-            className="hidden"
-            disabled={uploadMutation.isPending}
-          />
-        </CardContent>
+
+          <TabsContent value="upload" className="mt-0">
+            <CardContent className="p-8">
+              <div
+                className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
+                  dragActive
+                    ? 'border-primary bg-blue-50'
+                    : 'border-gray-300 hover:border-primary'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="space-y-4">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                    <FileArchive className="text-3xl text-gray-400 w-12 h-12" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      Drop your Java project ZIP file here
+                    </h3>
+                    <p className="text-muted-foreground mb-4">or click to browse and select a file</p>
+                    <Button disabled={uploadMutation.isPending}>
+                      <FolderOpen className="mr-2 w-4 h-4" />
+                      Browse Files
+                    </Button>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <p>Supported: .zip files containing Java source code</p>
+                    <p>Maximum file size: 50MB</p>
+                  </div>
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".zip"
+                onChange={handleFileInput}
+                className="hidden"
+                disabled={uploadMutation.isPending}
+              />
+            </CardContent>
+          </TabsContent>
+
+          <TabsContent value="github" className="mt-0">
+            <CardContent className="p-8">
+              <GithubInput onRepoAnalyzed={onFileUploaded} />
+            </CardContent>
+          </TabsContent>
+        </Tabs>
       </Card>
 
       {/* Features Overview */}

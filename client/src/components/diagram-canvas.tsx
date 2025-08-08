@@ -62,6 +62,63 @@ const nodeTypes = {
       <div className="text-xs text-gray-600 text-center">{data.annotations[0]}</div>
     </div>
   ),
+  class: ({ data }: { data: any }) => (
+    <div className="bg-white border-2 border-gray-800 min-w-[200px] max-w-[280px] shadow-lg">
+      {/* Class Name Header */}
+      <div className="bg-gray-100 border-b border-gray-800 p-3 text-center">
+        <div className="font-bold text-lg text-gray-800">{data.label}</div>
+        {data.annotations && data.annotations.length > 0 && (
+          <div className="text-xs text-gray-600 mt-1">
+            {data.annotations.slice(0, 2).join(', ')}
+          </div>
+        )}
+      </div>
+      
+      {/* Fields Section */}
+      <div className="border-b border-gray-800 p-3 min-h-[40px]">
+        <div className="text-xs font-semibold text-gray-700 mb-2">Fields:</div>
+        {data.fields && data.fields.length > 0 ? (
+          <div className="space-y-1">
+            {data.fields.slice(0, 6).map((field: any, idx: number) => (
+              <div key={idx} className="text-xs font-mono text-gray-800">
+                {field.annotations?.includes('@Id') ? '🔑' : ''}
+                {field.annotations?.includes('@OneToMany') ? '1..*' : ''}
+                {field.annotations?.includes('@ManyToOne') ? '*..1' : ''}
+                +{field.name}: {field.type}
+              </div>
+            ))}
+            {data.fields.length > 6 && (
+              <div className="text-xs text-gray-500">... {data.fields.length - 6} more</div>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-500 italic">No fields</div>
+        )}
+      </div>
+      
+      {/* Methods Section */}
+      <div className="p-3 min-h-[40px]">
+        <div className="text-xs font-semibold text-gray-700 mb-2">Methods:</div>
+        {data.methods && data.methods.length > 0 ? (
+          <div className="space-y-1">
+            {data.methods.slice(0, 5).map((method: any, idx: number) => (
+              <div key={idx} className="text-xs font-mono text-gray-800">
+                {method.annotations?.includes('@GetMapping') ? '📡' : ''}
+                {method.annotations?.includes('@PostMapping') ? '📤' : ''}
+                {method.annotations?.includes('@Autowired') ? '🔗' : ''}
+                +{method.name}({method.parameters?.length || 0} params): {method.returnType}
+              </div>
+            ))}
+            {data.methods.length > 5 && (
+              <div className="text-xs text-gray-500">... {data.methods.length - 5} more</div>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-500 italic">No methods</div>
+        )}
+      </div>
+    </div>
+  ),
   default: ({ data }: { data: any }) => (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-4 min-w-[150px]">
       <div className="font-medium text-sm text-center">{data.label}</div>
@@ -269,8 +326,105 @@ function generateComponentDiagram(analysisData: AnalysisData, nodes: Node[], edg
 }
 
 function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edge[]) {
-  // Similar to component diagram but focused on class relationships
-  generateComponentDiagram(analysisData, nodes, edges);
+  const allClasses = analysisData.classes;
+  const gridCols = Math.ceil(Math.sqrt(allClasses.length));
+  const nodeSpacing = 300; // Increased spacing for larger class nodes
+
+  allClasses.forEach((cls, index) => {
+    const row = Math.floor(index / gridCols);
+    const col = index % gridCols;
+
+    nodes.push({
+      id: cls.name,
+      type: 'class', // Use the new UML class node type
+      position: { x: col * nodeSpacing, y: row * nodeSpacing },
+      data: {
+        label: cls.name,
+        className: cls.name,
+        annotations: cls.annotations,
+        methods: cls.methods,
+        fields: cls.fields,
+      },
+    });
+  });
+
+  // Add relationship edges with UML-style styling
+  analysisData.relationships.forEach((rel, index) => {
+    const sourceExists = nodes.some(n => n.id === rel.from);
+    const targetExists = nodes.some(n => n.id === rel.to);
+    
+    if (sourceExists && targetExists) {
+      let edgeStyle = {};
+      let label = '';
+      let markerEnd = '';
+      
+      // Style edges based on relationship type
+      switch (rel.type) {
+        case 'extends':
+          // Inheritance - solid line with triangle arrow
+          edgeStyle = { 
+            strokeWidth: 2,
+            stroke: '#000000',
+          };
+          label = 'extends';
+          markerEnd = 'url(#inheritance-arrow)';
+          break;
+        case 'implements':
+          // Implementation - dashed line with triangle arrow
+          edgeStyle = { 
+            strokeWidth: 2,
+            stroke: '#000000',
+            strokeDasharray: '8,4',
+          };
+          label = 'implements';
+          markerEnd = 'url(#implementation-arrow)';
+          break;
+        case 'injects':
+          // Dependency injection - dashed line with regular arrow
+          edgeStyle = { 
+            strokeWidth: 1,
+            stroke: '#666666',
+            strokeDasharray: '4,2',
+          };
+          label = 'injects';
+          break;
+        case 'calls':
+          // Method calls - thin solid line
+          edgeStyle = { 
+            strokeWidth: 1,
+            stroke: '#999999',
+          };
+          label = rel.method ? `calls ${rel.method}()` : 'calls';
+          break;
+        case 'references':
+          // Association - solid line
+          edgeStyle = { 
+            strokeWidth: 2,
+            stroke: '#333333',
+          };
+          label = 'references';
+          break;
+        default:
+          edgeStyle = { strokeWidth: 1, stroke: '#cccccc' };
+      }
+
+      edges.push({
+        id: `${rel.from}-${rel.to}-${index}`,
+        source: rel.from,
+        target: rel.to,
+        type: 'smoothstep',
+        animated: rel.type === 'calls',
+        label: label,
+        style: edgeStyle,
+        markerEnd: markerEnd,
+        labelStyle: { 
+          fontSize: '11px',
+          fontWeight: 'normal',
+          fill: '#666666',
+        },
+      });
+    }
+  });
 }
 
 function generateERDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edge[]) {

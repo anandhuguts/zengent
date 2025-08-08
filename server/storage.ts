@@ -48,6 +48,18 @@ export class MemStorage implements IStorage {
       ...insertProject,
       id,
       uploadedAt: new Date(),
+      status: insertProject.status || 'processing',
+      analysisData: insertProject.analysisData || null,
+      fileCount: insertProject.fileCount || 0,
+      controllerCount: insertProject.controllerCount || 0,
+      serviceCount: insertProject.serviceCount || 0,
+      repositoryCount: insertProject.repositoryCount || 0,
+      entityCount: insertProject.entityCount || 0,
+      originalFileName: insertProject.originalFileName || null,
+      githubUrl: insertProject.githubUrl || null,
+      githubRepo: insertProject.githubRepo || null,
+      githubBranch: insertProject.githubBranch || null,
+      sourceType: insertProject.sourceType || 'upload',
     };
     this.projects.set(id, project);
     return project;

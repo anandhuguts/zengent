@@ -12,7 +12,11 @@ export const users = pgTable("users", {
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  originalFileName: text("original_file_name").notNull(),
+  originalFileName: text("original_file_name"),
+  githubUrl: text("github_url"),
+  githubRepo: text("github_repo"), // format: "owner/repo"
+  githubBranch: text("github_branch").default("main"),
+  sourceType: text("source_type").notNull().default("upload"), // 'upload', 'github'
   status: text("status").notNull().default("processing"), // 'processing', 'completed', 'failed'
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   analysisData: jsonb("analysis_data"),
@@ -33,10 +37,17 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   uploadedAt: true,
 });
 
+export const githubProjectSchema = z.object({
+  githubUrl: z.string().url(),
+  name: z.string().optional(),
+  githubBranch: z.string().default("main"),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+export type GithubProject = z.infer<typeof githubProjectSchema>;
 
 // Analysis result types
 export const AnalysisDataSchema = z.object({

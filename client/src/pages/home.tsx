@@ -12,7 +12,7 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>('upload');
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
-  const { data: currentProject, refetch: refetchProject } = useQuery({
+  const { data: currentProject, refetch: refetchProject } = useQuery<Project>({
     queryKey: ['/api/projects', currentProjectId],
     enabled: !!currentProjectId,
   });

@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema } from "@shared/schema";
+import { insertProjectSchema, githubProjectSchema } from "@shared/schema";
 import { analyzeJavaProject } from "./services/javaAnalyzer";
+import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
 import multer from "multer";
 import { z } from "zod";
 
@@ -99,6 +100,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.status(500).json({ message: "Failed to upload and analyze project" });
+    }
+  });
+
+  // Analyze GitHub repository
+  app.post("/api/projects/github", async (req, res) => {
+    try {
+      const validatedData = githubProjectSchema.parse(req.body);
+      
+      if (!isValidGithubUrl(validatedData.githubUrl)) {
+        return res.status(400).json({ message: "Invalid GitHub URL format" });
+      }
+
+      const projectId = await analyzeGithubRepository(validatedData);
+      const project = await storage.getProject(projectId);
+      
+      res.json(project);
+    } catch (error) {
+      console.error("Error analyzing GitHub repository:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid GitHub repository data", 
+          errors: error.errors 
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to analyze GitHub repository" });
     }
   });
 

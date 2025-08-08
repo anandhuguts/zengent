@@ -198,7 +198,7 @@ function extractAnnotations(content: string): string[] {
     annotations.push(`@${match[1]}`);
   }
   
-  return [...new Set(annotations)]; // Remove duplicates
+  return Array.from(new Set(annotations)); // Remove duplicates
 }
 
 function extractMethods(content: string): AnalysisData['classes'][0]['methods'] {

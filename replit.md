@@ -2,9 +2,16 @@
 
 ## Overview
 
-This is a full-stack web application designed to analyze Java project architecture by uploading ZIP files containing Java source code. The system extracts and parses Java files to identify architectural patterns, annotations, and relationships between classes. It provides visual diagrams and detailed analysis of Spring Boot applications, including controllers, services, repositories, and entities.
+This is a full-stack web application designed to analyze Java project architecture through multiple input methods: ZIP file uploads and GitHub repository analysis. The system extracts and parses Java files to identify architectural patterns, annotations, and relationships between classes. It provides interactive visual diagrams and detailed analysis of Spring Boot applications, including controllers, services, repositories, and entities.
 
-The application features a modern React frontend with a clean, professional interface for uploading projects and viewing analysis results, backed by an Express.js server that handles file processing and Java code analysis.
+The application features a modern React frontend with a clean, professional interface for uploading projects and viewing analysis results, backed by an Express.js server that handles file processing, GitHub integration, and Java code analysis with UML-style class diagram generation.
+
+## Recent Changes (August 2025)
+
+- **GitHub Integration**: Added ability to analyze public GitHub repositories directly
+- **Enhanced Class Diagrams**: Implemented UML-style class representations with proper field/method sections
+- **Improved UI**: Enhanced diagram canvas with better node styling and relationship visualization
+- **Technical Documentation**: Added comprehensive README with full technical stack details
 
 ## User Preferences
 
