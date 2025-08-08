@@ -17,6 +17,7 @@ export const projects = pgTable("projects", {
   githubRepo: text("github_repo"), // format: "owner/repo"
   githubBranch: text("github_branch").default("main"),
   sourceType: text("source_type").notNull().default("upload"), // 'upload', 'github'
+  projectType: text("project_type").default("java"), // 'java', 'python', 'pyspark', 'mainframe'
   status: text("status").notNull().default("processing"), // 'processing', 'completed', 'failed'
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   analysisData: jsonb("analysis_data"),

@@ -1,17 +1,19 @@
-# Zengent - Java Project Architecture Analyzer
+# Zengent - Multi-Language Project Architecture Analyzer
 
 ## Overview
 
-This is a full-stack web application designed to analyze Java project architecture through multiple input methods: ZIP file uploads and GitHub repository analysis. The system extracts and parses Java files to identify architectural patterns, annotations, and relationships between classes. It provides interactive visual diagrams and detailed analysis of Spring Boot applications, including controllers, services, repositories, and entities.
+This is a full-stack web application designed to analyze multi-language project architectures through multiple input methods: ZIP file uploads and GitHub repository analysis. The system supports Java, Python, PySpark, and Mainframe codebases, extracting and parsing source files to identify architectural patterns, dependencies, and relationships between components. It provides interactive visual diagrams and AI-powered analysis using OpenAI GPT-4o for intelligent insights.
 
-The application features a modern React frontend with a clean, professional interface for uploading projects and viewing analysis results, backed by an Express.js server that handles file processing, GitHub integration, and Java code analysis with UML-style class diagram generation.
+The application features a modern React frontend with an agent-like interface supporting multiple programming languages, backed by an Express.js server that handles file processing, GitHub integration, and intelligent code analysis with UML-style diagrams and AI-generated recommendations.
 
 ## Recent Changes (August 2025)
 
-- **GitHub Integration**: Added ability to analyze public GitHub repositories directly
-- **Enhanced Class Diagrams**: Implemented UML-style class representations with proper field/method sections
-- **Improved UI**: Enhanced diagram canvas with better node styling and relationship visualization
-- **Technical Documentation**: Added comprehensive README with full technical stack details
+- **Multi-Language Support**: Expanded from Java-only to support Java, Python, PySpark, and Mainframe codebases
+- **AI Agent Interface**: Redesigned with professional agent-like UI featuring language selection blocks
+- **OpenAI Integration**: Fully migrated to OpenAI GPT-4o for advanced AI-powered code analysis
+- **Zensar Branding**: Integrated corporate branding with Zensar logo and banner
+- **GitHub Integration**: Enhanced GitHub repository analysis with multi-language detection
+- **Agent-Style Design**: Professional interface with language-specific analysis features
 
 ## User Preferences
 
@@ -61,15 +63,18 @@ The schema includes user management capabilities:
 - **Session Management**: PostgreSQL session store configuration (connect-pg-simple)
 - **Project Ownership**: Projects can be associated with users for multi-tenant support
 
-### Java Code Analysis Engine
+### Multi-Language Code Analysis Engine
 
-The core analysis functionality processes uploaded Java projects:
+The core analysis functionality processes multiple programming languages:
 
-- **ZIP Extraction**: Automatic extraction and validation of Java source files
-- **Pattern Recognition**: Identifies Spring Boot architectural patterns (controllers, services, repositories, entities)
-- **Annotation Processing**: Parses and categorizes Java annotations
-- **Relationship Mapping**: Builds dependency graphs between classes
-- **Metrics Collection**: Counts various architectural components for summary statistics
+- **Java Projects**: Spring Boot patterns, JPA entities, MVC architecture, Maven/Gradle dependencies
+- **Python Applications**: Django/Flask frameworks, module dependencies, API endpoint mapping
+- **PySpark Workflows**: DataFrame analysis, job flow visualization, performance metrics
+- **Mainframe Systems**: COBOL program flow, JCL job dependencies, database connections
+- **ZIP Extraction**: Automatic extraction and validation of source files across all supported languages
+- **AI-Powered Insights**: OpenAI GPT-4o integration for intelligent pattern recognition and recommendations
+- **Relationship Mapping**: Builds dependency graphs and architectural relationships
+- **Interactive Diagrams**: UML-style visualizations with language-specific representations
 
 ## External Dependencies
 
