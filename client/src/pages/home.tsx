@@ -91,26 +91,6 @@ export default function Home() {
 
   return (
     <div className="bg-background font-sans text-foreground min-h-screen">
-      {/* Zensar Banner */}
-      <div className="relative">
-        <img 
-          src={topBanner} 
-          alt="Zengent AI Agents" 
-          className="w-full h-24 object-cover"
-        />
-        <div className="absolute top-2 left-6 flex items-center space-x-3">
-          <img 
-            src={zensarLogo} 
-            alt="Zensar Logo" 
-            className="h-8 w-auto"
-          />
-          <div className="text-white">
-            <h1 className="text-lg font-semibold">Zengent</h1>
-            <p className="text-xs opacity-90">AI-Powered Code Analysis</p>
-          </div>
-        </div>
-      </div>
-
       {/* Header */}
       <header className="bg-primary text-white shadow-lg">
         <div className="container mx-auto px-6 py-3">
@@ -118,7 +98,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <GitBranch className="text-xl" />
               <div>
-                <h2 className="text-lg font-medium">Multi-Language Architecture Analyzer</h2>
+                <h2 className="text-lg font-medium">Multi-Language Architecture Analyzer - Zengent AI</h2>
                 <p className="text-blue-200 text-sm">Intelligent code analysis for enterprise applications</p>
               </div>
             </div>
@@ -133,6 +113,26 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Zensar Banner */}
+      <div className="relative">
+        <img 
+          src={topBanner} 
+          alt="Zengent AI Agents" 
+          className="w-full h-24 object-cover"
+        />
+        <div className="absolute top-2 left-6 flex items-center space-x-3">
+          <img 
+            src={zensarLogo} 
+            alt="Zensar Logo" 
+            className="h-8 w-auto"
+          />
+          <div className="text-white">
+            <h1 className="text-lg font-semibold">Zengent AI</h1>
+            <p className="text-xs opacity-90">Multi-Language Code Analysis</p>
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto px-6 py-8">
         {appState === 'upload' && !selectedProjectType && (
