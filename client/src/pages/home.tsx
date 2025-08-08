@@ -120,7 +120,7 @@ export default function Home() {
           <img 
             src={topBanner} 
             alt="Zengent AI Agents" 
-            className="w-full h-full object-cover rounded-lg shadow-md"
+            className="w-full h-full object-contain rounded-lg shadow-md"
           />
           <div className="absolute top-2 left-6 flex items-center space-x-3">
             <img 
