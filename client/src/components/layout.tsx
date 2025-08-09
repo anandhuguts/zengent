@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { 
   Menu, 
   X, 
@@ -87,6 +88,9 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                   </Button>
                 )
               )}
+              <div className="text-white">
+                <ThemeToggle />
+              </div>
               <button className="text-blue-200 hover:text-white transition-colors">
                 <HelpCircle className="w-5 h-5" />
               </button>

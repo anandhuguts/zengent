@@ -803,7 +803,7 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
   };
 
   return (
-    <div className="w-full h-[600px] border border-gray-200 rounded-lg overflow-hidden">
+    <div className="w-full h-[600px] border border-border rounded-lg overflow-hidden bg-card">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -823,13 +823,13 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
           variant={BackgroundVariant.Dots} 
           gap={20} 
           size={1} 
-          color="#e5e7eb"
-          className="bg-gray-50" 
+          color="hsl(var(--muted-foreground) / 0.3)"
+          className="bg-background dark:bg-card" 
         />
         <Controls 
           position="top-right"
           showInteractive={false}
-          className="bg-white shadow-lg border border-gray-200 rounded-lg"
+          className="bg-card border-border shadow-lg rounded-lg [&>button]:bg-background [&>button]:border-border [&>button]:text-foreground hover:[&>button]:bg-muted"
         />
       </ReactFlow>
     </div>

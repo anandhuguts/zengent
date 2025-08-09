@@ -45,35 +45,40 @@
 }
 
 .dark {
-  /* Card-based Theme - Dark Mode */
-  --background: hsl(210, 25%, 10%); /* Dark slate background like in image */
-  --foreground: hsl(210, 40%, 95%);
-  --card: hsl(210, 20%, 14%);
-  --card-foreground: hsl(210, 40%, 95%);
-  --popover: hsl(210, 25%, 12%);
-  --popover-foreground: hsl(210, 40%, 95%);
+  /* Card-based Theme - Dark Mode - Enhanced */
+  --background: hsl(220, 27%, 8%); /* Rich dark background */
+  --foreground: hsl(210, 40%, 98%);
+  --card: hsl(220, 23%, 12%); /* Elevated card background */
+  --card-foreground: hsl(210, 40%, 98%);
+  --popover: hsl(220, 27%, 10%);
+  --popover-foreground: hsl(210, 40%, 98%);
   --primary: hsl(160, 84%, 39%); /* Success Green */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(214, 100%, 59%); /* Confirmation Blue */
+  --secondary: hsl(217, 91%, 60%); /* Enhanced Blue */
   --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(210, 25%, 16%);
-  --muted-foreground: hsl(210, 20%, 65%);
+  --muted: hsl(220, 23%, 18%); /* Better muted background */
+  --muted-foreground: hsl(215, 20%, 65%);
   --accent: hsl(160, 84%, 39%); /* Success Green accent */
   --accent-foreground: hsl(0, 0%, 100%);
-  --destructive: hsl(348, 86%, 61%); /* Failure Red */
+  --destructive: hsl(0, 84%, 60%); /* Enhanced Red */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --warning: hsl(36, 100%, 50%); /* Warning Orange */
+  --warning: hsl(38, 92%, 50%); /* Enhanced Orange */
   --warning-foreground: hsl(0, 0%, 100%);
-  --border: hsl(210, 25%, 18%);
-  --input: hsl(210, 25%, 16%);
+  --border: hsl(220, 23%, 20%); /* Better border visibility */
+  --input: hsl(220, 23%, 18%);
   --ring: hsl(160, 84%, 39%);
-  --sidebar: hsl(210, 30%, 8%); /* Very dark slate */
-  --sidebar-foreground: hsl(210, 40%, 90%);
+  --chart-1: hsl(160, 84%, 39%); /* Success Green */
+  --chart-2: hsl(0, 84%, 60%); /* Enhanced Red */
+  --chart-3: hsl(38, 92%, 50%); /* Enhanced Orange */
+  --chart-4: hsl(217, 91%, 60%); /* Enhanced Blue */
+  --chart-5: hsl(266, 85%, 58%); /* Purple accent */
+  --sidebar: hsl(220, 30%, 6%); /* Very dark slate */
+  --sidebar-foreground: hsl(210, 40%, 92%);
   --sidebar-primary: hsl(160, 84%, 39%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(210, 25%, 14%);
+  --sidebar-accent: hsl(220, 23%, 14%);
   --sidebar-accent-foreground: hsl(160, 84%, 39%);
-  --sidebar-border: hsl(210, 25%, 16%);
+  --sidebar-border: hsl(220, 23%, 18%);
   --sidebar-ring: hsl(160, 84%, 39%);
 }
 
@@ -94,5 +99,33 @@
   
   .animate-pulse-slow {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Dark mode specific React Flow styles */
+  .dark .react-flow__node {
+    color: var(--foreground);
+  }
+  
+  .dark .react-flow__edge-path {
+    stroke: var(--muted-foreground);
+  }
+  
+  .dark .react-flow__minimap {
+    background-color: var(--muted);
+  }
+  
+  .dark .react-flow__controls {
+    background-color: var(--card);
+    border-color: var(--border);
+  }
+  
+  .dark .react-flow__controls button {
+    background-color: var(--background);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  
+  .dark .react-flow__controls button:hover {
+    background-color: var(--muted);
   }
 }
