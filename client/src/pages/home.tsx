@@ -194,7 +194,7 @@ export default function Home() {
                     onClick={() => setSelectedProjectType(type.id)}
                     className={`relative group cursor-pointer bg-white dark:bg-gray-800 rounded-xl border-2 ${type.borderColor} hover:border-opacity-60 shadow-lg hover:shadow-xl transition-all duration-300 p-6`}
                   >
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-white rounded-lg mb-4 p-2">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-lg mb-4 p-3">
                       <img 
                         src={type.logoSrc} 
                         alt={`${type.name} logo`}
@@ -262,7 +262,7 @@ export default function Home() {
                   if (!selectedType) return null;
                   return (
                     <>
-                      <div className="inline-flex items-center justify-center w-12 h-12 bg-white rounded-lg p-2">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-lg p-3">
                         <img 
                           src={selectedType.logoSrc} 
                           alt={`${selectedType.name} logo`}
