@@ -155,7 +155,7 @@ export default function Home() {
       <div className="bg-white font-sans text-foreground min-h-screen">
 
       {/* Main Heading */}
-      <div className="bg-gradient-to-b from-background to-muted py-8">
+      <div className="bg-white py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">
             Ready to Explore our Agents
@@ -164,7 +164,7 @@ export default function Home() {
       </div>
 
       {/* Zenagent Banner */}
-      <div className="flex justify-center py-4 bg-muted">
+      <div className="flex justify-center py-4 bg-white">
         <div className="w-[60%] h-[30vw] max-h-60">
           <img 
             src={zenagentBanner} 
