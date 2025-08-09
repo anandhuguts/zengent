@@ -161,7 +161,7 @@ export default function Home() {
             {/* Center - Zengent AI Text */}
             <div className="flex-1 text-center">
               <h2 className="text-lg font-medium">Zengent AI - Enterprise Application Intelligence Platform</h2>
-              <p className="text-blue-200 text-sm">Comprehensive enterprise application analysis and intelligence platform</p>
+
             </div>
             
             {/* Right side - AI Settings */}
@@ -192,7 +192,7 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Welcome to Zengent AI Agent
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-sm text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Amex Diamond Project Discovery's intelligent assistant — uncover patterns, map dependencies, gain insights
           </p>
         </div>
