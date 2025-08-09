@@ -51,8 +51,11 @@ export default function Landing() {
           <LoginForm />
           
           <div className="text-center mt-6">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mb-2">
               Prepared by Diamond Zensar Team
+            </p>
+            <p className="text-xs text-gray-400">
+              © 2025 | <a href="#" className="hover:text-gray-600">Terms of use</a> | <a href="#" className="hover:text-gray-600">Privacy Policy</a>
             </p>
           </div>
         </div>
