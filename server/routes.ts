@@ -581,23 +581,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const loadAverage = os.loadavg();
       const cpuPercentage = Math.round(Math.min(100, loadAverage[0] * 25)); // Approximate CPU usage
 
-      // Get all projects and analyses from storage
-      const allProjects = await storage.listProjects();
-      const analyses = await Promise.all(
-        allProjects.map(async (project) => {
-          try {
-            return await storage.getAnalysisResult(project.id);
-          } catch {
-            return null;
-          }
-        })
-      );
+      // Get all projects from storage
+      const allProjects = await storage.getProjects();
+      const totalProjects = allProjects.length;
       
-      const validAnalyses = analyses.filter(Boolean);
-      const successfulAnalyses = validAnalyses.filter(analysis => 
-        analysis && !analysis.error
-      );
-      const failedAnalyses = validAnalyses.length - successfulAnalyses.length;
+      // Calculate basic statistics from existing project data
+      const analyses = allProjects;
+      
+      const successfulAnalyses = analyses.filter(project => project.status === 'completed');
+      const failedAnalyses = analyses.filter(project => project.status === 'failed');
+      const processingAnalyses = analyses.filter(project => project.status === 'processing');
 
       // Count project types from actual project data
       const projectTypes = {
@@ -608,13 +601,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       allProjects.forEach(project => {
-        if (project.name?.toLowerCase().includes('java') || project.files?.some(f => f.name.endsWith('.java'))) {
+        const projectType = project.projectType || 'java';
+        if (projectType === 'java') {
           projectTypes.java++;
-        } else if (project.name?.toLowerCase().includes('python') || project.files?.some(f => f.name.endsWith('.py'))) {
+        } else if (projectType === 'python') {
           projectTypes.python++;
-        } else if (project.name?.toLowerCase().includes('pyspark') || project.name?.toLowerCase().includes('spark')) {
+        } else if (projectType === 'pyspark') {
           projectTypes.pyspark++;
-        } else if (project.name?.toLowerCase().includes('mainframe') || project.name?.toLowerCase().includes('cobol')) {
+        } else if (projectType === 'mainframe') {
           projectTypes.mainframe++;
         }
       });
@@ -626,11 +620,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .map((project, index) => ({
           id: project.id,
           type: 'analysis' as const,
-          message: `${project.language || 'Project'} analysis ${
-            successfulAnalyses.some(a => a && a.projectId === project.id) ? 'completed' : 'processed'
+          message: `${project.projectType || 'Project'} analysis ${
+            project.status === 'completed' ? 'completed' : 'processed'
           } for project ${project.name}`,
           timestamp: `${(index + 1) * 5} minutes ago`,
-          status: successfulAnalyses.some(a => a && a.projectId === project.id) ? 'success' as const : 'success' as const,
+          status: project.status === 'completed' ? 'success' as const : 'info' as const,
           user: 'system'
         }));
 
@@ -639,7 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: cpuPercentage > 90 ? 'critical' : cpuPercentage > 70 ? 'warning' : 'healthy',
           uptime: uptimeFormatted,
           responseTime: Math.round(Math.random() * 100 + 200), // Would need actual response time tracking
-          errorRate: Math.round((failedAnalyses / Math.max(validAnalyses.length, 1)) * 100 * 100) / 100
+          errorRate: Math.round((failedAnalyses.length / Math.max(totalProjects, 1)) * 100 * 100) / 100
         },
         userActivity: {
           activeUsers: 1, // Current session
@@ -648,10 +642,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionDuration: Math.round(uptime / 60)
         },
         agentUsage: {
-          totalAnalyses: validAnalyses.length,
+          totalAnalyses: totalProjects,
           successfulAnalyses: successfulAnalyses.length,
-          failedAnalyses: failedAnalyses,
-          averageProcessingTime: validAnalyses.length > 0 ? 3.2 : 0, // Based on typical processing time
+          failedAnalyses: failedAnalyses.length,
+          averageProcessingTime: totalProjects > 0 ? 3.2 : 0, // Based on typical processing time
           projectTypes: projectTypes
         },
         llmUsage: {

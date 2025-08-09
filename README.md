@@ -1,6 +1,8 @@
-# Zengent - Multi-Language Architecture Analyzer
+# Zengent AI - Enterprise Application Intelligence Platform
 
-A comprehensive AI-powered project architecture analysis platform that transforms source code into interactive, intelligent visualizations and detailed insights.
+A comprehensive enterprise application intelligence platform designed to analyze multi-language project architectures through multiple input methods: ZIP file uploads and GitHub repository analysis. The system supports Java, Python, PySpark, and Mainframe codebases, extracting and parsing source files to identify architectural patterns, dependencies, and relationships between components.
+
+The platform features a modern React frontend with an agent-like interface supporting multiple programming languages, backed by an Express.js server that handles file processing, GitHub integration, and intelligent code analysis with UML-style diagrams and AI-generated recommendations. The system includes comprehensive enterprise features including SonarQube integration, Swagger API documentation, professional PDF report generation, and complete user management.
 
 ## Overview
 
