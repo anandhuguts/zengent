@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import UsageStatistics from "@/pages/usage-statistics";
+import AdminDashboard from "@/pages/admin-dashboard";
 import Layout from "@/components/layout";
 
 function Router() {
@@ -15,6 +16,13 @@ function Router() {
         {() => (
           <Layout>
             <UsageStatistics />
+          </Layout>
+        )}
+      </Route>
+      <Route path="/admin-dashboard">
+        {() => (
+          <Layout>
+            <AdminDashboard />
           </Layout>
         )}
       </Route>

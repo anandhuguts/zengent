@@ -13,24 +13,29 @@ interface AIModelSelectorProps {
 }
 
 export interface AIModelConfig {
-  type: 'openai' | 'claude' | 'gemini';
+  type: 'openai' | 'claude' | 'gemini' | 'local';
   openaiApiKey?: string;
   claudeApiKey?: string;
   geminiApiKey?: string;
+  localEndpoint?: string;
+  modelName?: string;
 }
 
 export default function AIModelSelector({ onModelSelect, currentConfig }: AIModelSelectorProps) {
-  const [modelType, setModelType] = useState<'openai' | 'claude' | 'gemini'>(currentConfig?.type || 'openai');
+  const [modelType, setModelType] = useState<'openai' | 'claude' | 'gemini' | 'local'>(currentConfig?.type || 'openai');
   const [openaiApiKey, setOpenaiApiKey] = useState(currentConfig?.openaiApiKey || '');
   const [claudeApiKey, setClaudeApiKey] = useState(currentConfig?.claudeApiKey || '');
   const [geminiApiKey, setGeminiApiKey] = useState(currentConfig?.geminiApiKey || '');
+  const [localEndpoint, setLocalEndpoint] = useState(currentConfig?.localEndpoint || 'http://localhost:11434');
+  const [modelName, setModelName] = useState(currentConfig?.modelName || 'llama2');
 
   const handleSaveConfig = () => {
     const config: AIModelConfig = {
       type: modelType,
       ...(modelType === 'openai' && { openaiApiKey }),
       ...(modelType === 'claude' && { claudeApiKey }),
-      ...(modelType === 'gemini' && { geminiApiKey })
+      ...(modelType === 'gemini' && { geminiApiKey }),
+      ...(modelType === 'local' && { localEndpoint, modelName })
     };
     onModelSelect(config);
   };
@@ -43,12 +48,12 @@ export default function AIModelSelector({ onModelSelect, currentConfig }: AIMode
           <span>AI Model Configuration</span>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Choose between OpenAI, AWS Claude, or Google Gemini for generating AI insights
+          Choose between major online LLM providers or configure a local LLM for AI analysis
         </p>
       </CardHeader>
       
       <CardContent className="space-y-6">
-        <RadioGroup value={modelType} onValueChange={(value) => setModelType(value as 'openai' | 'claude' | 'gemini')}>
+        <RadioGroup value={modelType} onValueChange={(value) => setModelType(value as 'openai' | 'claude' | 'gemini' | 'local')}>
           {/* OpenAI Option */}
           <div className="flex items-start space-x-3 p-4 border rounded-lg">
             <RadioGroupItem value="openai" id="openai" className="mt-1" />
@@ -140,6 +145,52 @@ export default function AIModelSelector({ onModelSelect, currentConfig }: AIMode
                   <p className="text-xs text-muted-foreground">
                     Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" className="text-purple-600 hover:underline">Google AI Studio</a>
                   </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Local LLM Option */}
+          <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <RadioGroupItem value="local" id="local" className="mt-1" />
+            <div className="flex-1">
+              <Label htmlFor="local" className="flex items-center space-x-2 cursor-pointer">
+                <Server className="w-4 h-4 text-green-600" />
+                <span className="font-medium">Local LLM (Ollama)</span>
+                <Badge variant="outline" className="text-xs">Privacy First</Badge>
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Use Ollama or other local LLM for offline, privacy-focused analysis
+              </p>
+              
+              {modelType === 'local' && (
+                <div className="mt-3 space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="local-endpoint" className="text-xs font-medium">Local Endpoint</Label>
+                    <Input
+                      id="local-endpoint"
+                      type="url"
+                      placeholder="http://localhost:11434"
+                      value={localEndpoint}
+                      onChange={(e) => setLocalEndpoint(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="model-name" className="text-xs font-medium">Model Name</Label>
+                    <Input
+                      id="model-name"
+                      type="text"
+                      placeholder="llama2, codellama, deepseek-coder, etc."
+                      value={modelName}
+                      onChange={(e) => setModelName(e.target.value)}
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Available models: Code Llama, Deepseek Coder, StarCoder, Llama 2, Mistral
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

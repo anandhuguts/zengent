@@ -7,7 +7,8 @@ import {
   Bot, 
   BarChart3, 
   Settings, 
-  HelpCircle 
+  HelpCircle,
+  Shield
 } from "lucide-react";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 
@@ -34,6 +35,12 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
       href: '/usage-statistics',
       icon: BarChart3,
       current: location === '/usage-statistics'
+    },
+    {
+      name: 'Admin Dashboard',
+      href: '/admin-dashboard',
+      icon: Shield,
+      current: location === '/admin-dashboard'
     }
   ];
 
@@ -112,9 +119,9 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                       key={item.name}
                       href={item.href}
                     >
-                      <a
+                      <div
                         className={`
-                          group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors
+                          group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer
                           ${item.current
                             ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
@@ -131,7 +138,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                           `}
                         />
                         {item.name}
-                      </a>
+                      </div>
                     </Link>
                   );
                 })}
