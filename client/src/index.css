@@ -4,73 +4,77 @@
 @tailwind utilities;
 
 :root {
-  /* Mint Theme Colors */
-  --background: hsl(180, 25%, 97%);
-  --foreground: hsl(260, 35%, 25%);
-  --card: hsl(180, 20%, 95%);
-  --card-foreground: hsl(260, 35%, 25%);
-  --popover: hsl(180, 25%, 98%);
-  --popover-foreground: hsl(260, 35%, 25%);
-  --primary: hsl(165, 60%, 65%); /* Mint Green */
-  --primary-foreground: hsl(260, 35%, 15%);
-  --secondary: hsl(200, 50%, 70%); /* Light Blue */
-  --secondary-foreground: hsl(260, 35%, 15%);
-  --muted: hsl(180, 15%, 92%);
-  --muted-foreground: hsl(260, 25%, 45%);
-  --accent: hsl(165, 60%, 65%); /* Mint Green accent */
-  --accent-foreground: hsl(260, 35%, 15%);
-  --destructive: hsl(0, 84%, 60%);
+  /* Card-based Theme - Light Mode */
+  --background: hsl(210, 20%, 98%);
+  --foreground: hsl(210, 40%, 8%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(210, 40%, 8%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(210, 40%, 8%);
+  --primary: hsl(160, 84%, 39%); /* Success Green */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(214, 100%, 59%); /* Confirmation Blue */
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(210, 25%, 40%);
+  --accent: hsl(160, 84%, 39%); /* Success Green accent */
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(348, 86%, 61%); /* Failure Red */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(180, 20%, 85%);
-  --input: hsl(180, 20%, 94%);
-  --ring: hsl(165, 60%, 65%);
-  --chart-1: hsl(165, 60%, 65%); /* Mint */
-  --chart-2: hsl(200, 50%, 70%); /* Light Blue */
-  --chart-3: hsl(220, 45%, 65%); /* Medium Blue */
-  --chart-4: hsl(260, 40%, 60%); /* Purple */
-  --chart-5: hsl(180, 40%, 55%); /* Teal */
-  --sidebar: hsl(260, 40%, 15%); /* Dark Purple */
-  --sidebar-foreground: hsl(180, 25%, 95%);
-  --sidebar-primary: hsl(165, 60%, 65%); /* Mint */
-  --sidebar-primary-foreground: hsl(260, 35%, 15%);
-  --sidebar-accent: hsl(260, 30%, 25%);
-  --sidebar-accent-foreground: hsl(165, 60%, 65%);
-  --sidebar-border: hsl(260, 25%, 30%);
-  --sidebar-ring: hsl(165, 60%, 65%);
+  --warning: hsl(36, 100%, 50%); /* Warning Orange */
+  --warning-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 36%, 91%);
+  --input: hsl(210, 40%, 96%);
+  --ring: hsl(160, 84%, 39%);
+  --chart-1: hsl(160, 84%, 39%); /* Success Green */
+  --chart-2: hsl(348, 86%, 61%); /* Failure Red */
+  --chart-3: hsl(36, 100%, 50%); /* Warning Orange */
+  --chart-4: hsl(214, 100%, 59%); /* Confirmation Blue */
+  --chart-5: hsl(266, 85%, 58%); /* Purple accent */
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(210, 40%, 8%);
+  --sidebar-primary: hsl(160, 84%, 39%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 40%, 96%);
+  --sidebar-accent-foreground: hsl(210, 40%, 8%);
+  --sidebar-border: hsl(210, 36%, 91%);
+  --sidebar-ring: hsl(160, 84%, 39%);
   --font-sans: 'Roboto', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
-  --radius: 1.3rem;
+  --radius: 0.75rem;
 }
 
 .dark {
-  /* Dark Mint Theme */
-  --background: hsl(260, 40%, 8%);
-  --foreground: hsl(180, 25%, 90%);
-  --card: hsl(260, 35%, 12%);
-  --card-foreground: hsl(180, 25%, 85%);
-  --popover: hsl(260, 40%, 10%);
-  --popover-foreground: hsl(180, 25%, 90%);
-  --primary: hsl(165, 60%, 65%); /* Mint Green */
-  --primary-foreground: hsl(260, 40%, 8%);
-  --secondary: hsl(200, 45%, 60%); /* Light Blue */
-  --secondary-foreground: hsl(260, 40%, 8%);
-  --muted: hsl(260, 30%, 15%);
-  --muted-foreground: hsl(180, 15%, 65%);
-  --accent: hsl(165, 60%, 65%); /* Mint Green accent */
-  --accent-foreground: hsl(260, 40%, 8%);
-  --destructive: hsl(0, 84%, 60%);
+  /* Card-based Theme - Dark Mode */
+  --background: hsl(210, 25%, 10%); /* Dark slate background like in image */
+  --foreground: hsl(210, 40%, 95%);
+  --card: hsl(210, 20%, 14%);
+  --card-foreground: hsl(210, 40%, 95%);
+  --popover: hsl(210, 25%, 12%);
+  --popover-foreground: hsl(210, 40%, 95%);
+  --primary: hsl(160, 84%, 39%); /* Success Green */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(214, 100%, 59%); /* Confirmation Blue */
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 25%, 16%);
+  --muted-foreground: hsl(210, 20%, 65%);
+  --accent: hsl(160, 84%, 39%); /* Success Green accent */
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(348, 86%, 61%); /* Failure Red */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(260, 25%, 20%);
-  --input: hsl(260, 30%, 18%);
-  --ring: hsl(165, 60%, 65%);
-  --sidebar: hsl(260, 45%, 5%); /* Very Dark Purple */
-  --sidebar-foreground: hsl(180, 25%, 85%);
-  --sidebar-primary: hsl(165, 60%, 65%); /* Mint */
-  --sidebar-primary-foreground: hsl(260, 40%, 8%);
-  --sidebar-accent: hsl(260, 35%, 15%);
-  --sidebar-accent-foreground: hsl(165, 60%, 65%);
-  --sidebar-border: hsl(260, 30%, 18%);
-  --sidebar-ring: hsl(165, 60%, 65%);
+  --warning: hsl(36, 100%, 50%); /* Warning Orange */
+  --warning-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 25%, 18%);
+  --input: hsl(210, 25%, 16%);
+  --ring: hsl(160, 84%, 39%);
+  --sidebar: hsl(210, 30%, 8%); /* Very dark slate */
+  --sidebar-foreground: hsl(210, 40%, 90%);
+  --sidebar-primary: hsl(160, 84%, 39%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 25%, 14%);
+  --sidebar-accent-foreground: hsl(160, 84%, 39%);
+  --sidebar-border: hsl(210, 25%, 16%);
+  --sidebar-ring: hsl(160, 84%, 39%);
 }
 
 @layer base {

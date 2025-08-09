@@ -79,9 +79,9 @@ export default function Home() {
       name: 'Java',
       description: 'Comprehensive analysis of Java applications including Spring Boot frameworks, Maven/Gradle builds, and enterprise patterns',
       logoSrc: agentLogo,
-      color: 'bg-mint-600',
-      hoverColor: 'hover:bg-mint-700',
-      borderColor: 'border-mint-200',
+      color: 'bg-primary',
+      hoverColor: 'hover:bg-primary/90',
+      borderColor: 'border-primary/20',
       features: [
         'Spring Boot & Spring Framework analysis',
         'JPA/Hibernate entity relationship mapping', 
@@ -96,9 +96,9 @@ export default function Home() {
       name: 'PySpark',
       description: 'Advanced big data processing pipeline analysis with Apache Spark ecosystem integration and performance optimization insights',
       logoSrc: agentLogo,
-      color: 'bg-sky-500',
-      hoverColor: 'hover:bg-sky-600',
-      borderColor: 'border-sky-200',
+      color: 'bg-secondary',
+      hoverColor: 'hover:bg-secondary/90',
+      borderColor: 'border-secondary/20',
       features: [
         'DataFrame operations and transformations',
         'Spark job execution flow visualization',
@@ -113,9 +113,9 @@ export default function Home() {
       name: 'Mainframe',
       description: 'Legacy system analysis for COBOL programs, JCL job scheduling, and mainframe database integrations with modernization insights',
       logoSrc: agentLogo,
-      color: 'bg-blue-600',
-      hoverColor: 'hover:bg-blue-700',
-      borderColor: 'border-blue-200',
+      color: 'bg-warning',
+      hoverColor: 'hover:bg-warning/90',
+      borderColor: 'border-warning/20',
       features: [
         'COBOL program structure and flow analysis',
         'JCL job dependency mapping',
@@ -130,9 +130,9 @@ export default function Home() {
       name: 'Python',
       description: 'Full-stack Python application analysis covering Django/Flask frameworks, API architectures, and dependency management',
       logoSrc: agentLogo,
-      color: 'bg-purple-600',
-      hoverColor: 'hover:bg-purple-700',
-      borderColor: 'border-purple-200',
+      color: 'bg-destructive',
+      hoverColor: 'hover:bg-destructive/90',
+      borderColor: 'border-destructive/20',
       features: [
         'Django/Flask framework pattern detection',
         'Python package and module dependencies',
@@ -161,19 +161,19 @@ export default function Home() {
       <div className="bg-background font-sans text-foreground min-h-screen">
 
       {/* Main Heading */}
-      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+      <div className="bg-gradient-to-b from-background to-muted py-12">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Ready to Explore our Agents
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Select a project type to get started with intelligent project analysis
           </p>
         </div>
       </div>
 
       {/* Zensar Banner */}
-      <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
+      <div className="flex justify-center py-4 bg-muted">
         <div className="w-[60%] h-[60vw] max-h-96">
           <img 
             src={topBanner} 
