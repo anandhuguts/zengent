@@ -48,7 +48,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-primary text-white shadow-lg relative z-50">
+      <header className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-600 text-white shadow-lg relative z-50">
         <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             {/* Left side - Menu button and Zensar Logo */}
