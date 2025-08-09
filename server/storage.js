@@ -1,50 +1,35 @@
-import { type User, type InsertUser, type Project, type InsertProject } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  
-  getProject(id: string): Promise<Project | undefined>;
-  createProject(project: InsertProject): Promise<Project>;
-  updateProject(id: string, project: Partial<Project>): Promise<Project | undefined>;
-  listProjects(): Promise<Project[]>;
-}
-
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private projects: Map<string, Project>;
-
+export class MemStorage {
   constructor() {
     this.users = new Map();
     this.projects = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id) {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
+  async getUserByUsername(username) {
     return Array.from(this.users.values()).find(
       (user) => user.username === username,
     );
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser) {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user = { ...insertUser, id };
     this.users.set(id, user);
     return user;
   }
 
-  async getProject(id: string): Promise<Project | undefined> {
+  async getProject(id) {
     return this.projects.get(id);
   }
 
-  async createProject(insertProject: InsertProject): Promise<Project> {
+  async createProject(insertProject) {
     const id = randomUUID();
-    const project: Project = {
+    const project = {
       ...insertProject,
       id,
       uploadedAt: new Date(),
@@ -65,7 +50,7 @@ export class MemStorage implements IStorage {
     return project;
   }
 
-  async updateProject(id: string, updates: Partial<Project>): Promise<Project | undefined> {
+  async updateProject(id, updates) {
     const project = this.projects.get(id);
     if (!project) return undefined;
     
@@ -74,7 +59,7 @@ export class MemStorage implements IStorage {
     return updatedProject;
   }
 
-  async listProjects(): Promise<Project[]> {
+  async listProjects() {
     return Array.from(this.projects.values()).sort(
       (a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()
     );

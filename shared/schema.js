@@ -44,39 +44,12 @@ export const githubProjectSchema = z.object({
   githubBranch: z.string().default("main"),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-export type InsertProject = z.infer<typeof insertProjectSchema>;
-export type Project = typeof projects.$inferSelect;
-export type GithubProject = z.infer<typeof githubProjectSchema>;
-
 // AI Model Configuration Schema
 export const aiModelConfigSchema = z.object({
   type: z.enum(['openai', 'local']),
   localEndpoint: z.string().optional(),
   modelName: z.string().optional(),
 });
-
-export type AIModelConfig = z.infer<typeof aiModelConfigSchema>;
-
-// AI Analysis types
-export interface AIInsight {
-  id: string;
-  type: 'overview' | 'module_description' | 'function_description' | 'architecture_suggestion';
-  title: string;
-  content: string;
-  confidence: number;
-  tags: string[];
-  relatedComponents: string[];
-}
-
-export interface AIAnalysisResult {
-  projectOverview: string;
-  architectureInsights: string[];
-  moduleInsights: Record<string, AIInsight>;
-  suggestions: string[];
-  qualityScore: number;
-}
 
 // Analysis result types
 export const AnalysisDataSchema = z.object({
@@ -150,5 +123,3 @@ export const AnalysisDataSchema = z.object({
     qualityScore: z.number(),
   }).optional(),
 });
-
-export type AnalysisData = z.infer<typeof AnalysisDataSchema>;
