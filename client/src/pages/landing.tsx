@@ -58,8 +58,13 @@ export default function Landing() {
             <p className="text-xs text-gray-500 mb-2">
               Prepared by Diamond Zensar Team
             </p>
+            <p className="text-xs text-gray-400 mb-2">
+              © 2025 | <a href="/terms-of-use" className="hover:text-gray-600">Terms of use</a> | <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
+            </p>
             <p className="text-xs text-gray-400">
-              © 2025 | <a href="#" className="hover:text-gray-600">Terms of use</a> | <a href="#" className="hover:text-gray-600">Privacy Policy</a>
+              <a href="https://www.zensar.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600">
+                www.zensar.com
+              </a>
             </p>
           </div>
         </div>

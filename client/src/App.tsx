@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
+import TermsOfUse from "@/pages/terms-of-use";
+import PrivacyPolicy from "@/pages/privacy-policy";
 import UsageStatistics from "@/pages/usage-statistics";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Layout from "@/components/layout";
@@ -17,6 +19,10 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public routes available without authentication */}
+      <Route path="/terms-of-use" component={TermsOfUse} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
