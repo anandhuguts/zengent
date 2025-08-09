@@ -154,14 +154,7 @@ export default function Home() {
     <Layout aiConfigButton={aiConfigButton}>
       <div className="bg-white font-sans text-foreground min-h-screen">
 
-      {/* Main Heading */}
-      <div className="bg-white py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            Ready to Explore our Agents
-          </h1>
-        </div>
-      </div>
+
 
       {/* Zenagent Banner */}
       <div className="flex justify-center py-4 bg-white">
