@@ -197,7 +197,7 @@ export default function Home() {
                     <div className="text-center">
                       {/* Top - Logo */}
                       <div className="flex justify-center mb-4">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-lg p-2">
+                        <div className={`inline-flex items-center justify-center bg-white rounded-lg p-2 ${type.id === 'pyspark' ? 'w-24 h-16' : 'w-16 h-16'}`}>
                           <img 
                             src={type.logoSrc} 
                             alt={`${type.name} logo`}
