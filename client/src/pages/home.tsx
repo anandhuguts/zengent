@@ -193,7 +193,7 @@ export default function Home() {
             Welcome to Zengent AI Agent
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Your intelligent enterprise application analysis assistant. Choose your project type below and I'll help you analyze architecture patterns, dependencies, and provide actionable insights.
+            Diamond Project Discovery's intelligent Agent — uncover patterns, map dependencies, gain insights
           </p>
         </div>
       </div>
