@@ -194,9 +194,9 @@ export default function Home() {
                     onClick={() => setSelectedProjectType(type.id)}
                     className={`relative group cursor-pointer bg-white dark:bg-gray-800 rounded-xl border-2 ${type.borderColor} hover:border-opacity-60 shadow-lg hover:shadow-xl transition-all duration-300 p-6`}
                   >
-                    <div className="flex items-center space-x-4">
-                      {/* Left side - Logo */}
-                      <div className="flex-shrink-0">
+                    <div className="text-center">
+                      {/* Top - Logo */}
+                      <div className="flex justify-center mb-4">
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-lg p-2">
                           <img 
                             src={type.logoSrc} 
@@ -206,12 +206,12 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      {/* Right side - Content stacked vertically */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-tight">
+                      {/* Bottom - Content stacked vertically and centered */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white leading-tight mb-2">
                           {type.name}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
                           {type.description}
                         </p>
                       </div>
