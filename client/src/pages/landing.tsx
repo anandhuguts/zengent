@@ -1,4 +1,4 @@
-import zenagentAgents from "@assets/zenagentw_1754761892455.png";
+import zenagentAgents from "@assets/zenagentw_1754761999252.png";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 import { LoginForm } from "@/components/login-form";
 
