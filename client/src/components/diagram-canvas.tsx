@@ -25,38 +25,106 @@ interface DiagramCanvasProps {
 // Enhanced node types for better flow visualization
 const nodeTypes = {
   flowNode: ({ data }: { data: any }) => {
-    const getNodeColor = (type: string) => {
+    const getNodeStyle = (type: string) => {
       switch (type) {
-        case 'controller': return { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-white' };
-        case 'service': return { bg: 'bg-green-500', border: 'border-green-600', text: 'text-white' };
-        case 'repository': return { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-white' };
-        case 'entity': return { bg: 'bg-orange-500', border: 'border-orange-600', text: 'text-white' };
-        default: return { bg: 'bg-gray-500', border: 'border-gray-600', text: 'text-white' };
+        case 'controller': 
+          return { 
+            bg: 'bg-gradient-to-br from-blue-500 to-blue-600', 
+            border: 'border-blue-700', 
+            text: 'text-white',
+            icon: '🎮'
+          };
+        case 'service': 
+          return { 
+            bg: 'bg-gradient-to-br from-green-500 to-green-600', 
+            border: 'border-green-700', 
+            text: 'text-white',
+            icon: '⚙️'
+          };
+        case 'repository': 
+          return { 
+            bg: 'bg-gradient-to-br from-purple-500 to-purple-600', 
+            border: 'border-purple-700', 
+            text: 'text-white',
+            icon: '📦'
+          };
+        case 'entity': 
+          return { 
+            bg: 'bg-gradient-to-br from-orange-500 to-orange-600', 
+            border: 'border-orange-700', 
+            text: 'text-white',
+            icon: '📄'
+          };
+        case 'client': 
+          return { 
+            bg: 'bg-gradient-to-br from-indigo-500 to-indigo-600', 
+            border: 'border-indigo-700', 
+            text: 'text-white',
+            icon: '🌐'
+          };
+        case 'gateway': 
+          return { 
+            bg: 'bg-gradient-to-br from-cyan-500 to-cyan-600', 
+            border: 'border-cyan-700', 
+            text: 'text-white',
+            icon: '🚪'
+          };
+        case 'database': 
+          return { 
+            bg: 'bg-gradient-to-br from-yellow-500 to-yellow-600', 
+            border: 'border-yellow-700', 
+            text: 'text-white',
+            icon: '🗄️'
+          };
+        default: 
+          return { 
+            bg: 'bg-gradient-to-br from-gray-500 to-gray-600', 
+            border: 'border-gray-700', 
+            text: 'text-white',
+            icon: '📦'
+          };
       }
     };
     
-    const colors = getNodeColor(data.nodeType);
+    const style = getNodeStyle(data.nodeType);
     
     return (
-      <div className={`${colors.bg} ${colors.border} border-2 rounded-xl shadow-lg min-w-[140px] max-w-[200px]`}>
+      <div className={`${style.bg} ${style.border} border-2 rounded-xl shadow-lg min-w-[160px] max-w-[220px] transform hover:scale-105 transition-transform duration-200`}>
         <Handle type="target" position={Position.Top} id="target" />
-        <div className="p-3">
-          <div className={`font-bold text-sm ${colors.text} text-center mb-1`}>
-            {data.label}
+        <div className="p-4">
+          {/* Header with Icon */}
+          <div className="flex items-center justify-center mb-2">
+            <span className="text-2xl mr-2">{style.icon}</span>
+            <div className={`font-bold text-sm ${style.text} text-center`}>
+              {data.label}
+            </div>
           </div>
-          <div className="text-xs bg-white bg-opacity-20 rounded px-2 py-1 text-center">
-            {data.nodeType}
+          
+          {/* Node Type Badge */}
+          <div className="text-xs bg-black bg-opacity-20 rounded-full px-3 py-1 text-center mb-2">
+            {data.nodeType.toUpperCase()}
           </div>
+          
+          {/* Description */}
+          {data.description && (
+            <div className="text-xs text-white opacity-80 text-center mb-2">
+              {data.description}
+            </div>
+          )}
+          
+          {/* Methods Section */}
           {data.methods && data.methods.length > 0 && (
             <div className="mt-2 pt-2 border-t border-white border-opacity-30">
               <div className="text-xs text-white opacity-80">
                 {data.methods.slice(0, 2).map((method: any, idx: number) => (
                   <div key={idx} className="truncate">
-                    {method.name}()
+                    • {method.name}()
                   </div>
                 ))}
                 {data.methods.length > 2 && (
-                  <div>+{data.methods.length - 2} more</div>
+                  <div className="text-center mt-1">
+                    +{data.methods.length - 2} more methods
+                  </div>
                 )}
               </div>
             </div>
@@ -164,14 +232,28 @@ const nodeTypes = {
   ),
 };
 
-// Dagre layout utility for automatic node positioning
+// Enhanced Dagre layout utility for better flow visualization
 const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: direction, nodesep: 100, ranksep: 150 });
+  
+  // Enhanced layout settings for better flow chart appearance
+  dagreGraph.setGraph({ 
+    rankdir: direction, 
+    nodesep: 120,     // Horizontal spacing between nodes
+    ranksep: 180,     // Vertical spacing between layers
+    marginx: 20,      // Margin around the graph
+    marginy: 20,
+    align: 'UL'       // Align to upper left for consistent positioning
+  });
 
+  // Set node dimensions based on type for better layout
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 200, height: 150 });
+    const isSpecialNode = ['client-browser', 'api-gateway', 'database'].includes(node.id);
+    dagreGraph.setNode(node.id, { 
+      width: isSpecialNode ? 180 : 200, 
+      height: isSpecialNode ? 120 : 160 
+    });
   });
 
   edges.forEach((edge) => {
@@ -185,10 +267,11 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
     node.targetPosition = Position.Top;
     node.sourcePosition = Position.Bottom;
     
-    // Adjust position to match React Flow anchor point
+    // Adjust position to match React Flow anchor point with better centering
+    const isSpecialNode = ['client-browser', 'api-gateway', 'database'].includes(node.id);
     node.position = {
-      x: nodeWithPosition.x - 100,
-      y: nodeWithPosition.y - 75,
+      x: nodeWithPosition.x - (isSpecialNode ? 90 : 100),
+      y: nodeWithPosition.y - (isSpecialNode ? 60 : 80),
     };
 
     return node;
@@ -228,51 +311,208 @@ function generateFlowDiagram(analysisData: AnalysisData, nodes: Node[], edges: E
   const controllers = analysisData.classes.filter(c => c.type === 'controller');
   const services = analysisData.classes.filter(c => c.type === 'service');
   const repositories = analysisData.classes.filter(c => c.type === 'repository');
+  const entities = analysisData.entities || [];
 
-  // Create flow nodes for each layer
-  [...controllers, ...services, ...repositories].forEach((cls) => {
+  // 1. Add Client/Browser Entry Point
+  nodes.push({
+    id: 'client-browser',
+    type: 'flowNode',
+    position: { x: 0, y: 0 },
+    data: {
+      label: 'Client Browser',
+      nodeType: 'client',
+      description: 'HTTP Requests'
+    },
+  });
+
+  // 2. Add Load Balancer/API Gateway if multiple controllers
+  if (controllers.length > 1) {
     nodes.push({
-      id: cls.name,
+      id: 'api-gateway',
       type: 'flowNode',
-      position: { x: 0, y: 0 }, // Will be set by dagre layout
+      position: { x: 0, y: 0 },
       data: {
-        label: cls.name,
-        nodeType: cls.type,
-        annotations: cls.annotations,
-        methods: cls.methods,
+        label: 'API Gateway',
+        nodeType: 'gateway',
+        description: 'Route Requests'
+      },
+    });
+    
+    edges.push({
+      id: 'client-to-gateway',
+      source: 'client-browser',
+      target: 'api-gateway',
+      type: 'smoothstep',
+      label: 'HTTP Requests',
+      style: { strokeWidth: 2, stroke: '#3b82f6' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
+    });
+  }
+
+  // 3. Add Controllers (Presentation Layer)
+  controllers.forEach((controller) => {
+    nodes.push({
+      id: controller.name,
+      type: 'flowNode',
+      position: { x: 0, y: 0 },
+      data: {
+        label: controller.name.replace('Controller', ''),
+        nodeType: 'controller',
+        annotations: controller.annotations,
+        methods: controller.methods.slice(0, 3),
+        description: `${controller.methods.length} endpoints`
+      },
+    });
+
+    // Connect from gateway or directly from client
+    const sourceId = controllers.length > 1 ? 'api-gateway' : 'client-browser';
+    edges.push({
+      id: `${sourceId}-${controller.name}`,
+      source: sourceId,
+      target: controller.name,
+      type: 'smoothstep',
+      label: 'HTTP',
+      style: { strokeWidth: 2, stroke: '#3b82f6' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
+    });
+  });
+
+  // 4. Add Services (Business Layer)
+  services.forEach((service) => {
+    nodes.push({
+      id: service.name,
+      type: 'flowNode',
+      position: { x: 0, y: 0 },
+      data: {
+        label: service.name.replace('Service', ''),
+        nodeType: 'service',
+        annotations: service.annotations,
+        methods: service.methods.slice(0, 3),
+        description: `${service.methods.length} methods`
       },
     });
   });
 
-  // Add edges based on relationships with better validation
-  analysisData.relationships.forEach((rel, index) => {
-    if (rel.type === 'injects' || rel.type === 'calls') {
-      const sourceNode = nodes.find(n => n.id === rel.from);
-      const targetNode = nodes.find(n => n.id === rel.to);
-      
-      if (sourceNode && targetNode) {
-        edges.push({
-          id: `${rel.from}-${rel.to}-${index}`,
-          source: rel.from,
-          target: rel.to,
-          // Remove specific handle IDs to allow React Flow to auto-connect
-          type: 'smoothstep',
-          animated: rel.type === 'calls',
-          label: rel.method || rel.type,
-          style: { 
-            strokeWidth: 2,
-            stroke: rel.type === 'calls' ? '#10b981' : '#3b82f6'
-          },
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: rel.type === 'calls' ? '#10b981' : '#3b82f6',
-          },
-        });
-      }
+  // 5. Add Repositories (Data Access Layer)
+  repositories.forEach((repo) => {
+    nodes.push({
+      id: repo.name,
+      type: 'flowNode',
+      position: { x: 0, y: 0 },
+      data: {
+        label: repo.name.replace('Repository', ''),
+        nodeType: 'repository',
+        annotations: repo.annotations,
+        methods: repo.methods.slice(0, 3),
+        description: `${repo.methods.length} queries`
+      },
+    });
+  });
+
+  // 6. Add Database Node
+  nodes.push({
+    id: 'database',
+    type: 'flowNode',
+    position: { x: 0, y: 0 },
+    data: {
+      label: 'Database',
+      nodeType: 'database',
+      description: `${entities.length} tables`
+    },
+  });
+
+  // 7. Create logical flow connections
+  // Controller -> Service connections
+  controllers.forEach((controller) => {
+    // Find related services based on naming patterns or relationships
+    const relatedServices = services.filter(service => 
+      analysisData.relationships.some(rel => 
+        rel.from === controller.name && rel.to === service.name
+      ) ||
+      // Fallback: match by similar naming (UserController -> UserService)
+      controller.name.replace('Controller', '').toLowerCase() === 
+      service.name.replace('Service', '').toLowerCase()
+    );
+
+    relatedServices.forEach((service) => {
+      edges.push({
+        id: `${controller.name}-${service.name}`,
+        source: controller.name,
+        target: service.name,
+        type: 'smoothstep',
+        animated: true,
+        label: 'Business Logic',
+        style: { strokeWidth: 2, stroke: '#10b981' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
+      });
+    });
+
+    // If no specific service found, connect to first available service
+    if (relatedServices.length === 0 && services.length > 0) {
+      edges.push({
+        id: `${controller.name}-${services[0].name}`,
+        source: controller.name,
+        target: services[0].name,
+        type: 'smoothstep',
+        label: 'Delegates',
+        style: { strokeWidth: 1, stroke: '#6b7280', strokeDasharray: '3,3' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#6b7280' },
+      });
     }
   });
 
-  // Apply automatic layout
+  // Service -> Repository connections
+  services.forEach((service) => {
+    const relatedRepos = repositories.filter(repo => 
+      analysisData.relationships.some(rel => 
+        rel.from === service.name && rel.to === repo.name
+      ) ||
+      // Fallback: match by similar naming
+      service.name.replace('Service', '').toLowerCase() === 
+      repo.name.replace('Repository', '').toLowerCase()
+    );
+
+    relatedRepos.forEach((repo) => {
+      edges.push({
+        id: `${service.name}-${repo.name}`,
+        source: service.name,
+        target: repo.name,
+        type: 'smoothstep',
+        animated: true,
+        label: 'Data Access',
+        style: { strokeWidth: 2, stroke: '#8b5cf6' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6' },
+      });
+    });
+
+    // If no specific repo found, connect to first available repo
+    if (relatedRepos.length === 0 && repositories.length > 0) {
+      edges.push({
+        id: `${service.name}-${repositories[0].name}`,
+        source: service.name,
+        target: repositories[0].name,
+        type: 'smoothstep',
+        label: 'Queries',
+        style: { strokeWidth: 1, stroke: '#6b7280', strokeDasharray: '3,3' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#6b7280' },
+      });
+    }
+  });
+
+  // Repository -> Database connections
+  repositories.forEach((repo) => {
+    edges.push({
+      id: `${repo.name}-database`,
+      source: repo.name,
+      target: 'database',
+      type: 'smoothstep',
+      label: 'SQL/JPA',
+      style: { strokeWidth: 2, stroke: '#f59e0b' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b' },
+    });
+  });
+
+  // Apply automatic hierarchical layout
   const layouted = getLayoutedElements(nodes, edges, 'TB');
   nodes.splice(0, nodes.length, ...layouted.nodes);
   edges.splice(0, edges.length, ...layouted.edges);
