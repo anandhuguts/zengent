@@ -160,7 +160,17 @@ export default function Home() {
     <Layout aiConfigButton={aiConfigButton}>
       <div className="bg-background font-sans text-foreground min-h-screen">
 
-
+      {/* Main Heading */}
+      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Ready to Explore our Agents
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Select a project type to get started with intelligent project analysis
+          </p>
+        </div>
+      </div>
 
       {/* Zensar Banner */}
       <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
