@@ -193,7 +193,7 @@ export default function Home() {
             Welcome to Zengent AI Agent
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Amex Diamond Project Discovery's intelligent assistant — uncover patterns, map dependencies, gain insights
+            Amex Diamond Project Discovery's intelligent assistant
           </p>
         </div>
       </div>
