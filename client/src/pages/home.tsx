@@ -79,9 +79,9 @@ export default function Home() {
       name: 'Java',
       description: 'Comprehensive analysis of Java applications including Spring Boot frameworks, Maven/Gradle builds, and enterprise patterns',
       logoSrc: agentLogo,
-      color: 'bg-orange-500',
-      hoverColor: 'hover:bg-orange-600',
-      borderColor: 'border-orange-200',
+      color: 'bg-mint-600',
+      hoverColor: 'hover:bg-mint-700',
+      borderColor: 'border-mint-200',
       features: [
         'Spring Boot & Spring Framework analysis',
         'JPA/Hibernate entity relationship mapping', 
@@ -96,9 +96,9 @@ export default function Home() {
       name: 'PySpark',
       description: 'Advanced big data processing pipeline analysis with Apache Spark ecosystem integration and performance optimization insights',
       logoSrc: agentLogo,
-      color: 'bg-yellow-500',
-      hoverColor: 'hover:bg-yellow-600',
-      borderColor: 'border-yellow-200',
+      color: 'bg-sky-500',
+      hoverColor: 'hover:bg-sky-600',
+      borderColor: 'border-sky-200',
       features: [
         'DataFrame operations and transformations',
         'Spark job execution flow visualization',
@@ -113,8 +113,8 @@ export default function Home() {
       name: 'Mainframe',
       description: 'Legacy system analysis for COBOL programs, JCL job scheduling, and mainframe database integrations with modernization insights',
       logoSrc: agentLogo,
-      color: 'bg-blue-500',
-      hoverColor: 'hover:bg-blue-600',
+      color: 'bg-blue-600',
+      hoverColor: 'hover:bg-blue-700',
       borderColor: 'border-blue-200',
       features: [
         'COBOL program structure and flow analysis',
@@ -130,9 +130,9 @@ export default function Home() {
       name: 'Python',
       description: 'Full-stack Python application analysis covering Django/Flask frameworks, API architectures, and dependency management',
       logoSrc: agentLogo,
-      color: 'bg-green-500',
-      hoverColor: 'hover:bg-green-600',
-      borderColor: 'border-green-200',
+      color: 'bg-purple-600',
+      hoverColor: 'hover:bg-purple-700',
+      borderColor: 'border-purple-200',
       features: [
         'Django/Flask framework pattern detection',
         'Python package and module dependencies',
@@ -149,7 +149,7 @@ export default function Home() {
       variant="outline"
       size="sm"
       onClick={() => setShowAIConfig(true)}
-      className="text-blue-900 bg-white border-white hover:bg-gray-100 hover:text-primary font-medium"
+      className="text-primary bg-white border-primary hover:bg-primary hover:text-white font-medium transition-colors"
     >
       <Settings className="w-4 h-4 mr-2" />
       AI Settings
