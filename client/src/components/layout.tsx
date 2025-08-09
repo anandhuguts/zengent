@@ -25,7 +25,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
 
   const navigation = [
     {
-      name: 'AI Agents',
+      name: 'Agentic AI',
       href: '/',
       icon: Bot,
       current: location === '/'

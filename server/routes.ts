@@ -449,13 +449,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get memory usage
       const memoryUsage = process.memoryUsage();
-      const totalMemory = require('os').totalmem();
-      const freeMemory = require('os').freemem();
+      const os = await import('os');
+      const totalMemory = os.totalmem();
+      const freeMemory = os.freemem();
       const usedMemory = totalMemory - freeMemory;
       const memoryPercentage = Math.round((usedMemory / totalMemory) * 100);
 
       // Get CPU load average
-      const loadAverage = require('os').loadavg();
+      const loadAverage = os.loadavg();
       const cpuPercentage = Math.round(Math.min(100, loadAverage[0] * 25)); // Approximate CPU usage
 
       // Get all projects and analyses from storage
