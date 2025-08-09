@@ -12,7 +12,7 @@ export default function Landing() {
           <h1 className="text-2xl font-bold mb-2 tracking-wide">
             ENTERPRISE APPLICATION INTELLIGENCE
           </h1>
-          <h2 className="text-base font-medium mb-4 opacity-90">
+          <h2 className="text-base font-medium mb-4 text-cyan-400">
             PLATFORM POWERED BY AI AGENTS
           </h2>
         </div>
