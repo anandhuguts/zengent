@@ -8,7 +8,7 @@ import Dashboard from "@/components/dashboard";
 import AIModelSelector, { type AIModelConfig } from "@/components/ai-model-selector";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
-import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode } from "lucide-react";
+import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode, Eye, GitMerge, Shield } from "lucide-react";
 import Layout from "@/components/layout";
 import { SiPython, SiApachespark } from "react-icons/si";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
@@ -19,7 +19,7 @@ import pysparkLogo from "@assets/pyspark-lang_1754703714412.png";
 import ibmLogo from "@assets/ibm_1754703124415.png";
 
 type AppState = 'upload' | 'processing' | 'results';
-type ProjectType = 'java' | 'pyspark' | 'mainframe' | 'python';
+type ProjectType = 'java' | 'pyspark' | 'mainframe' | 'python' | 'code-lens' | 'match-lens' | 'validator';
 
 export default function Home() {
   const [appState, setAppState] = useState<AppState>('upload');
@@ -134,6 +134,57 @@ export default function Home() {
         'Database ORM relationship analysis',
         'Virtual environment and requirements review',
         'Code quality and security assessment'
+      ]
+    },
+    {
+      id: 'code-lens' as ProjectType,
+      name: 'Code Lens Agent',
+      description: 'Advanced demographic field analysis and integration pattern detection for comprehensive application understanding',
+      logoSrc: agentLogo,
+      borderColor: 'border-chart-3', // Peach Crayola
+      bgColor: 'bg-chart-3/5',
+      hoverBgColor: 'hover:bg-chart-3/10',
+      features: [
+        'Demographic field identification and analysis',
+        'Integration pattern detection and mapping',
+        'Data flow and transformation analysis',
+        'Cross-system dependency identification',
+        'API endpoint and service interaction mapping',
+        'Business logic and workflow documentation'
+      ]
+    },
+    {
+      id: 'match-lens' as ProjectType,
+      name: 'Match Lens Agent',
+      description: 'Intelligent field matching between demographic data and C360 customer fields with automated relationship discovery',
+      logoSrc: agentLogo,
+      borderColor: 'border-chart-4', // Wintergreen Dream
+      bgColor: 'bg-chart-4/5',
+      hoverBgColor: 'hover:bg-chart-4/10',
+      features: [
+        'Demographic field to C360 field matching',
+        'Automated relationship discovery and mapping',
+        'Data quality and consistency analysis',
+        'Field transformation rule identification',
+        'Customer data model alignment verification',
+        'Integration gap analysis and recommendations'
+      ]
+    },
+    {
+      id: 'validator' as ProjectType,
+      name: 'Validator Agent',
+      description: 'Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment',
+      logoSrc: agentLogo,
+      borderColor: 'border-chart-5', // Dark Jungle Green
+      bgColor: 'bg-chart-5/5',
+      hoverBgColor: 'hover:bg-chart-5/10',
+      features: [
+        'Security vulnerability detection and assessment',
+        'Privacy compliance and data protection validation',
+        'Code quality metrics and best practices review',
+        'Performance bottleneck identification',
+        'Regulatory compliance verification (GDPR, CCPA)',
+        'Security risk scoring and remediation guidance'
       ]
     }
   ];
