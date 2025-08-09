@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { 
+  User as UserIcon,
   Mail, 
   Calendar, 
   Clock, 
@@ -205,13 +206,13 @@ export default function Profile() {
                 <div className="relative mx-auto w-24 h-24 mb-4">
                   {profileImage || user.profileImageUrl ? (
                     <img 
-                      src={profileImage || user.profileImageUrl} 
+                      src={profileImage || user.profileImageUrl || ""} 
                       alt={user.username}
                       className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                     />
                   ) : (
                     <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                      <User className="w-12 h-12 text-white" />
+                      <UserIcon className="w-12 h-12 text-white" />
                     </div>
                   )}
                   <input
@@ -245,14 +246,14 @@ export default function Profile() {
                   <Calendar className="w-4 h-4 text-gray-500" />
                   <div>
                     <p className="font-medium">Member since</p>
-                    <p className="text-gray-600">{format(new Date(user.createdAt), "MMM dd, yyyy")}</p>
+                    <p className="text-gray-600">{user.createdAt ? format(new Date(user.createdAt), "MMM dd, yyyy") : "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 text-sm">
                   <Activity className="w-4 h-4 text-gray-500" />
                   <div>
                     <p className="font-medium">Last updated</p>
-                    <p className="text-gray-600">{format(new Date(user.updatedAt), "MMM dd, yyyy")}</p>
+                    <p className="text-gray-600">{user.updatedAt ? format(new Date(user.updatedAt), "MMM dd, yyyy") : "N/A"}</p>
                   </div>
                 </div>
               </CardContent>
@@ -298,7 +299,7 @@ export default function Profile() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <User className="w-5 h-5" />
+                    <UserIcon className="w-5 h-5" />
                     <span>Personal Details</span>
                   </div>
                   {!isEditing ? (
