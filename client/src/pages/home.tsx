@@ -9,6 +9,7 @@ import AIModelSelector, { type AIModelConfig } from "@/components/ai-model-selec
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode } from "lucide-react";
+import Layout from "@/components/layout";
 import { SiPython, SiApachespark } from "react-icons/si";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 import topBanner from "@assets/top banner_1754681525606.png";
@@ -143,48 +144,21 @@ export default function Home() {
     }
   ];
 
-  return (
-    <div className="bg-background font-sans text-foreground min-h-screen">
-      {/* Header */}
-      <header className="bg-primary text-white shadow-lg">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center justify-between">
-            {/* Left side - Zensar Logo */}
-            <div className="flex items-center space-x-3">
-              <img 
-                src={zensarLogo} 
-                alt="Zensar Logo" 
-                className="h-12 w-auto"
-              />
-            </div>
-            
-            {/* Center - Zengent AI Text */}
-            <div className="flex-1 text-center">
-              <h2 className="text-lg font-medium">Zengent AI - Enterprise Application Intelligence Platform</h2>
+  const aiConfigButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => setShowAIConfig(true)}
+      className="text-blue-900 bg-white border-white hover:bg-gray-100 hover:text-primary font-medium"
+    >
+      <Settings className="w-4 h-4 mr-2" />
+      AI Settings
+    </Button>
+  );
 
-            </div>
-            
-            {/* Right side - AI Settings */}
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAIConfig(true)}
-                className="text-blue-900 bg-white border-white hover:bg-gray-100 hover:text-primary font-medium"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                AI Settings
-              </Button>
-              <button className="text-blue-200 hover:text-white transition-colors">
-                <HelpCircle className="w-5 h-5" />
-              </button>
-              <button className="text-blue-200 hover:text-white transition-colors">
-                <Settings className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+  return (
+    <Layout aiConfigButton={aiConfigButton}>
+      <div className="bg-background font-sans text-foreground min-h-screen">
 
       {/* AI Agent Introduction - Moved above banner */}
       <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
@@ -378,6 +352,7 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 }

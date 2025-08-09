@@ -13,23 +13,24 @@ interface AIModelSelectorProps {
 }
 
 export interface AIModelConfig {
-  type: 'openai' | 'local';
+  type: 'openai' | 'claude' | 'gemini';
   openaiApiKey?: string;
-  localEndpoint?: string;
-  modelName?: string;
+  claudeApiKey?: string;
+  geminiApiKey?: string;
 }
 
 export default function AIModelSelector({ onModelSelect, currentConfig }: AIModelSelectorProps) {
-  const [modelType, setModelType] = useState<'openai' | 'local'>(currentConfig?.type || 'openai');
+  const [modelType, setModelType] = useState<'openai' | 'claude' | 'gemini'>(currentConfig?.type || 'openai');
   const [openaiApiKey, setOpenaiApiKey] = useState(currentConfig?.openaiApiKey || '');
-  const [localEndpoint, setLocalEndpoint] = useState(currentConfig?.localEndpoint || 'http://localhost:11434');
-  const [modelName, setModelName] = useState(currentConfig?.modelName || 'llama2');
+  const [claudeApiKey, setClaudeApiKey] = useState(currentConfig?.claudeApiKey || '');
+  const [geminiApiKey, setGeminiApiKey] = useState(currentConfig?.geminiApiKey || '');
 
   const handleSaveConfig = () => {
     const config: AIModelConfig = {
       type: modelType,
       ...(modelType === 'openai' && { openaiApiKey }),
-      ...(modelType === 'local' && { localEndpoint, modelName })
+      ...(modelType === 'claude' && { claudeApiKey }),
+      ...(modelType === 'gemini' && { geminiApiKey })
     };
     onModelSelect(config);
   };
@@ -42,19 +43,19 @@ export default function AIModelSelector({ onModelSelect, currentConfig }: AIMode
           <span>AI Model Configuration</span>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Choose between online OpenAI or local LLM for generating AI insights
+          Choose between OpenAI, AWS Claude, or Google Gemini for generating AI insights
         </p>
       </CardHeader>
       
       <CardContent className="space-y-6">
-        <RadioGroup value={modelType} onValueChange={(value) => setModelType(value as 'openai' | 'local')}>
+        <RadioGroup value={modelType} onValueChange={(value) => setModelType(value as 'openai' | 'claude' | 'gemini')}>
           {/* OpenAI Option */}
           <div className="flex items-start space-x-3 p-4 border rounded-lg">
             <RadioGroupItem value="openai" id="openai" className="mt-1" />
             <div className="flex-1">
               <Label htmlFor="openai" className="flex items-center space-x-2 cursor-pointer">
                 <Cloud className="w-4 h-4 text-blue-600" />
-                <span className="font-medium">OpenAI (Online)</span>
+                <span className="font-medium">OpenAI GPT-4o</span>
                 <Badge variant="secondary" className="text-xs">Recommended</Badge>
               </Label>
               <p className="text-sm text-muted-foreground mt-1">
@@ -63,7 +64,7 @@ export default function AIModelSelector({ onModelSelect, currentConfig }: AIMode
               
               {modelType === 'openai' && (
                 <div className="mt-3 space-y-2">
-                  <Label htmlFor="openai-key" className="text-xs font-medium">API Key</Label>
+                  <Label htmlFor="openai-key" className="text-xs font-medium">OpenAI API Key</Label>
                   <Input
                     id="openai-key"
                     type="password"
@@ -73,52 +74,71 @@ export default function AIModelSelector({ onModelSelect, currentConfig }: AIMode
                     className="text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Your OpenAI API key for GPT-4o access
+                    Get your API key from <a href="https://platform.openai.com/account/api-keys" target="_blank" className="text-blue-600 hover:underline">OpenAI Platform</a>
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Local LLM Option */}
+          {/* AWS Claude Option */}
           <div className="flex items-start space-x-3 p-4 border rounded-lg">
-            <RadioGroupItem value="local" id="local" className="mt-1" />
+            <RadioGroupItem value="claude" id="claude" className="mt-1" />
             <div className="flex-1">
-              <Label htmlFor="local" className="flex items-center space-x-2 cursor-pointer">
-                <Server className="w-4 h-4 text-green-600" />
-                <span className="font-medium">Local LLM</span>
-                <Badge variant="outline" className="text-xs">Privacy Focused</Badge>
+              <Label htmlFor="claude" className="flex items-center space-x-2 cursor-pointer">
+                <Cloud className="w-4 h-4 text-orange-600" />
+                <span className="font-medium">AWS Claude 3.5</span>
+                <Badge variant="outline" className="text-xs">Advanced</Badge>
               </Label>
               <p className="text-sm text-muted-foreground mt-1">
-                Use local Ollama or other LLM server for private analysis
+                Use Anthropic's Claude 3.5 Sonnet for sophisticated reasoning and analysis
               </p>
               
-              {modelType === 'local' && (
-                <div className="mt-3 space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="endpoint" className="text-xs font-medium">Local Endpoint</Label>
-                    <Input
-                      id="endpoint"
-                      placeholder="http://localhost:11434"
-                      value={localEndpoint}
-                      onChange={(e) => setLocalEndpoint(e.target.value)}
-                      className="text-sm"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="model-name" className="text-xs font-medium">Model Name</Label>
-                    <Input
-                      id="model-name"
-                      placeholder="llama2, codellama, etc."
-                      value={modelName}
-                      onChange={(e) => setModelName(e.target.value)}
-                      className="text-sm"
-                    />
-                  </div>
-                  
+              {modelType === 'claude' && (
+                <div className="mt-3 space-y-2">
+                  <Label htmlFor="claude-key" className="text-xs font-medium">Claude API Key</Label>
+                  <Input
+                    id="claude-key"
+                    type="password"
+                    placeholder="sk-ant-..."
+                    value={claudeApiKey}
+                    onChange={(e) => setClaudeApiKey(e.target.value)}
+                    className="text-sm"
+                  />
                   <p className="text-xs text-muted-foreground">
-                    Ensure your local LLM server is running and accessible
+                    Get your API key from <a href="https://console.anthropic.com/" target="_blank" className="text-orange-600 hover:underline">Anthropic Console</a>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Google Gemini Option */}
+          <div className="flex items-start space-x-3 p-4 border rounded-lg">
+            <RadioGroupItem value="gemini" id="gemini" className="mt-1" />
+            <div className="flex-1">
+              <Label htmlFor="gemini" className="flex items-center space-x-2 cursor-pointer">
+                <Cloud className="w-4 h-4 text-purple-600" />
+                <span className="font-medium">Google Gemini Pro</span>
+                <Badge variant="outline" className="text-xs">Multimodal</Badge>
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Use Google's Gemini Pro for comprehensive code analysis and insights
+              </p>
+              
+              {modelType === 'gemini' && (
+                <div className="mt-3 space-y-2">
+                  <Label htmlFor="gemini-key" className="text-xs font-medium">Gemini API Key</Label>
+                  <Input
+                    id="gemini-key"
+                    type="password"
+                    placeholder="AIza..."
+                    value={geminiApiKey}
+                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                    className="text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" className="text-purple-600 hover:underline">Google AI Studio</a>
                   </p>
                 </div>
               )}
