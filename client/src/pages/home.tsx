@@ -152,7 +152,7 @@ export default function Home() {
 
   return (
     <Layout aiConfigButton={aiConfigButton}>
-      <div className="bg-background font-sans text-foreground min-h-screen">
+      <div className="bg-white font-sans text-foreground min-h-screen">
 
       {/* Main Heading */}
       <div className="bg-gradient-to-b from-background to-muted py-8">
@@ -228,27 +228,7 @@ export default function Home() {
               })}
             </div>
 
-            {/* CTA Section */}
-            <div className="text-center">
-              <div className="bg-gradient-to-r from-muted to-muted/50 rounded-xl p-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
-                  Ready to analyze your code?
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Select a project type above to get started with intelligent code analysis
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload ZIP files</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <Github className="w-4 h-4" />
-                    <span>Analyze GitHub repos</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
         )}
 
