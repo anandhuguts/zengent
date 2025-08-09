@@ -207,21 +207,10 @@ export default function Home() {
                       </div>
                       
                       {/* Right side - Content */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      <div className="flex-1 min-w-0 flex items-center">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           {type.name}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                          {type.description}
-                        </p>
-                        <ul className="space-y-1">
-                          {type.features.map((feature, index) => (
-                            <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full mr-2 flex-shrink-0"></div>
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
                       </div>
                     </div>
                     
