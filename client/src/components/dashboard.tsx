@@ -26,6 +26,7 @@ import {
   MessageSquareText
 } from 'lucide-react';
 import { type AnalysisData, type AIAnalysisResult } from '@shared/schema';
+import AIProgressModal, { type AIProgressStep } from './ai-progress-modal';
 
 interface DashboardProps {
   analysisData: AnalysisData;
@@ -134,6 +135,76 @@ export default function Dashboard({ analysisData }: DashboardProps) {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
+  
+  // AI Progress Modal State
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [progressSteps, setProgressSteps] = useState<AIProgressStep[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [aiModel, setAiModel] = useState('OpenAI GPT-4o');
+
+  // Initialize progress steps
+  const initializeProgressSteps = (model: string) => {
+    const steps: AIProgressStep[] = [
+      {
+        id: 'init',
+        label: 'Initializing AI Analysis',
+        description: 'Setting up analysis parameters and validating input data',
+        status: 'pending'
+      },
+      {
+        id: 'parsing',
+        label: 'Parsing Project Structure',
+        description: 'Analyzing codebase architecture and relationships',
+        status: 'pending',
+        details: 'Extracting classes, methods, and dependencies from source code'
+      },
+      {
+        id: 'context',
+        label: 'Building Context',
+        description: 'Preparing comprehensive project context for AI analysis',
+        status: 'pending',
+        details: 'Integrating custom prompts and architectural patterns'
+      },
+      {
+        id: 'overview',
+        label: 'Generating Project Overview',
+        description: 'Creating high-level project description and objectives',
+        status: 'pending',
+        details: model.includes('local') ? 'Processing with local LLM for privacy' : 'Sending request to cloud AI service'
+      },
+      {
+        id: 'architecture',
+        label: 'Analyzing Architecture',
+        description: 'Identifying architectural patterns and design principles',
+        status: 'pending',
+        details: 'Evaluating Spring Boot patterns, dependency injection, and layered architecture'
+      },
+      {
+        id: 'modules',
+        label: 'Examining Module Details',
+        description: 'Analyzing individual components and their responsibilities',
+        status: 'pending',
+        details: 'Generating insights for controllers, services, and repositories'
+      },
+      {
+        id: 'suggestions',
+        label: 'Generating Recommendations',
+        description: 'Creating actionable improvement suggestions',
+        status: 'pending',
+        details: 'Analyzing code quality, performance, and best practices'
+      },
+      {
+        id: 'finalizing',
+        label: 'Finalizing Results',
+        description: 'Compiling and formatting analysis results',
+        status: 'pending',
+        details: 'Preparing comprehensive insights and quality scores'
+      }
+    ];
+    
+    setProgressSteps(steps);
+    setCurrentStep(0);
+  };
 
   // Calculate statistics
   const stats = {
@@ -149,6 +220,51 @@ export default function Dashboard({ analysisData }: DashboardProps) {
 
   const generateAIAnalysis = async () => {
     setIsLoadingAI(true);
+    
+    // Get current AI model configuration
+    try {
+      const configResponse = await fetch('/api/ai-config');
+      const configData = await configResponse.json();
+      const modelName = configData.type === 'local' ? `Local LLM (${configData.model || 'Ollama'})` : 
+                       configData.type === 'claude' ? 'AWS Claude 3.5 Sonnet' :
+                       configData.type === 'gemini' ? 'Google Gemini Pro' :
+                       'OpenAI GPT-4o';
+      setAiModel(modelName);
+    } catch (error) {
+      setAiModel('OpenAI GPT-4o'); // fallback
+    }
+
+    // Initialize and show progress modal
+    initializeProgressSteps(aiModel);
+    setShowProgressModal(true);
+    
+    // Simulate step progression
+    const progressSteps = [
+      { step: 0, delay: 500, details: 'Validating project data and custom prompts' },
+      { step: 1, delay: 1000, details: 'Scanning Java classes and annotations' },
+      { step: 2, delay: 1500, details: 'Integrating architectural context' },
+      { step: 3, delay: 3000, details: 'Generating comprehensive project overview' },
+      { step: 4, delay: 4000, details: 'Analyzing Spring Boot patterns and dependencies' },
+      { step: 5, delay: 5000, details: 'Examining individual module responsibilities' },
+      { step: 6, delay: 6000, details: 'Creating improvement recommendations' },
+      { step: 7, delay: 7000, details: 'Compiling final analysis report' }
+    ];
+
+    // Update progress steps
+    progressSteps.forEach(({ step, delay, details }) => {
+      setTimeout(() => {
+        setProgressSteps(prev => prev.map((s, index) => {
+          if (index < step) {
+            return { ...s, status: 'completed' as const, timestamp: new Date() };
+          } else if (index === step) {
+            return { ...s, status: 'running' as const, details };
+          }
+          return s;
+        }));
+        setCurrentStep(step);
+      }, delay);
+    });
+
     try {
       const requestBody = {
         ...analysisData,
@@ -170,17 +286,45 @@ export default function Dashboard({ analysisData }: DashboardProps) {
       }
       
       const result = await response.json();
-      setAiAnalysis(result);
+      
+      // Complete all steps
+      setTimeout(() => {
+        setProgressSteps(prev => prev.map(s => ({ 
+          ...s, 
+          status: 'completed' as const, 
+          timestamp: new Date() 
+        })));
+        setCurrentStep(7); // Final step index
+        
+        // Close modal after a brief delay
+        setTimeout(() => {
+          setShowProgressModal(false);
+          setAiAnalysis(result);
+        }, 1500);
+      }, 7500);
+      
     } catch (error) {
       console.error('Failed to generate AI analysis:', error);
-      // Show user-friendly error message
-      setAiAnalysis({
-        projectOverview: "Unable to generate AI analysis at this time. Please try again later.",
-        architectureInsights: [],
-        moduleInsights: {},
-        suggestions: [],
-        qualityScore: 0
-      });
+      
+      // Mark current step as error
+      setProgressSteps(prev => prev.map((s, index) => {
+        if (index === currentStep) {
+          return { ...s, status: 'error' as const };
+        }
+        return s;
+      }));
+      
+      // Show error and close modal
+      setTimeout(() => {
+        setShowProgressModal(false);
+        setAiAnalysis({
+          projectOverview: "Unable to generate AI analysis at this time. Please check your AI configuration and try again.",
+          architectureInsights: [],
+          moduleInsights: {},
+          suggestions: [],
+          qualityScore: 0
+        });
+      }, 2000);
     } finally {
       setIsLoadingAI(false);
     }
@@ -481,6 +625,16 @@ Example: 'Focus on security vulnerabilities and performance bottlenecks' or 'Ana
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* AI Progress Modal */}
+      <AIProgressModal
+        isOpen={showProgressModal}
+        onClose={() => setShowProgressModal(false)}
+        steps={progressSteps}
+        currentStep={currentStep}
+        aiModel={aiModel}
+        estimatedTime={45}
+      />
     </div>
   );
 }
