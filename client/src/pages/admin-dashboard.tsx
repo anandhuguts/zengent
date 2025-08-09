@@ -93,101 +93,11 @@ export default function AdminDashboard() {
   const { data: stats, refetch } = useQuery<AdminStats>({
     queryKey: ['/api/admin/statistics', timeRange],
     queryFn: async () => {
-      // Simulate API call with realistic admin data
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      return {
-        systemHealth: {
-          status: 'healthy',
-          uptime: '15 days, 4 hours',
-          responseTime: 287,
-          errorRate: 0.12
-        },
-        userActivity: {
-          activeUsers: 47,
-          totalUsers: 342,
-          newUsersToday: 8,
-          sessionDuration: 24.6
-        },
-        agentUsage: {
-          totalAnalyses: 1247,
-          successfulAnalyses: 1134,
-          failedAnalyses: 113,
-          averageProcessingTime: 3.4,
-          projectTypes: {
-            java: 567,
-            python: 389,
-            pyspark: 198,
-            mainframe: 93
-          }
-        },
-        llmUsage: {
-          openai: {
-            requests: 789,
-            tokens: 1245680,
-            cost: 186.42,
-            averageResponseTime: 2.3
-          },
-          claude: {
-            requests: 234,
-            tokens: 456780,
-            cost: 89.24,
-            averageResponseTime: 3.1
-          },
-          gemini: {
-            requests: 123,
-            tokens: 234560,
-            cost: 34.67,
-            averageResponseTime: 1.8
-          }
-        },
-        resourceUsage: {
-          cpuUsage: 68,
-          memoryUsage: 74,
-          diskUsage: 45,
-          bandwidth: 82
-        },
-        recentActivities: [
-          {
-            id: '1',
-            type: 'analysis',
-            message: 'Java project analysis completed for user john.smith',
-            timestamp: '2 minutes ago',
-            status: 'success',
-            user: 'john.smith'
-          },
-          {
-            id: '2',
-            type: 'llm_request',
-            message: 'OpenAI GPT-4o request processed - 1,234 tokens',
-            timestamp: '5 minutes ago',
-            status: 'success'
-          },
-          {
-            id: '3',
-            type: 'user_login',
-            message: 'New user registered: sarah.johnson',
-            timestamp: '12 minutes ago',
-            status: 'success',
-            user: 'sarah.johnson'
-          },
-          {
-            id: '4',
-            type: 'error',
-            message: 'Failed to process PySpark project - timeout error',
-            timestamp: '18 minutes ago',
-            status: 'error',
-            user: 'mike.wilson'
-          },
-          {
-            id: '5',
-            type: 'analysis',
-            message: 'Mainframe analysis completed with insights generated',
-            timestamp: '25 minutes ago',
-            status: 'success',
-            user: 'alice.brown'
-          }
-        ]
-      } as AdminStats;
+      const response = await fetch(`/api/admin/statistics?timeRange=${timeRange}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin statistics');
+      }
+      return response.json();
     },
     refetchInterval: 30000 // Refresh every 30 seconds
   });
