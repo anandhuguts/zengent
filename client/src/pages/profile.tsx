@@ -38,12 +38,14 @@ export default function Profile() {
   const [editForm, setEditForm] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
-    email: user?.email || ""
+    email: user?.email || "",
+    position: user?.position || "",
+    department: user?.department || ""
   });
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { firstName: string; lastName: string; email: string }) => {
+    mutationFn: async (data: { firstName: string; lastName: string; email: string; position: string; department: string }) => {
       return await apiRequest("PATCH", "/api/auth/user", data);
     },
     onSuccess: () => {
@@ -129,7 +131,9 @@ export default function Profile() {
     setEditForm({
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      email: user?.email || ""
+      email: user?.email || "",
+      position: user?.position || "",
+      department: user?.department || ""
     });
   };
 
@@ -407,6 +411,40 @@ export default function Profile() {
                     ) : (
                       <div className="p-3 bg-gray-50 rounded-lg border mt-1">
                         <p className="text-sm">{user.lastName || "Not provided"}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="position" className="text-sm font-medium text-gray-700">Position</Label>
+                    {isEditing ? (
+                      <Input
+                        id="position"
+                        type="text"
+                        value={editForm.position}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, position: e.target.value }))}
+                        className="mt-1"
+                        placeholder="e.g., Sr Solution Architect"
+                      />
+                    ) : (
+                      <div className="p-3 bg-gray-50 rounded-lg border mt-1">
+                        <p className="text-sm">{user.position || "Not provided"}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="department" className="text-sm font-medium text-gray-700">Department</Label>
+                    {isEditing ? (
+                      <Input
+                        id="department"
+                        type="text"
+                        value={editForm.department}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, department: e.target.value }))}
+                        className="mt-1"
+                        placeholder="e.g., AES Team"
+                      />
+                    ) : (
+                      <div className="p-3 bg-gray-50 rounded-lg border mt-1">
+                        <p className="text-sm">{user.department || "Not provided"}</p>
                       </div>
                     )}
                   </div>
