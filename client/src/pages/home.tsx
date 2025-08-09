@@ -160,17 +160,7 @@ export default function Home() {
     <Layout aiConfigButton={aiConfigButton}>
       <div className="bg-background font-sans text-foreground min-h-screen">
 
-      {/* AI Agent Introduction - Moved above banner */}
-      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to Zengent AI Agent
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Amex Diamond Project Discovery's intelligent assistant
-          </p>
-        </div>
-      </div>
+
 
       {/* Zensar Banner */}
       <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
