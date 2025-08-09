@@ -24,11 +24,11 @@ export default function Landing() {
         </div>
         
         {/* Text below image */}
-        <div className="text-center mb-8">
-          <h2 className="text-lg font-medium mb-4 opacity-90">
+        <div className="text-center mb-6">
+          <h2 className="text-lg font-medium mb-6 opacity-90">
             PLATFORM POWERED BY AI AGENTS
           </h2>
-          <p className="text-base opacity-80 leading-relaxed max-w-lg mx-auto">
+          <p className="text-sm opacity-70 leading-relaxed max-w-md mx-auto mt-8">
             Analyze your enterprise applications with powerful AI-driven insights 
             and comprehensive project intelligence for better decision making.
           </p>
