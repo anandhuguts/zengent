@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
+import type { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,7 +15,7 @@ import {
   Settings, 
   HelpCircle,
   Shield,
-  User,
+  User as UserIcon,
   LogOut,
   ChevronDown
 } from "lucide-react";
@@ -31,7 +32,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | undefined };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -140,8 +141,8 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center space-x-2 text-white hover:text-blue-200 transition-colors bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">{user.username}</span>
+                    <UserIcon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{user?.username}</span>
                     <ChevronDown className="w-3 h-3" />
                   </button>
                   
@@ -149,22 +150,21 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                       <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-xs text-gray-500">Signed in as</p>
-                        <p className="text-sm font-medium text-gray-900 truncate">{user.username}</p>
-                        {user.email && (
+                        <p className="text-sm font-medium text-gray-900 truncate">{user?.username}</p>
+                        {user?.email && (
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         )}
                       </div>
                       
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          // Add profile functionality here if needed
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Profile</span>
-                      </button>
+                      <Link href="/profile">
+                        <button
+                          onClick={() => setShowUserMenu(false)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                        >
+                          <UserIcon className="w-4 h-4" />
+                          <span>Profile</span>
+                        </button>
+                      </Link>
                       
                       <button
                         onClick={() => {

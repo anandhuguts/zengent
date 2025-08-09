@@ -12,6 +12,7 @@ import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import UsageStatistics from "@/pages/usage-statistics";
 import AdminDashboard from "@/pages/admin-dashboard";
+import Profile from "@/pages/profile";
 import Layout from "@/components/layout";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
               </Layout>
             )}
           </Route>
+          <Route path="/profile" component={Profile} />
           <Route path="/" component={Home} />
         </>
       )}
