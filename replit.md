@@ -8,7 +8,6 @@ The platform features a modern React frontend with an agent-like interface suppo
 
 ## Recent Changes (August 2025)
 
-- **TypeScript to JavaScript Migration (Latest)**: Successfully converted entire backend from TypeScript to JavaScript while maintaining full functionality
 - **Enterprise Application Intelligence Platform**: Renamed to "Zengent AI - Enterprise Application Intelligence Platform" to reflect comprehensive enterprise capabilities
 - **Multi-Language Support**: Expanded from Java-only to support Java, Python, PySpark, and Mainframe codebases
 - **AI Agent Interface**: Redesigned with professional agent-like UI featuring language selection blocks
@@ -48,7 +47,7 @@ The frontend follows a three-phase user experience:
 
 The server is built with Express.js and follows a modular design:
 
-- **Framework**: Express.js with JavaScript (migrated from TypeScript August 2025)
+- **Framework**: Express.js with TypeScript
 - **File Processing**: Multer for handling ZIP file uploads with 50MB limit
 - **Storage Layer**: Abstracted storage interface with in-memory implementation (extensible to databases)
 - **Java Analysis**: Custom Java source code parser that identifies Spring annotations and architectural patterns

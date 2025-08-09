@@ -1,10 +1,8 @@
 export class OllamaService {
-  constructor() {
-    this.endpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434';
-    this.model = process.env.OLLAMA_MODEL || 'mistral:7b';
-  }
+  private endpoint: string = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434';
+  private model: string = process.env.OLLAMA_MODEL || 'mistral:7b';
   
-  async isAvailable() {
+  async isAvailable(): Promise<boolean> {
     try {
       const response = await fetch(`${this.endpoint}/api/tags`, {
         method: 'GET',
@@ -17,7 +15,11 @@ export class OllamaService {
     }
   }
 
-  async generateText(prompt, options = {}) {
+  async generateText(prompt: string, options: {
+    temperature?: number;
+    top_p?: number;
+    max_tokens?: number;
+  } = {}): Promise<string> {
     try {
       const response = await fetch(`${this.endpoint}/api/generate`, {
         method: 'POST',
@@ -46,13 +48,13 @@ export class OllamaService {
     }
   }
 
-  async listModels() {
+  async listModels(): Promise<string[]> {
     try {
       const response = await fetch(`${this.endpoint}/api/tags`);
       if (!response.ok) return [];
       
       const data = await response.json();
-      return data.models?.map((model) => model.name) || [];
+      return data.models?.map((model: any) => model.name) || [];
     } catch (error) {
       console.error('Error listing models:', error);
       return [];
