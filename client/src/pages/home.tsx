@@ -168,23 +168,12 @@ export default function Home() {
 
       {/* Zensar Banner */}
       <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
-        <div className="relative w-[60%] h-[60vw] max-h-96">
+        <div className="w-[60%] h-[60vw] max-h-96">
           <img 
             src={topBanner} 
             alt="Zengent AI Agents" 
             className="w-full h-full object-contain rounded-lg"
           />
-          <div className="absolute top-2 left-6 flex items-center space-x-3">
-            <img 
-              src={zensarLogo} 
-              alt="Zensar Logo" 
-              className="h-8 w-auto"
-            />
-            <div className="text-white">
-              <h1 className="text-lg font-semibold">Zengent AI</h1>
-              <p className="text-xs opacity-90">Enterprise Application Intelligence</p>
-            </div>
-          </div>
         </div>
       </div>
 
