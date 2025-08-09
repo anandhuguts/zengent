@@ -68,7 +68,20 @@ export default function Profile() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("profileImage", file);
-      return await apiRequest("POST", "/api/auth/upload-avatar", formData);
+      
+      // Use fetch directly for file upload instead of apiRequest
+      const response = await fetch("/api/auth/upload-avatar", {
+        method: "POST",
+        body: formData,
+        credentials: 'include', // Include session cookies
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -77,10 +90,10 @@ export default function Profile() {
         description: "Profile image updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to upload profile image",
+        description: error.message || "Failed to upload profile image",
         variant: "destructive",
       });
     },
