@@ -145,6 +145,21 @@ export default function Home() {
         </div>
       </header>
 
+      {/* AI Agent Introduction - Moved above banner */}
+      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6">
+            <Code2 className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Welcome to Zengent AI Agent
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Your intelligent enterprise application analysis assistant. Choose your project type below and I'll help you analyze architecture patterns, dependencies, and provide actionable insights.
+          </p>
+        </div>
+      </div>
+
       {/* Zensar Banner */}
       <div className="flex justify-center py-4 bg-gray-50 dark:bg-gray-900">
         <div className="relative w-[60%] h-[60vw] max-h-96">
@@ -170,18 +185,6 @@ export default function Home() {
       <div className="container mx-auto px-6 py-8">
         {appState === 'upload' && !selectedProjectType && (
           <div className="max-w-6xl mx-auto">
-            {/* AI Agent Introduction */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6">
-                <Code2 className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Welcome to Zengent AI Agent
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                I'm your intelligent code analysis assistant. Choose your project type below and I'll help you analyze architecture patterns, dependencies, and provide actionable insights.
-              </p>
-            </div>
 
             {/* Project Type Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
