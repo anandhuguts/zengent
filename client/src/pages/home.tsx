@@ -162,6 +162,23 @@ export default function Home() {
         'Regulatory compliance verification (GDPR, CCPA)',
         'Security risk scoring and remediation guidance'
       ]
+    },
+    {
+      id: 'responsible-ai' as ProjectType,
+      name: 'Responsible AI Agent',
+      description: 'Ethics and bias detection in code analysis with comprehensive AI governance and fairness assessment',
+      logoSrc: agentLogo,
+      borderColor: 'border-purple-500',
+      bgColor: 'bg-purple-50',
+      hoverBgColor: 'hover:bg-purple-100',
+      features: [
+        'AI ethics and bias detection in algorithms',
+        'Fairness assessment across demographic groups',
+        'Algorithmic transparency and explainability',
+        'Compliance with AI governance frameworks',
+        'Ethical code review and recommendations',
+        'Responsible AI deployment validation'
+      ]
     }
   ];
 
@@ -309,7 +326,7 @@ export default function Home() {
                     Enterprise Application Agents
                   </h2>
                   <p className="text-blue-100 text-sm mb-3">
-                    Transform your codebase understanding with 9 specialized AI agents covering multi-language analysis, 
+                    Transform your codebase understanding with 11 specialized AI agents covering multi-language analysis, 
                     vector database intelligence, and enterprise-grade document processing. Each agent provides unique 
                     capabilities for comprehensive application intelligence and code analysis.
                   </p>
