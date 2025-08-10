@@ -26,7 +26,9 @@ import {
   FileText,
   CheckCircle,
   AlertCircle,
-  Info
+  Info,
+  TrendingUp,
+  Plus
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import Layout from "@/components/layout";
@@ -144,10 +146,14 @@ export default function JavaAgent() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <img src={agentLogo} alt="Java Agent" className="w-16 h-16" />
+          <div className="w-16 h-16 bg-gradient-to-br from-[#ef476f] to-[#ffd166] rounded-xl flex items-center justify-center shadow-lg">
+            <Coffee className="w-8 h-8 text-white" />
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Java Agent</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#ef476f] to-[#06d6a0] bg-clip-text text-transparent">
+              Java Agent
+            </h1>
+            <p className="text-gray-600">
               Comprehensive analysis of Java applications with Spring Boot frameworks, Maven/Gradle builds, and enterprise patterns
             </p>
           </div>
@@ -310,33 +316,131 @@ export default function JavaAgent() {
           {analysisResult && (
             <>
               <TabsContent value="overview" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Project Overview</h2>
-                  <Button onClick={handleNewAnalysis} variant="outline">
+                {/* Admin Template Header */}
+                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-[#ef476f]/10 via-[#ffd166]/10 to-[#118ab2]/10 rounded-xl border-l-4 border-l-[#ef476f]">
+                  <div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-[#ef476f] to-[#118ab2] bg-clip-text text-transparent">
+                      Analytics Dashboard
+                    </h2>
+                    <p className="text-gray-600 mt-1">Comprehensive Java Application Analysis</p>
+                  </div>
+                  <Button onClick={handleNewAnalysis} className="bg-gradient-to-r from-[#ef476f] to-[#ffd166] hover:from-[#ef476f]/80 hover:to-[#ffd166]/80 text-white border-0">
+                    <Plus className="w-4 h-4 mr-2" />
                     New Analysis
                   </Button>
                 </div>
-                
-                <Card>
+
+                {/* Key Metrics Grid - Admin Style */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card className="border-l-4 border-l-[#ef476f] bg-gradient-to-br from-[#ef476f]/10 to-transparent hover:shadow-lg transition-all">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Classes</p>
+                          <p className="text-3xl font-bold text-[#ef476f]">{analysisResult.qualityMetrics.totalClasses}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-[#ef476f]/20 rounded-lg flex items-center justify-center">
+                          <Code2 className="w-6 h-6 text-[#ef476f]" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center text-xs text-gray-600">
+                          <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
+                          <span>Active codebase</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-[#ffd166] bg-gradient-to-br from-[#ffd166]/10 to-transparent hover:shadow-lg transition-all">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Controllers</p>
+                          <p className="text-3xl font-bold text-[#ffd166]">{analysisResult.qualityMetrics.controllers}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-[#ffd166]/20 rounded-lg flex items-center justify-center">
+                          <Cpu className="w-6 h-6 text-[#ffd166]" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center text-xs text-gray-600">
+                          <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
+                          <span>REST endpoints</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-[#118ab2] bg-gradient-to-br from-[#118ab2]/10 to-transparent hover:shadow-lg transition-all">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Services</p>
+                          <p className="text-3xl font-bold text-[#118ab2]">{analysisResult.qualityMetrics.services}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-[#118ab2]/20 rounded-lg flex items-center justify-center">
+                          <Zap className="w-6 h-6 text-[#118ab2]" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center text-xs text-gray-600">
+                          <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
+                          <span>Business logic</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-l-4 border-l-[#073b4c] bg-gradient-to-br from-[#073b4c]/10 to-transparent hover:shadow-lg transition-all">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Entities</p>
+                          <p className="text-3xl font-bold text-[#073b4c]">{analysisResult.qualityMetrics.entities}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-[#073b4c]/20 rounded-lg flex items-center justify-center">
+                          <Database className="w-6 h-6 text-[#073b4c]" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center text-xs text-gray-600">
+                          <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
+                          <span>Data models</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Analysis Summary */}
+                <Card className="bg-gradient-to-r from-white to-gray-50 border-t-4 border-t-[#ef476f]">
                   <CardHeader>
-                    <CardTitle>Analysis Summary</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart4 className="w-5 h-5 text-[#ef476f]" />
+                      Analysis Summary
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-gray-700 leading-relaxed">
                       {analysisResult.projectOverview}
                     </p>
                   </CardContent>
                 </Card>
 
+                {/* Architecture & Features Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="border-l-4 border-l-[#ffd166] bg-gradient-to-br from-[#ffd166]/5 to-white">
                     <CardHeader>
-                      <CardTitle>Architecture Patterns</CardTitle>
+                      <CardTitle className="flex items-center gap-2 text-[#ffd166]">
+                        <GitBranch className="w-5 h-5" />
+                        Architecture Patterns
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
                         {analysisResult.architecturePatterns.map((pattern, index) => (
-                          <Badge key={index} variant="secondary">
+                          <Badge key={index} className="bg-[#ffd166]/20 text-[#ffd166] border-[#ffd166]/30 hover:bg-[#ffd166]/30">
                             {pattern}
                           </Badge>
                         ))}
@@ -344,16 +448,19 @@ export default function JavaAgent() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border-l-4 border-l-[#118ab2] bg-gradient-to-br from-[#118ab2]/5 to-white">
                     <CardHeader>
-                      <CardTitle>Spring Features</CardTitle>
+                      <CardTitle className="flex items-center gap-2 text-[#118ab2]">
+                        <Coffee className="w-5 h-5" />
+                        Spring Features
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {analysisResult.springFeatures.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <span className="text-sm">{feature}</span>
+                          <div key={index} className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-[#118ab2] rounded-full"></div>
+                            <span className="text-sm font-medium text-gray-700">{feature}</span>
                           </div>
                         ))}
                       </div>
@@ -459,64 +566,76 @@ export default function JavaAgent() {
                 <h2 className="text-2xl font-bold">Quality Metrics</h2>
                 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <Card>
+                  <Card className="border-l-4 border-l-[#ef476f] bg-gradient-to-br from-[#ef476f]/10 to-transparent">
                     <CardContent className="pt-6 text-center">
-                      <div className="text-2xl font-bold text-primary">
+                      <div className="text-2xl font-bold text-[#ef476f]">
                         {analysisResult.qualityMetrics.totalClasses}
                       </div>
-                      <p className="text-sm text-muted-foreground">Total Classes</p>
+                      <p className="text-sm text-gray-600">Total Classes</p>
                     </CardContent>
                   </Card>
                   
-                  <Card>
+                  <Card className="border-l-4 border-l-[#ffd166] bg-gradient-to-br from-[#ffd166]/10 to-transparent">
                     <CardContent className="pt-6 text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold text-[#ffd166]">
                         {analysisResult.qualityMetrics.controllers}
                       </div>
-                      <p className="text-sm text-muted-foreground">Controllers</p>
+                      <p className="text-sm text-gray-600">Controllers</p>
                     </CardContent>
                   </Card>
                   
-                  <Card>
+                  <Card className="border-l-4 border-l-[#06d6a0] bg-gradient-to-br from-[#06d6a0]/10 to-transparent">
                     <CardContent className="pt-6 text-center">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-[#06d6a0]">
                         {analysisResult.qualityMetrics.services}
                       </div>
-                      <p className="text-sm text-muted-foreground">Services</p>
+                      <p className="text-sm text-gray-600">Services</p>
                     </CardContent>
                   </Card>
                   
-                  <Card>
+                  <Card className="border-l-4 border-l-[#118ab2] bg-gradient-to-br from-[#118ab2]/10 to-transparent">
                     <CardContent className="pt-6 text-center">
-                      <div className="text-2xl font-bold text-purple-600">
+                      <div className="text-2xl font-bold text-[#118ab2]">
                         {analysisResult.qualityMetrics.repositories}
                       </div>
-                      <p className="text-sm text-muted-foreground">Repositories</p>
+                      <p className="text-sm text-gray-600">Repositories</p>
                     </CardContent>
                   </Card>
                   
-                  <Card>
+                  <Card className="border-l-4 border-l-[#073b4c] bg-gradient-to-br from-[#073b4c]/10 to-transparent">
                     <CardContent className="pt-6 text-center">
-                      <div className="text-2xl font-bold text-orange-600">
+                      <div className="text-2xl font-bold text-[#073b4c]">
                         {analysisResult.qualityMetrics.entities}
                       </div>
-                      <p className="text-sm text-muted-foreground">Entities</p>
+                      <p className="text-sm text-gray-600">Entities</p>
                     </CardContent>
                   </Card>
                 </div>
 
-                <Card>
+                <Card className="bg-gradient-to-r from-[#ef476f]/5 via-[#ffd166]/5 to-[#06d6a0]/5 border-l-4 border-l-gradient-to-b border-l-[#ef476f]">
                   <CardHeader>
-                    <CardTitle>Code Quality Score</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-[#ef476f] rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#ffd166] rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#06d6a0] rounded-full"></div>
+                      Code Quality Score
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span>Overall Quality</span>
-                        <span className="font-bold">{analysisResult.qualityMetrics.codeQualityScore}/100</span>
+                        <span className="text-lg font-medium">Overall Quality</span>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-[#ef476f] to-[#06d6a0] bg-clip-text text-transparent">
+                          {analysisResult.qualityMetrics.codeQualityScore}/100
+                        </span>
                       </div>
-                      <Progress value={analysisResult.qualityMetrics.codeQualityScore} className="w-full" />
-                      <p className="text-sm text-muted-foreground">
+                      <div className="relative">
+                        <Progress value={analysisResult.qualityMetrics.codeQualityScore} className="w-full h-3" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#ef476f] via-[#ffd166] to-[#06d6a0] rounded-full opacity-80" 
+                             style={{width: `${analysisResult.qualityMetrics.codeQualityScore}%`}}>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600">
                         Based on architectural patterns, Spring best practices, and code organization
                       </p>
                     </div>
