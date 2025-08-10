@@ -30,7 +30,8 @@ const nodeTypes = {
         <div className="bg-cyan-400 border-2 border-cyan-600 rounded-lg px-4 py-2 min-w-[120px] text-center">
           <div className="text-sm font-medium text-gray-800">{data.label}</div>
         </div>
-        {/* Lifeline - will be handled by custom edges */}
+        <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+        <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       </div>
     );
   },
@@ -655,15 +656,21 @@ function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: 
         id: `${rel.from}-${rel.to}-${index}`,
         source: rel.from,
         target: rel.to,
-        sourceHandle: 'source',
-        targetHandle: 'target',
-        type: 'smoothstep',
+        type: rel.type === 'extends' || rel.type === 'implements' ? 'straight' : 'smoothstep',
+        animated: rel.type === 'calls',
         label: rel.type,
         style: getEdgeStyle(rel.type),
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: getEdgeStyle(rel.type).stroke,
         },
+        labelStyle: {
+          fontSize: '11px',
+          fontWeight: 'bold',
+          background: 'white',
+          padding: '2px 4px',
+          borderRadius: '4px'
+        }
       });
     }
   });
@@ -675,28 +682,42 @@ function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: 
 }
 
 function generateSequenceDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edge[]) {
-  // Enhanced UML sequence diagram with proper lifelines and interactions
-  const actors = ['window : UI', 'aChain : HotelChain', 'aHotel : Hotel'];
-  const actorSpacing = 250;
+  // Generate sequence diagram from actual project data
+  const classes = analysisData.classes.filter(c => 
+    c.type === 'controller' || c.type === 'service' || c.type === 'repository'
+  ).slice(0, 4); // Limit to 4 main classes for clarity
+  
+  if (classes.length === 0) {
+    // Fallback if no suitable classes found
+    classes.push(
+      { name: 'Client', type: 'component', methods: [], annotations: [], fields: [] },
+      { name: 'Controller', type: 'controller', methods: [], annotations: [], fields: [] },
+      { name: 'Service', type: 'service', methods: [], annotations: [], fields: [] }
+    );
+  }
+
+  const actorSpacing = 220;
   const startY = 50;
   
-  // Create actor header nodes
-  actors.forEach((actor, index) => {
+  // Create actor header nodes from actual classes
+  classes.forEach((cls, index) => {
+    const actorLabel = `${cls.name} : ${cls.type.charAt(0).toUpperCase() + cls.type.slice(1)}`;
+    
     nodes.push({
       id: `actor-${index}`,
       type: 'sequenceActor',
-      position: { x: index * actorSpacing + 100, y: startY },
+      position: { x: index * actorSpacing + 50, y: startY },
       data: {
-        label: actor,
+        label: actorLabel,
         actorType: 'participant'
       },
     });
     
-    // Create lifeline (vertical dashed line) - represented as a tall invisible node
+    // Create lifeline (vertical dashed line)
     nodes.push({
       id: `lifeline-${index}`,
       type: 'default',
-      position: { x: index * actorSpacing + 170, y: startY + 60 },
+      position: { x: index * actorSpacing + 110, y: startY + 60 },
       data: { label: '' },
       style: {
         width: 2,
@@ -711,119 +732,39 @@ function generateSequenceDiagram(analysisData: AnalysisData, nodes: Node[], edge
     });
   });
 
-  // Add activation boxes for method calls
-  const activations = [
-    { actor: 1, start: 120, height: 300, id: 'activation-1' },
-    { actor: 2, start: 180, height: 100, id: 'activation-2' }
-  ];
+  // Generate activation boxes and messages from actual relationships
+  const relationships = analysisData.relationships.filter(rel => rel.type === 'calls').slice(0, 5);
+  let messageY = 120;
   
-  activations.forEach(activation => {
-    nodes.push({
-      id: activation.id,
-      type: 'sequenceActivation',
-      position: { 
-        x: activation.actor * actorSpacing + 162, 
-        y: startY + activation.start 
-      },
-      data: { label: '' },
-      style: {
-        width: 12,
-        height: activation.height,
-        background: '#e5e7eb',
-        border: '1px solid #9ca3af'
-      }
-    });
-  });
+  relationships.forEach((rel, index) => {
+    const sourceIndex = classes.findIndex(c => c.name === rel.from);
+    const targetIndex = classes.findIndex(c => c.name === rel.to);
+    
+    if (sourceIndex >= 0 && targetIndex >= 0) {
+      // Add activation box for target
+      nodes.push({
+        id: `activation-${index}`,
+        type: 'sequenceActivation',
+        position: { 
+          x: targetIndex * actorSpacing + 104, 
+          y: startY + messageY - 10 
+        },
+        data: { label: '' },
+        style: {
+          width: 12,
+          height: 60,
+          background: '#e5e7eb',
+          border: '1px solid #9ca3af'
+        }
+      });
 
-  // Add loop fragment
-  nodes.push({
-    id: 'loop-fragment',
-    type: 'sequenceLoop',
-    position: { x: 320, y: startY + 140 },
-    data: { 
-      condition: 'each day',
-      label: 'loop'
-    },
-    style: {
-      width: 480,
-      height: 180,
-      background: 'rgba(239, 246, 255, 0.8)',
-      border: '2px solid #3b82f6',
-      borderRadius: '8px'
-    }
-  });
-
-  // Add alternative fragment  
-  nodes.push({
-    id: 'alt-fragment',
-    type: 'sequenceAlt',
-    position: { x: 360, y: startY + 260 },
-    data: { 
-      condition: 'isRoom = true',
-      label: 'alt'
-    },
-    style: {
-      width: 400,
-      height: 40,
-      background: 'rgba(254, 242, 242, 0.8)',
-      border: '2px solid #ef4444',
-      borderRadius: '8px'
-    }
-  });
-
-  // Create message arrows between actors
-  const messages = [
-    {
-      id: 'msg-1',
-      from: 0,
-      to: 1,
-      y: 100,
-      label: '1: makeReservation',
-      type: 'sync'
-    },
-    {
-      id: 'msg-2', 
-      from: 1,
-      to: 2,
-      y: 130,
-      label: '1.1: makeReservation',
-      type: 'sync'
-    },
-    {
-      id: 'msg-3',
-      from: 2,
-      to: 2,
-      y: 200,
-      label: '1.1.1: available(roomId, date): isRoom',
-      type: 'self'
-    },
-    {
-      id: 'msg-4',
-      from: 2,
-      to: 1,
-      y: 320,
-      label: '1.1.2: aReservation : Reservation',
-      type: 'response'
-    },
-    {
-      id: 'msg-5',
-      from: 1,
-      to: 0,
-      y: 380,
-      label: '2: aNotice : Confirmation',
-      type: 'async'
-    }
-  ];
-
-  messages.forEach(msg => {
-    if (msg.type === 'self') {
-      // Self-message (rectangle to self)
+      // Add message arrow
       edges.push({
-        id: msg.id,
-        source: `actor-${msg.from}`,
-        target: `actor-${msg.to}`,
-        type: 'smoothstep',
-        label: msg.label,
+        id: `msg-${index}`,
+        source: `actor-${sourceIndex}`,
+        target: `actor-${targetIndex}`,
+        type: 'straight',
+        label: `${index + 1}: ${rel.method || 'method'}()`,
         style: { 
           strokeWidth: 2, 
           stroke: '#3b82f6'
@@ -832,42 +773,44 @@ function generateSequenceDiagram(analysisData: AnalysisData, nodes: Node[], edge
           type: MarkerType.ArrowClosed,
           color: '#3b82f6',
         },
-        labelStyle: { fontSize: '12px', fontWeight: 'bold' }
-      });
-    } else {
-      // Regular message between actors
-      const isResponse = msg.type === 'response';
-      edges.push({
-        id: msg.id,
-        source: `actor-${msg.from}`,
-        target: `actor-${msg.to}`,
-        type: 'straight',
-        label: msg.label,
-        animated: msg.type === 'async',
-        style: { 
-          strokeWidth: 2, 
-          stroke: isResponse ? '#10b981' : '#3b82f6',
-          strokeDasharray: isResponse ? '5,5' : 'none'
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: isResponse ? '#10b981' : '#3b82f6',
-        },
         labelStyle: { 
-          fontSize: '12px', 
+          fontSize: '11px', 
           fontWeight: 'bold',
           background: 'white',
           padding: '2px 4px',
           borderRadius: '4px'
         }
       });
+      
+      messageY += 70;
     }
   });
+
+  // Add a conditional fragment if we have multiple method calls
+  if (relationships.length > 1) {
+    nodes.push({
+      id: 'alt-fragment',
+      type: 'sequenceAlt',
+      position: { x: 180, y: startY + 200 },
+      data: { 
+        condition: 'validation success',
+        label: 'alt'
+      },
+      style: {
+        width: (classes.length - 1) * actorSpacing,
+        height: 80,
+        background: 'rgba(254, 242, 242, 0.8)',
+        border: '2px solid #ef4444',
+        borderRadius: '8px'
+      }
+    });
+  }
 }
 
 function generateERDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edge[]) {
   const entities = analysisData.entities;
 
+  // Create entity nodes
   entities.forEach((entity) => {
     nodes.push({
       id: entity.name,
@@ -882,25 +825,110 @@ function generateERDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edg
     });
   });
 
-  // Add relationship edges between entities
+  // Enhanced relationship mapping between entities
   entities.forEach(entity => {
     entity.fields.forEach((field, fieldIndex) => {
       if (field.relationship && field.targetEntity) {
         const targetExists = nodes.some(n => n.id === field.targetEntity);
         if (targetExists) {
+          const getRelationshipStyle = (relationship: string) => {
+            switch (relationship) {
+              case 'OneToMany':
+                return { 
+                  strokeWidth: 2, 
+                  stroke: '#10b981',
+                  strokeDasharray: 'none'
+                };
+              case 'ManyToOne':
+                return { 
+                  strokeWidth: 2, 
+                  stroke: '#3b82f6',
+                  strokeDasharray: 'none'
+                };
+              case 'OneToOne':
+                return { 
+                  strokeWidth: 2, 
+                  stroke: '#8b5cf6',
+                  strokeDasharray: 'none'
+                };
+              case 'ManyToMany':
+                return { 
+                  strokeWidth: 3, 
+                  stroke: '#f59e0b',
+                  strokeDasharray: '5,5'
+                };
+              default:
+                return { 
+                  strokeWidth: 1, 
+                  stroke: '#6b7280',
+                  strokeDasharray: 'none'
+                };
+            }
+          };
+          
+          const relationshipStyle = getRelationshipStyle(field.relationship);
+          
           edges.push({
             id: `${entity.name}-${field.targetEntity}-${fieldIndex}`,
             source: entity.name,
             target: field.targetEntity,
-            sourceHandle: 'source',
-            targetHandle: 'target',
             type: 'smoothstep',
-            label: field.relationship,
-            style: { strokeWidth: 2 },
+            label: `${field.name} (${field.relationship})`,
+            style: relationshipStyle,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: relationshipStyle.stroke,
+            },
+            labelStyle: {
+              fontSize: '10px',
+              fontWeight: 'bold',
+              background: 'white',
+              padding: '2px 4px',
+              borderRadius: '4px',
+              color: relationshipStyle.stroke
+            }
           });
         }
       }
     });
+  });
+
+  // Also add relationships from analysisData.relationships for entities
+  analysisData.relationships.forEach((rel, index) => {
+    const sourceEntity = entities.find(e => e.name === rel.from);
+    const targetEntity = entities.find(e => e.name === rel.to);
+    
+    if (sourceEntity && targetEntity && rel.type !== 'calls') {
+      const edgeId = `rel-${rel.from}-${rel.to}-${index}`;
+      const existingEdge = edges.find(e => e.source === rel.from && e.target === rel.to);
+      
+      if (!existingEdge) {
+        edges.push({
+          id: edgeId,
+          source: rel.from,
+          target: rel.to,
+          type: 'smoothstep',
+          label: rel.type,
+          style: { 
+            strokeWidth: 2, 
+            stroke: '#dc2626',
+            strokeDasharray: '3,3'
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#dc2626',
+          },
+          labelStyle: {
+            fontSize: '10px',
+            fontWeight: 'bold',
+            background: 'white',
+            padding: '2px 4px',
+            borderRadius: '4px',
+            color: '#dc2626'
+          }
+        });
+      }
+    }
   });
 
   // Apply automatic layout
