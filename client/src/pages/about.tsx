@@ -290,6 +290,64 @@ export default function About() {
           </CardContent>
         </Card>
 
+        {/* Diamond Zensar Team */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="h-6 w-6 text-blue-600 mr-2" />
+              Diamond Zensar Team - For AI Agents
+            </CardTitle>
+            <CardDescription>
+              The specialized team behind Zengent AI development and implementation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Role</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900">Specialization</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Kaushik Saha</td>
+                    <td className="py-3 px-4 text-blue-600">Project Manager</td>
+                    <td className="py-3 px-4 text-gray-600">-</td>
+                  </tr>
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Sameer Kumar Sharma</td>
+                    <td className="py-3 px-4 text-blue-600">Engineering Manager</td>
+                    <td className="py-3 px-4 text-gray-600">-</td>
+                  </tr>
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Piyush Gupta</td>
+                    <td className="py-3 px-4 text-blue-600">Onsite Manager</td>
+                    <td className="py-3 px-4 text-gray-600">Code Lens, Match Lens, Validator Agent</td>
+                  </tr>
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Ullas Krishnan</td>
+                    <td className="py-3 px-4 text-blue-600">Solution Architect</td>
+                    <td className="py-3 px-4 text-gray-600">-</td>
+                  </tr>
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Hrushikesh Nalwade</td>
+                    <td className="py-3 px-4 text-blue-600">Java Architect</td>
+                    <td className="py-3 px-4 text-gray-600">Frameworks, Microservices</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-900">Pavan Luka</td>
+                    <td className="py-3 px-4 text-blue-600">IBM Expert</td>
+                    <td className="py-3 px-4 text-gray-600">Mainframe, COBOL, Batch Processing</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <div className="text-center py-8 border-t">
           <p className="text-gray-600 mb-2">

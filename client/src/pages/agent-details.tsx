@@ -15,8 +15,6 @@ import {
   Cpu,
   Shield,
   BarChart3,
-  Users,
-  Briefcase,
   MapPin,
   Star,
   Zap,
@@ -24,12 +22,6 @@ import {
   Target,
   Activity
 } from 'lucide-react';
-
-interface TeamMember {
-  name: string;
-  role: string;
-  responsibility?: string;
-}
 
 interface AgentInfo {
   id: string;
@@ -48,38 +40,7 @@ interface AgentInfo {
   }[];
 }
 
-const teamMembers: TeamMember[] = [
-  {
-    name: "Kaushik Saha",
-    role: "Project Manager",
-    responsibility: "Overall project coordination and delivery"
-  },
-  {
-    name: "Sameer Kumar Sharma", 
-    role: "Engineering Manager",
-    responsibility: "Technical leadership and team management"
-  },
-  {
-    name: "Piyush Gupta",
-    role: "Onsite Manager", 
-    responsibility: "Code Lens, Match Lens, Validator Agent"
-  },
-  {
-    name: "Ullas Krishnan",
-    role: "Solution Architect",
-    responsibility: "System architecture and design"
-  },
-  {
-    name: "Hrushikesh Nalwade",
-    role: "Java Architect",
-    responsibility: "Frameworks, Microservices"
-  },
-  {
-    name: "Pavan Luka",
-    role: "IBM Expert",
-    responsibility: "Mainframe, COBOL, Batch Processing"
-  }
-];
+
 
 const agents: AgentInfo[] = [
   {
@@ -482,31 +443,7 @@ export default function AgentDetails() {
           </p>
         </div>
 
-        {/* Team Information */}
-        <Card className="mb-8 border-2 border-blue-200 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Users className="w-6 h-6" />
-              Diamond Zensar Team - For AI Agents
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teamMembers.map((member, index) => (
-                <div key={index} className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Briefcase className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 text-lg">{member.name}</h3>
-                  <p className="text-blue-600 font-medium mb-2">{member.role}</p>
-                  {member.responsibility && (
-                    <p className="text-sm text-gray-600">{member.responsibility}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Agent Selection Tabs */}
         <Tabs value={selectedAgent} onValueChange={setSelectedAgent} className="w-full">
