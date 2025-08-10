@@ -478,7 +478,7 @@ export default function AgentDetails() {
           <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Users className="w-6 h-6" />
-              Diamond Team - Amex Project
+              Diamond Zensar Team - For AI Agents
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">

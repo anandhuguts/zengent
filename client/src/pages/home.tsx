@@ -8,7 +8,10 @@ import Dashboard from "@/components/dashboard";
 import AIModelSelector, { type AIModelConfig } from "@/components/ai-model-selector";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
-import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode, Eye, GitMerge, Shield } from "lucide-react";
+import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode, Eye, GitMerge, Shield, Bot, Brain, Zap, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "wouter";
 import Layout from "@/components/layout";
 import { SiPython, SiApachespark } from "react-icons/si";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
@@ -238,6 +241,132 @@ export default function Home() {
       <div className="container mx-auto px-6 py-8">
         {appState === 'upload' && !selectedProjectType && (
           <div className="max-w-6xl mx-auto">
+
+            {/* AI Agents Section */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="w-6 h-6" />
+                  AI Agents Portfolio
+                </CardTitle>
+                <p className="text-gray-600 mt-2">Specialized AI agents for enterprise application intelligence</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                  {/* ZenVector Agent */}
+                  <Link href="/zenvector-agent">
+                    <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-purple-50 to-indigo-50">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                        <Database className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">ZenVector Agent</h3>
+                      <p className="text-sm text-gray-600 mb-3">Code Intelligence & Vector Analysis with ChromaDB integration</p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="secondary" className="text-xs">ChromaDB</Badge>
+                        <Badge variant="secondary" className="text-xs">SonarQube</Badge>
+                        <Badge variant="secondary" className="text-xs">HuggingFace</Badge>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Knowledge Agent */}
+                  <Link href="/knowledge-agent">
+                    <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-blue-50 to-cyan-50">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center mb-4">
+                        <Brain className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Knowledge Agent</h3>
+                      <p className="text-sm text-gray-600 mb-3">Document Intelligence & Q&A with enterprise AI integration</p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="secondary" className="text-xs">IBM Doclinq</Badge>
+                        <Badge variant="secondary" className="text-xs">LangChain</Badge>
+                        <Badge variant="secondary" className="text-xs">Redis</Badge>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Code Lens Agent */}
+                  <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-green-50 to-emerald-50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mb-4">
+                      <Eye className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Code Lens Agent</h3>
+                    <p className="text-sm text-gray-600 mb-3">Advanced Code Analysis & Pattern Recognition</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">CodeBERT</Badge>
+                      <Badge variant="secondary" className="text-xs">Security Scan</Badge>
+                      <Badge variant="secondary" className="text-xs">Performance</Badge>
+                    </div>
+                  </div>
+
+                  {/* AI Analysis Service */}
+                  <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-yellow-50 to-orange-50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center mb-4">
+                      <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Analysis Service</h3>
+                    <p className="text-sm text-gray-600 mb-3">Multi-model AI integration with intelligent analysis</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">OpenAI</Badge>
+                      <Badge variant="secondary" className="text-xs">Claude</Badge>
+                      <Badge variant="secondary" className="text-xs">Gemini</Badge>
+                    </div>
+                  </div>
+
+                  {/* Java Analyzer Agent */}
+                  <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-red-50 to-pink-50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center mb-4">
+                      <Code2 className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Java Analyzer Agent</h3>
+                    <p className="text-sm text-gray-600 mb-3">Specialized Java & Spring Boot project analysis</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">Spring Boot</Badge>
+                      <Badge variant="secondary" className="text-xs">MVC</Badge>
+                      <Badge variant="secondary" className="text-xs">JPA</Badge>
+                    </div>
+                  </div>
+
+                  {/* GitHub Service Agent */}
+                  <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-gray-50 to-slate-50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center mb-4">
+                      <Github className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">GitHub Service Agent</h3>
+                    <p className="text-sm text-gray-600 mb-3">Repository integration & multi-language analysis</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">Git</Badge>
+                      <Badge variant="secondary" className="text-xs">Multi-Lang</Badge>
+                      <Badge variant="secondary" className="text-xs">CI/CD</Badge>
+                    </div>
+                  </div>
+
+                  {/* Ollama Service Agent */}
+                  <div className="p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200 cursor-pointer bg-gradient-to-br from-violet-50 to-purple-50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                      <Cpu className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Ollama Service Agent</h3>
+                    <p className="text-sm text-gray-600 mb-3">Local LLM integration for privacy-focused analysis</p>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">Local LLM</Badge>
+                      <Badge variant="secondary" className="text-xs">Privacy</Badge>
+                      <Badge variant="secondary" className="text-xs">Offline</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* View All Agents Button */}
+                <div className="text-center">
+                  <Link href="/agent-details">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                      <Info className="w-4 h-4 mr-2" />
+                      View Complete Agent Portfolio
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Project Type Selection */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
