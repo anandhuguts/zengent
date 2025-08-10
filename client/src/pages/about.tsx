@@ -284,7 +284,7 @@ export default function About() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Sameer Kumar Sharma</h3>
                     <p className="text-blue-600 font-medium mb-1">Technical Manager</p>
-                    <p className="text-gray-600 text-sm">AI, Migration Process</p>
+                    <p className="text-gray-600 text-sm">AI, Migration Process, Java Framework</p>
                   </div>
                 </div>
               </div>
