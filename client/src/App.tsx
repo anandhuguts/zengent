@@ -17,6 +17,7 @@ import TeamBehind from "@/pages/about";
 import ReadmePage from "@/pages/readme";
 import KnowledgeAgent from "@/pages/knowledge-agent";
 import ZenVectorAgent from "@/pages/zenvector-agent";
+import JavaAgent from "@/pages/java-agent";
 
 import Layout from "@/components/layout";
 
@@ -72,6 +73,9 @@ function Router() {
             <ZenVectorAgent />
           </Layout>
         )}
+      </Route>
+      <Route path="/java-agent">
+        <JavaAgent />
       </Route>
 
       <Route path="/" component={Home} />
