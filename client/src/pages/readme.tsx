@@ -67,7 +67,9 @@ export default function ReadmePage() {
   const prerequisites = [
     "Node.js 18+",
     "PostgreSQL database", 
-    "OpenAI API key (optional, for online AI analysis)"
+    "OpenAI API key (optional, for online AI analysis)",
+    "Local LLM setup with Ollama (optional, for offline AI analysis)",
+    "Choose between Online AI models (GPT-4o, Claude, Gemini) or Local LLM models"
   ];
 
   const features = [
@@ -172,8 +174,16 @@ export default function ReadmePage() {
 DATABASE_URL=postgresql://username:password@localhost:5432/zengent
 SESSION_SECRET=your-secret-key
 
-# Optional (for AI features)
-OPENAI_API_KEY=your-openai-api-key`}
+# Optional - Online AI Models (choose one or more)
+OPENAI_API_KEY=your-openai-api-key
+ANTHROPIC_API_KEY=your-claude-api-key
+GOOGLE_API_KEY=your-gemini-api-key
+
+# Optional - Local LLM (for privacy-first offline analysis)
+# Install Ollama and download models like:
+# ollama pull codellama
+# ollama pull deepseek-coder
+# ollama pull starcoder`}
                     label="Environment variables"
                   />
                 </div>
@@ -195,11 +205,23 @@ OPENAI_API_KEY=your-openai-api-key`}
                 </div>
               </div>
 
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800 font-medium flex items-center">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Application will be available at http://localhost:5000
-                </p>
+              <div className="mt-4 space-y-3">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium flex items-center">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Application will be available at http://localhost:5000
+                  </p>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 font-medium mb-2 flex items-center">
+                    <Settings className="h-4 w-4 mr-2" />
+                    AI Model Configuration
+                  </p>
+                  <p className="text-blue-700 text-sm">
+                    <strong>Online Models:</strong> Provide API keys for GPT-4o, Claude 3.5, or Gemini Pro<br/>
+                    <strong>Local Models:</strong> Install Ollama and download models for complete offline analysis
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>
