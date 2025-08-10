@@ -328,8 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Perform specialized Java analysis
-        const javaAnalysisService = new AIAnalysisService({ type: 'openai' });
-        const analysisResult = await javaAnalysisService.analyzeJavaProject(javaFiles, tempDir, customPrompt);
+        const analysisResult = await aiAnalysisService.analyzeJavaProject(javaFiles, tempDir, customPrompt);
         
         res.json(analysisResult);
         
