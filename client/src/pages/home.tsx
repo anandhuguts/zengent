@@ -38,6 +38,8 @@ export default function Home() {
   const [selectedProjectType, setSelectedProjectType] = useState<ProjectType | null>(null);
   const [showAIConfig, setShowAIConfig] = useState(false);
   const [aiConfig, setAiConfig] = useState<AIModelConfig>({ type: 'openai' });
+  const [showDevelopmentModal, setShowDevelopmentModal] = useState(false);
+  const [selectedAgentName, setSelectedAgentName] = useState<string>('');
   const { toast } = useToast();
 
   const { data: currentProject, refetch: refetchProject } = useQuery<Project>({
@@ -84,7 +86,7 @@ export default function Home() {
       // Java Agent and Code Lens Agent navigate to analysis pages
       setSelectedProjectType(agentId);
     } else {
-      // All other agents show development mode notification
+      // All other agents show development mode modal
       const agentNames: Record<ProjectType, string> = {
         'java': 'Java Agent',
         'pyspark': 'PySpark Agent',
@@ -100,11 +102,8 @@ export default function Home() {
         'codeshift': 'Codeshift Lens Agent'
       };
       
-      toast({
-        title: "Agent in Development Mode",
-        description: `${agentNames[agentId]} is currently under development. Coming soon!`,
-        variant: "default",
-      });
+      setSelectedAgentName(agentNames[agentId]);
+      setShowDevelopmentModal(true);
     }
   };
 
@@ -685,6 +684,44 @@ export default function Home() {
                 onModelSelect={handleAIModelConfig}
                 currentConfig={aiConfig}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Development Mode Modal */}
+      {showDevelopmentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+            <div className="text-center p-8">
+              {/* Icon */}
+              <div className="mx-auto flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full mb-4">
+                <Bot className="w-8 h-8 text-blue-600" />
+              </div>
+              
+              {/* Title */}
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {selectedAgentName}
+              </h3>
+              
+              {/* Subtitle */}
+              <h4 className="text-lg font-medium text-blue-600 mb-3">
+                Coming Soon!
+              </h4>
+              
+              {/* Description */}
+              <p className="text-gray-600 text-sm mb-6">
+                This agent is currently under development and will be available in our next update. 
+                Stay tuned for exciting new features!
+              </p>
+              
+              {/* Button */}
+              <Button
+                onClick={() => setShowDevelopmentModal(false)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-lg font-medium transition-colors"
+              >
+                Got it!
+              </Button>
             </div>
           </div>
         </div>
