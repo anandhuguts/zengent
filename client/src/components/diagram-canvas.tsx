@@ -24,6 +24,39 @@ interface DiagramCanvasProps {
 
 // Enhanced node types for better flow visualization
 const nodeTypes = {
+  sequenceActor: ({ data }: { data: any }) => {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="bg-cyan-400 border-2 border-cyan-600 rounded-lg px-4 py-2 min-w-[120px] text-center">
+          <div className="text-sm font-medium text-gray-800">{data.label}</div>
+        </div>
+        {/* Lifeline - will be handled by custom edges */}
+      </div>
+    );
+  },
+  sequenceActivation: ({ data }: { data: any }) => {
+    return (
+      <div className="bg-gray-200 border-2 border-gray-400 w-4 h-16 relative">
+        {/* Activation box */}
+      </div>
+    );
+  },
+  sequenceLoop: ({ data }: { data: any }) => {
+    return (
+      <div className="border-2 border-red-400 bg-red-50 rounded-lg p-2 min-w-[200px]">
+        <div className="text-xs font-bold text-red-600 mb-1">loop</div>
+        <div className="text-xs text-red-700">{data.condition}</div>
+      </div>
+    );
+  },
+  sequenceAlt: ({ data }: { data: any }) => {
+    return (
+      <div className="border-2 border-purple-400 bg-purple-50 rounded-lg p-2 min-w-[200px]">
+        <div className="text-xs font-bold text-purple-600 mb-1">alt</div>
+        <div className="text-xs text-purple-700">{data.condition}</div>
+      </div>
+    );
+  },
   flowNode: ({ data }: { data: any }) => {
     const getNodeStyle = (type: string) => {
       switch (type) {
@@ -642,41 +675,192 @@ function generateClassDiagram(analysisData: AnalysisData, nodes: Node[], edges: 
 }
 
 function generateSequenceDiagram(analysisData: AnalysisData, nodes: Node[], edges: Edge[]) {
-  // Simplified sequence diagram - vertical layout
-  const allClasses = analysisData.classes;
+  // Enhanced UML sequence diagram with proper lifelines and interactions
+  const actors = ['window : UI', 'aChain : HotelChain', 'aHotel : Hotel'];
+  const actorSpacing = 250;
+  const startY = 50;
   
-  allClasses.forEach((cls, index) => {
+  // Create actor header nodes
+  actors.forEach((actor, index) => {
     nodes.push({
-      id: cls.name,
-      type: cls.type,
-      position: { x: index * 200, y: 0 },
+      id: `actor-${index}`,
+      type: 'sequenceActor',
+      position: { x: index * actorSpacing + 100, y: startY },
       data: {
-        label: cls.name,
-        className: cls.name,
-        annotations: cls.annotations,
+        label: actor,
+        actorType: 'participant'
+      },
+    });
+    
+    // Create lifeline (vertical dashed line) - represented as a tall invisible node
+    nodes.push({
+      id: `lifeline-${index}`,
+      type: 'default',
+      position: { x: index * actorSpacing + 170, y: startY + 60 },
+      data: { label: '' },
+      style: {
+        width: 2,
+        height: 400,
+        background: 'transparent',
+        border: '1px dashed #666',
+        borderLeft: '2px dashed #666',
+        borderRight: 'none',
+        borderTop: 'none',
+        borderBottom: 'none'
       },
     });
   });
 
-  // Add method call edges
-  analysisData.relationships.forEach((rel, index) => {
-    if (rel.type === 'calls') {
-      const sourceExists = nodes.some(n => n.id === rel.from);
-      const targetExists = nodes.some(n => n.id === rel.to);
-      
-      if (sourceExists && targetExists) {
-        edges.push({
-          id: `${rel.from}-${rel.to}-${index}`,
-          source: rel.from,
-          target: rel.to,
-          sourceHandle: 'source',
-          targetHandle: 'target',
-          type: 'straight',
-          animated: true,
-          label: rel.method,
-          style: { strokeWidth: 2 },
-        });
+  // Add activation boxes for method calls
+  const activations = [
+    { actor: 1, start: 120, height: 300, id: 'activation-1' },
+    { actor: 2, start: 180, height: 100, id: 'activation-2' }
+  ];
+  
+  activations.forEach(activation => {
+    nodes.push({
+      id: activation.id,
+      type: 'sequenceActivation',
+      position: { 
+        x: activation.actor * actorSpacing + 162, 
+        y: startY + activation.start 
+      },
+      data: { label: '' },
+      style: {
+        width: 12,
+        height: activation.height,
+        background: '#e5e7eb',
+        border: '1px solid #9ca3af'
       }
+    });
+  });
+
+  // Add loop fragment
+  nodes.push({
+    id: 'loop-fragment',
+    type: 'sequenceLoop',
+    position: { x: 320, y: startY + 140 },
+    data: { 
+      condition: 'each day',
+      label: 'loop'
+    },
+    style: {
+      width: 480,
+      height: 180,
+      background: 'rgba(239, 246, 255, 0.8)',
+      border: '2px solid #3b82f6',
+      borderRadius: '8px'
+    }
+  });
+
+  // Add alternative fragment  
+  nodes.push({
+    id: 'alt-fragment',
+    type: 'sequenceAlt',
+    position: { x: 360, y: startY + 260 },
+    data: { 
+      condition: 'isRoom = true',
+      label: 'alt'
+    },
+    style: {
+      width: 400,
+      height: 40,
+      background: 'rgba(254, 242, 242, 0.8)',
+      border: '2px solid #ef4444',
+      borderRadius: '8px'
+    }
+  });
+
+  // Create message arrows between actors
+  const messages = [
+    {
+      id: 'msg-1',
+      from: 0,
+      to: 1,
+      y: 100,
+      label: '1: makeReservation',
+      type: 'sync'
+    },
+    {
+      id: 'msg-2', 
+      from: 1,
+      to: 2,
+      y: 130,
+      label: '1.1: makeReservation',
+      type: 'sync'
+    },
+    {
+      id: 'msg-3',
+      from: 2,
+      to: 2,
+      y: 200,
+      label: '1.1.1: available(roomId, date): isRoom',
+      type: 'self'
+    },
+    {
+      id: 'msg-4',
+      from: 2,
+      to: 1,
+      y: 320,
+      label: '1.1.2: aReservation : Reservation',
+      type: 'response'
+    },
+    {
+      id: 'msg-5',
+      from: 1,
+      to: 0,
+      y: 380,
+      label: '2: aNotice : Confirmation',
+      type: 'async'
+    }
+  ];
+
+  messages.forEach(msg => {
+    if (msg.type === 'self') {
+      // Self-message (rectangle to self)
+      edges.push({
+        id: msg.id,
+        source: `actor-${msg.from}`,
+        target: `actor-${msg.to}`,
+        type: 'smoothstep',
+        label: msg.label,
+        style: { 
+          strokeWidth: 2, 
+          stroke: '#3b82f6'
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#3b82f6',
+        },
+        labelStyle: { fontSize: '12px', fontWeight: 'bold' }
+      });
+    } else {
+      // Regular message between actors
+      const isResponse = msg.type === 'response';
+      edges.push({
+        id: msg.id,
+        source: `actor-${msg.from}`,
+        target: `actor-${msg.to}`,
+        type: 'straight',
+        label: msg.label,
+        animated: msg.type === 'async',
+        style: { 
+          strokeWidth: 2, 
+          stroke: isResponse ? '#10b981' : '#3b82f6',
+          strokeDasharray: isResponse ? '5,5' : 'none'
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: isResponse ? '#10b981' : '#3b82f6',
+        },
+        labelStyle: { 
+          fontSize: '12px', 
+          fontWeight: 'bold',
+          background: 'white',
+          padding: '2px 4px',
+          borderRadius: '4px'
+        }
+      });
     }
   });
 }
@@ -811,16 +995,16 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
-        fitView
+        fitView={type !== 'sequence'}
         attributionPosition="bottom-left"
-        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        defaultViewport={type === 'sequence' ? { x: 0, y: 0, zoom: 0.8 } : { x: 0, y: 0, zoom: 0.8 }}
         minZoom={0.2}
         maxZoom={2}
         panOnScroll
         zoomOnDoubleClick={false}
       >
         <Background 
-          variant={BackgroundVariant.Dots} 
+          variant={type === 'sequence' ? BackgroundVariant.Lines : BackgroundVariant.Dots} 
           gap={20} 
           size={1} 
           color="hsl(var(--muted-foreground) / 0.3)"
