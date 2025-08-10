@@ -263,39 +263,83 @@ export default function About() {
           <CardContent>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Kaushik Saha</h3>
-                <p className="text-blue-600 font-medium mb-2">Project Manager</p>
-                <p className="text-gray-600 text-sm">AI, Migration Process</p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-red-400 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Kaushik Saha</h3>
+                    <p className="text-blue-600 font-medium mb-1">Project Manager</p>
+                    <p className="text-gray-600 text-sm">AI, Migration Process</p>
+                  </div>
+                </div>
               </div>
               
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Sameer Kumar Sharma</h3>
-                <p className="text-blue-600 font-medium mb-2">Technical Manager</p>
-                <p className="text-gray-600 text-sm">AI, Migration Process</p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-red-400 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Sameer Kumar Sharma</h3>
+                    <p className="text-blue-600 font-medium mb-1">Technical Manager</p>
+                    <p className="text-gray-600 text-sm">AI, Migration Process</p>
+                  </div>
+                </div>
               </div>
               
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Piyush Gupta</h3>
-                <p className="text-blue-600 font-medium mb-2">Onsite Manager</p>
-                <p className="text-gray-600 text-sm">Big Data Analyst<br/>Code Lens, Match Lens, Validator Agent</p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-red-400 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Piyush Gupta</h3>
+                    <p className="text-blue-600 font-medium mb-1">Onsite Manager</p>
+                    <p className="text-gray-600 text-sm">Big Data Analyst<br/>Code Lens, Match Lens, Validator Agent</p>
+                  </div>
+                </div>
               </div>
               
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Ullas Krishnan</h3>
-                <p className="text-blue-600 font-medium mb-2">AI Solution Architect</p>
-                <p className="text-gray-600 text-sm">Agentic AI Solutions</p>
+                <div className="flex items-start space-x-4">
+                  <img 
+                    src="/attached_assets/ullas pic_1754848174168.png" 
+                    alt="Ullas Krishnan" 
+                    className="w-16 h-16 rounded-lg object-cover border-2 border-blue-400 flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Ullas Krishnan</h3>
+                    <p className="text-blue-600 font-medium mb-1">AI Solution Architect</p>
+                    <p className="text-gray-600 text-sm">Agentic AI Solutions</p>
+                  </div>
+                </div>
               </div>
               
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Hrushikesh Nalwade</h3>
-                <p className="text-blue-600 font-medium mb-2">Java Architect</p>
-                <p className="text-gray-600 text-sm">AI, Frameworks</p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-red-400 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Hrushikesh Nalwade</h3>
+                    <p className="text-blue-600 font-medium mb-1">Java Architect</p>
+                    <p className="text-gray-600 text-sm">AI, Frameworks</p>
+                  </div>
+                </div>
               </div>
               
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2">Pavan Luka</h3>
-                <p className="text-blue-600 font-medium mb-2">IBM Architect</p>
-                <p className="text-gray-600 text-sm">Mainframe, COBOL, Batch Processing</p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-red-400 rounded-lg flex-shrink-0 flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Pavan Luka</h3>
+                    <p className="text-blue-600 font-medium mb-1">IBM Architect</p>
+                    <p className="text-gray-600 text-sm">Mainframe, COBOL, Batch Processing</p>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
