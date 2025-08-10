@@ -16,6 +16,7 @@ import {
   Database,
   Lock
 } from "lucide-react";
+import ullasPhoto from "@assets/ullas pic_1754848174168.png";
 
 
 export default function About() {
@@ -304,7 +305,7 @@ export default function About() {
               <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex items-start space-x-4">
                   <img 
-                    src="/attached_assets/ullas pic_1754848174168.png" 
+                    src={ullasPhoto} 
                     alt="Ullas Krishnan" 
                     className="w-16 h-16 rounded-lg object-cover border-2 border-blue-400 flex-shrink-0"
                   />
