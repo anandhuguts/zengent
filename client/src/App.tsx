@@ -17,6 +17,7 @@ import About from "@/pages/about";
 import ReadmePage from "@/pages/readme";
 import KnowledgeAgent from "@/pages/knowledge-agent";
 import ZenVectorAgent from "@/pages/zenvector-agent";
+import AgentDetails from "@/pages/agent-details";
 import Layout from "@/components/layout";
 
 function Router() {
@@ -72,6 +73,13 @@ function Router() {
             {() => (
               <Layout>
                 <ZenVectorAgent />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/agent-details">
+            {() => (
+              <Layout>
+                <AgentDetails />
               </Layout>
             )}
           </Route>

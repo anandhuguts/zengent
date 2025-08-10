@@ -91,6 +91,12 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
       current: location === '/zenvector-agent'
     },
     {
+      name: 'Agent Details',
+      href: '/agent-details',
+      icon: Info,
+      current: location === '/agent-details'
+    },
+    {
       name: 'Usage Statistics',
       href: '/usage-statistics',
       icon: BarChart3,
