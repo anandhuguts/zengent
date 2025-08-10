@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 import zenagentBanner from "@assets/zenagent_1754759778955.png";
-import agentLogo from "@assets/agent_1754754612491.png";
+import agentLogo from "@assets/agent_1754854183020.png";
 import pythonLogo from "@assets/pyth_1754703124415.png";
 import pysparkLogo from "@assets/pyspark-lang_1754703714412.png";
 import ibmLogo from "@assets/ibm_1754703124415.png";
