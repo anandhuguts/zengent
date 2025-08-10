@@ -76,6 +76,12 @@ export default function About() {
       description: "Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment",
       icon: "✅",
       category: "Code Quality"
+    },
+    {
+      name: "Responsible AI Agent",
+      description: "Ethics and bias detection in code analysis with comprehensive AI governance and fairness assessment",
+      icon: "⚖️",
+      category: "AI Ethics"
     }
   ];
 
@@ -181,7 +187,7 @@ export default function About() {
               Project AI Agents
             </CardTitle>
             <CardDescription>
-              Multi-language codebase analysis supporting enterprise frameworks
+              Six specialized agents for multi-language codebase analysis and enterprise frameworks
             </CardDescription>
           </CardHeader>
           <CardContent>
