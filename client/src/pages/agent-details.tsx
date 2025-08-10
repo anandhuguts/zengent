@@ -21,7 +21,9 @@ import {
   Eye,
   Target,
   Activity,
-  Users
+  Users,
+  BarChart4,
+  ArrowRightLeft
 } from 'lucide-react';
 
 interface AgentInfo {
@@ -423,6 +425,122 @@ const agents: AgentInfo[] = [
         description: "Optimized resource usage for local model execution"
       }
     ]
+  },
+  {
+    id: "datalens",
+    name: "Data Lens Agent",
+    icon: BarChart4,
+    description: "Enterprise Big Data Intelligence Agent specialized in analyzing large-scale datasets, data lakes, and distributed computing environments with advanced analytics and ML insights.",
+    capabilities: [
+      "Big Data Processing",
+      "Data Lake Analysis",
+      "Distributed Computing Optimization",
+      "Real-time Analytics",
+      "Data Pipeline Intelligence",
+      "Machine Learning Integration",
+      "Performance Monitoring",
+      "Data Quality Assessment"
+    ],
+    useCases: [
+      "Analyze petabyte-scale datasets for business insights",
+      "Optimize Spark and Hadoop job performance",
+      "Real-time streaming data analysis and alerting",
+      "Data quality monitoring and anomaly detection",
+      "ETL pipeline optimization and troubleshooting",
+      "Cost optimization for cloud-based big data workloads",
+      "Predictive analytics on historical data patterns",
+      "Data governance and compliance monitoring"
+    ],
+    technologyStack: [
+      "Apache Spark",
+      "Hadoop Ecosystem (HDFS, YARN, Hive)",
+      "Apache Kafka & Flink",
+      "Delta Lake & Apache Iceberg",
+      "Databricks & Snowflake",
+      "AWS EMR, Azure HDInsight, GCP Dataproc",
+      "MLflow & Apache Airflow",
+      "Elasticsearch & Kibana"
+    ],
+    status: "In Development",
+    version: "0.8.0",
+    integrations: ["Spark", "Hadoop", "Kafka", "Databricks", "Snowflake"],
+    features: [
+      {
+        title: "Scalable Analytics",
+        description: "Process and analyze massive datasets using distributed computing frameworks"
+      },
+      {
+        title: "Real-time Insights",
+        description: "Stream processing and real-time analytics for immediate business intelligence"
+      },
+      {
+        title: "ML Integration",
+        description: "Built-in machine learning pipelines for predictive analytics and pattern detection"
+      },
+      {
+        title: "Performance Optimization",
+        description: "Intelligent query optimization and resource management for big data workloads"
+      }
+    ]
+  },
+  {
+    id: "codeshift",
+    name: "Codeshift Lens Agent",
+    icon: ArrowRightLeft,
+    description: "Advanced Multi-Language Code Conversion Agent that intelligently transforms source code between different programming languages while preserving logic, structure, and best practices.",
+    capabilities: [
+      "Multi-Language Code Translation",
+      "Syntax Pattern Recognition",
+      "Framework Migration",
+      "API Mapping & Conversion",
+      "Code Structure Preservation",
+      "Best Practice Application",
+      "Dependency Management",
+      "Performance Optimization"
+    ],
+    useCases: [
+      "Legacy COBOL to modern Java/Python migration",
+      "Java Spring Boot to Node.js Express conversion",
+      "Python Django to Java Spring Boot transformation",
+      "C# .NET to Java Spring migration",
+      "JavaScript/Node.js to Python FastAPI conversion",
+      "PHP Laravel to Python Django transformation",
+      "Ruby on Rails to Java Spring Boot migration",
+      "Scala to Kotlin conversion for Android development",
+      "Go microservices to Java Spring Boot conversion",
+      "Rust system code to C++ transformation"
+    ],
+    technologyStack: [
+      "Abstract Syntax Tree (AST) Parsers",
+      "Language-Specific Compilers & Transpilers",
+      "OpenAI Codex & GPT-4 for Code Generation",
+      "Tree-sitter for Syntax Analysis",
+      "Babel & TypeScript Compiler API",
+      "ANTLR for Grammar Parsing",
+      "Language Server Protocol (LSP)",
+      "Static Analysis Tools (SonarQube, ESLint)"
+    ],
+    status: "In Development", 
+    version: "0.6.0",
+    integrations: ["OpenAI Codex", "Tree-sitter", "Babel", "TypeScript", "SonarQube"],
+    features: [
+      {
+        title: "Smart Translation",
+        description: "Intelligent code conversion that understands context and preserves business logic"
+      },
+      {
+        title: "Framework Mapping",
+        description: "Automatic mapping between equivalent frameworks and libraries across languages"
+      },
+      {
+        title: "Quality Preservation",
+        description: "Maintains code quality, patterns, and best practices during conversion"
+      },
+      {
+        title: "Bulk Processing",
+        description: "Process entire codebases and projects with dependency resolution"
+      }
+    ]
   }
 ];
 
@@ -457,7 +575,7 @@ export default function AgentDetails() {
               <div className="text-center">
                 <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <Bot className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">7</div>
+                  <div className="text-2xl font-bold text-gray-900">9</div>
                   <div className="text-sm text-gray-600">AI Agents</div>
                 </div>
               </div>
@@ -496,7 +614,7 @@ export default function AgentDetails() {
 
         {/* Agent Selection Tabs */}
         <Tabs value={selectedAgent} onValueChange={setSelectedAgent} className="w-full">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-7 mb-8 bg-white/80 backdrop-blur-sm border-2 border-blue-200">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-9 mb-8 bg-white/80 backdrop-blur-sm border-2 border-blue-200">
             {agents.map((agent) => (
               <TabsTrigger 
                 key={agent.id} 
