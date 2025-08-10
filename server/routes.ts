@@ -14,6 +14,7 @@ import swaggerUi from "swagger-ui-express";
 import multer from "multer";
 import { z } from "zod";
 import os from "os";
+import zenVectorRoutes from "./routes/zenVectorRoutes";
 
 interface AIModelConfig {
   type: 'openai' | 'local';
@@ -683,6 +684,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch admin statistics" });
     }
   });
+
+  // ZenVector Agent routes
+  app.use('/api/zenvector', zenVectorRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
