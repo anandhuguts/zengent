@@ -285,27 +285,22 @@ export default function Home() {
 
             {/* Enterprise AI Platform Summary */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <Bot className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">
-                    Enterprise Application Intelligence Platform
-                  </h2>
-                  <p className="text-gray-700 text-sm mb-3">
-                    Transform your codebase understanding with 9 specialized AI agents covering multi-language analysis, 
-                    vector database intelligence, and enterprise-grade document processing. Each agent provides unique 
-                    capabilities for comprehensive application intelligence and code analysis.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="text-xs">Java & Spring Boot</Badge>
-                    <Badge variant="secondary" className="text-xs">Python & Django</Badge>
-                    <Badge variant="secondary" className="text-xs">PySpark & Big Data</Badge>
-                    <Badge variant="secondary" className="text-xs">Mainframe & COBOL</Badge>
-                    <Badge variant="secondary" className="text-xs">AI/ML Analysis</Badge>
-                    <Badge variant="secondary" className="text-xs">Vector Database</Badge>
-                  </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  Enterprise Application Intelligence Platform
+                </h2>
+                <p className="text-gray-700 text-sm mb-3">
+                  Transform your codebase understanding with 9 specialized AI agents covering multi-language analysis, 
+                  vector database intelligence, and enterprise-grade document processing. Each agent provides unique 
+                  capabilities for comprehensive application intelligence and code analysis.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-xs">Java & Spring Boot</Badge>
+                  <Badge variant="secondary" className="text-xs">Python & Django</Badge>
+                  <Badge variant="secondary" className="text-xs">PySpark & Big Data</Badge>
+                  <Badge variant="secondary" className="text-xs">Mainframe & COBOL</Badge>
+                  <Badge variant="secondary" className="text-xs">AI/ML Analysis</Badge>
+                  <Badge variant="secondary" className="text-xs">Vector Database</Badge>
                 </div>
               </div>
             </div>
@@ -524,11 +519,15 @@ export default function Home() {
         
         {appState === 'results' && currentProject && currentProject.analysisData && (
           <div className="space-y-8">
-            <Dashboard analysisData={currentProject.analysisData} />
-            <AnalysisResults 
-              project={currentProject} 
-              onNewAnalysis={handleNewAnalysis}
-            />
+            {currentProject.analysisData && typeof currentProject.analysisData === 'object' && (
+              <>
+                <Dashboard analysisData={currentProject.analysisData} />
+                <AnalysisResults 
+                  project={currentProject} 
+                  onNewAnalysis={handleNewAnalysis}
+                />
+              </>
+            )}
           </div>
         )}
       </div>
