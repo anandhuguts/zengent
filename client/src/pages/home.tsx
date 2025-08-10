@@ -70,7 +70,7 @@ export default function Home() {
     }
   };
 
-  // Original language project types
+  // Original language project types with Validator Agent moved here
   const languageProjects = [
     {
       id: 'java' as ProjectType,
@@ -139,10 +139,27 @@ export default function Home() {
         'Virtual environment configuration review',
         'Code quality and PEP compliance checking'
       ]
+    },
+    {
+      id: 'validator' as ProjectType,
+      name: 'Validator Agent',
+      description: 'Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment',
+      logoSrc: agentLogo,
+      borderColor: 'border-chart-5',
+      bgColor: 'bg-chart-5/5',
+      hoverBgColor: 'hover:bg-chart-5/10',
+      features: [
+        'Security vulnerability detection and assessment',
+        'Privacy compliance and data protection validation',
+        'Code quality metrics and best practices review',
+        'Performance bottleneck identification',
+        'Regulatory compliance verification (GDPR, CCPA)',
+        'Security risk scoring and remediation guidance'
+      ]
     }
   ];
 
-  // AI Agent types
+  // AI Agent types (ZenVector Agent removed, Validator moved to Language Project Analysis)
   const aiAgents = [
     {
       id: 'code-lens' as ProjectType,
@@ -176,40 +193,6 @@ export default function Home() {
         'Field transformation rule identification',
         'Customer data model alignment verification',
         'Integration gap analysis and recommendations'
-      ]
-    },
-    {
-      id: 'validator' as ProjectType,
-      name: 'Validator Agent',
-      description: 'Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment',
-      logoSrc: agentLogo,
-      borderColor: 'border-chart-5',
-      bgColor: 'bg-chart-5/5',
-      hoverBgColor: 'hover:bg-chart-5/10',
-      features: [
-        'Security vulnerability detection and assessment',
-        'Privacy compliance and data protection validation',
-        'Code quality metrics and best practices review',
-        'Performance bottleneck identification',
-        'Regulatory compliance verification (GDPR, CCPA)',
-        'Security risk scoring and remediation guidance'
-      ]
-    },
-    {
-      id: 'zenvector' as ProjectType,
-      name: 'ZenVector Agent',
-      description: 'Advanced vector database intelligence with ChromaDB integration for code similarity analysis and semantic search capabilities',
-      logoSrc: agentLogo,
-      borderColor: 'border-emerald-500',
-      bgColor: 'bg-emerald-50',
-      hoverBgColor: 'hover:bg-emerald-100',
-      features: [
-        'ChromaDB vector database integration',
-        'Semantic code search capabilities',
-        'Code similarity detection algorithms',
-        'Pattern recognition and clustering',
-        'Multi-modal search functionality',
-        'HuggingFace model integration'
       ]
     },
     {
@@ -399,49 +382,54 @@ export default function Home() {
                   <p className="text-sm text-gray-600">Specialized AI agents for advanced analysis and processing</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 {aiAgents.map((type) => {
                   return (
                     <div
                       key={type.id}
                       onClick={() => setSelectedProjectType(type.id)}
-                      className={`relative group cursor-pointer bg-card rounded-xl border-2 ${type.borderColor} ${type.hoverBgColor} shadow-lg hover:shadow-xl transition-all duration-300 p-6`}
+                      className={`relative group cursor-pointer bg-card rounded-lg border-2 ${type.borderColor} ${type.hoverBgColor} shadow-md hover:shadow-lg transition-all duration-300 p-4`}
                     >
                       <div>
-                        {/* First line - Logo and Heading name */}
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="inline-flex items-center justify-center bg-background rounded-lg p-2 w-12 h-12">
+                        {/* Compact header with logo and name */}
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="inline-flex items-center justify-center bg-background rounded-lg p-1.5 w-8 h-8">
                             <img 
                               src={type.logoSrc} 
                               alt={`${type.name} logo`}
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          <h3 className="text-lg font-semibold text-foreground leading-tight">
+                          <h3 className="text-sm font-semibold text-foreground leading-tight">
                             {type.name}
                           </h3>
                         </div>
                         
-                        {/* Second line - Description text */}
-                        <div>
-                          <p className="text-muted-foreground text-sm mb-3">
-                            {type.description}
-                          </p>
-                          <div className={`${type.bgColor} rounded-lg p-3 mt-3`}>
-                            <ul className="space-y-1">
-                              {type.features.map((feature, index) => (
-                                <li key={index} className="text-xs text-foreground/80 flex items-start">
-                                  <div className="w-1 h-1 bg-primary rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
-                                  <span>{feature}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                        {/* Compact description */}
+                        <p className="text-muted-foreground text-xs mb-2 line-clamp-2">
+                          {type.description}
+                        </p>
+                        
+                        {/* Compact feature list - show only first 3 features */}
+                        <div className={`${type.bgColor} rounded-lg p-2`}>
+                          <ul className="space-y-0.5">
+                            {type.features.slice(0, 3).map((feature, index) => (
+                              <li key={index} className="text-xs text-foreground/70 flex items-start">
+                                <div className="w-1 h-1 bg-primary rounded-full mr-1.5 mt-1 flex-shrink-0"></div>
+                                <span className="line-clamp-1">{feature}</span>
+                              </li>
+                            ))}
+                            {type.features.length > 3 && (
+                              <li className="text-xs text-muted-foreground/60 italic">
+                                +{type.features.length - 3} more features
+                              </li>
+                            )}
+                          </ul>
                         </div>
                       </div>
                       
-                      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                       </div>
                     </div>
                   );
