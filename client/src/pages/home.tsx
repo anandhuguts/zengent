@@ -300,7 +300,7 @@ export default function Home() {
                   <Badge variant="secondary" className="text-xs">PySpark & Big Data</Badge>
                   <Badge variant="secondary" className="text-xs">Mainframe & COBOL</Badge>
                   <Badge variant="secondary" className="text-xs">AI/ML Analysis</Badge>
-                  <Badge variant="secondary" className="text-xs">Vector Database</Badge>
+                  <Badge variant="secondary" className="text-xs">Generative AI</Badge>
                 </div>
               </div>
             </div>
