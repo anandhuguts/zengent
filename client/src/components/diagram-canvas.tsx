@@ -988,29 +988,80 @@ export default function DiagramCanvas({ type, analysisData }: DiagramCanvasProps
   };
 
   const exportToSVG = () => {
-    const svgElement = document.querySelector('.react-flow__renderer svg') as SVGElement;
-    if (svgElement) {
-      // Clone the SVG to avoid modifying the original
-      const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
+    if (!reactFlowElement) {
+      console.error('React Flow element not found');
+      return;
+    }
+
+    // Get all SVG elements within the React Flow container
+    const svgElements = reactFlowElement.querySelectorAll('svg');
+    const mainSvg = svgElements[0] as SVGElement;
+    
+    if (!mainSvg) {
+      console.error('SVG element not found in React Flow');
+      return;
+    }
+
+    try {
+      // Create a new SVG element with proper structure
+      const exportSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const rect = reactFlowElement.getBoundingClientRect();
       
-      // Add proper SVG namespace and styling
-      clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+      // Set SVG attributes
+      exportSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      exportSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+      exportSvg.setAttribute('width', rect.width.toString());
+      exportSvg.setAttribute('height', rect.height.toString());
+      exportSvg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
       
-      // Get the SVG's current viewBox or set a default
-      const rect = svgElement.getBoundingClientRect();
-      clonedSvg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-      clonedSvg.setAttribute('width', rect.width.toString());
-      clonedSvg.setAttribute('height', rect.height.toString());
+      // Add a white background
+      const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      background.setAttribute('width', '100%');
+      background.setAttribute('height', '100%');
+      background.setAttribute('fill', 'white');
+      exportSvg.appendChild(background);
       
-      const svgData = new XMLSerializer().serializeToString(clonedSvg);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      // Clone all SVG content from the main SVG
+      const mainSvgContent = mainSvg.cloneNode(true) as SVGElement;
+      
+      // Copy all child elements from the cloned SVG
+      while (mainSvgContent.firstChild) {
+        exportSvg.appendChild(mainSvgContent.firstChild);
+      }
+      
+      // Add embedded CSS for proper styling
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      style.textContent = `
+        .react-flow__node-default { fill: white; stroke: #1a202c; stroke-width: 1px; }
+        .react-flow__node-class { fill: #f7fafc; stroke: #2d3748; stroke-width: 2px; }
+        .react-flow__node-entity { fill: #fef5e7; stroke: #c05621; stroke-width: 2px; }
+        .react-flow__node-flowNode { fill: #ebf8ff; stroke: #3182ce; stroke-width: 2px; }
+        text { font-family: Arial, sans-serif; font-size: 12px; fill: #1a202c; }
+        .react-flow__edge-path { stroke: #718096; stroke-width: 2px; fill: none; }
+        .react-flow__arrowhead { fill: #718096; }
+      `;
+      exportSvg.insertBefore(style, exportSvg.firstChild);
+      
+      // Serialize and download
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(exportSvg);
+      
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const svgUrl = URL.createObjectURL(svgBlob);
+      
       const link = document.createElement('a');
-      link.download = `${type}-diagram.svg`;
+      link.download = `${type}-architecture-diagram.svg`;
       link.href = svgUrl;
       link.click();
+      
+      // Cleanup
       URL.revokeObjectURL(svgUrl);
+      
+      console.log('SVG export completed successfully');
+    } catch (error) {
+      console.error('SVG export failed:', error);
+      alert('SVG export failed. Please try PNG export instead.');
     }
   };
 

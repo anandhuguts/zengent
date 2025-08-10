@@ -648,26 +648,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           averageProcessingTime: totalProjects > 0 ? 3.2 : 0, // Based on typical processing time
           projectTypes: projectTypes
         },
-        llmUsage: {
-          openai: {
-            requests: 0, // Would need to track API calls in AI service
-            tokens: 0,
-            cost: 0,
-            averageResponseTime: 0
-          },
-          claude: {
-            requests: 0,
-            tokens: 0,
-            cost: 0,
-            averageResponseTime: 0
-          },
-          gemini: {
-            requests: 0,
-            tokens: 0,
-            cost: 0,
-            averageResponseTime: 0
+        llmUsage: (() => {
+          try {
+            const { getGlobalUsageStats } = require('./services/aiAnalysisService');
+            return getGlobalUsageStats();
+          } catch (error) {
+            console.log('AI service not available, using default LLM stats');
+            return {
+              openai: { requests: 0, tokens: 0, cost: 0, averageResponseTime: 0 },
+              claude: { requests: 0, tokens: 0, cost: 0, averageResponseTime: 0 },
+              gemini: { requests: 0, tokens: 0, cost: 0, averageResponseTime: 0 }
+            };
           }
-        },
+        })(),
         resourceUsage: {
           cpuUsage: cpuPercentage,
           memoryUsage: memoryPercentage,

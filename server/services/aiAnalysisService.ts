@@ -1,6 +1,56 @@
 import { type AnalysisData } from '@shared/schema';
 import OpenAI from 'openai';
 
+// Global usage tracking for LLM costs
+interface UsageStats {
+  requests: number;
+  totalTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalCost: number;
+  responseTime: number[];
+}
+
+const globalUsageStats: Record<string, UsageStats> = {
+  openai: { requests: 0, totalTokens: 0, inputTokens: 0, outputTokens: 0, totalCost: 0, responseTime: [] },
+  claude: { requests: 0, totalTokens: 0, inputTokens: 0, outputTokens: 0, totalCost: 0, responseTime: [] },
+  gemini: { requests: 0, totalTokens: 0, inputTokens: 0, outputTokens: 0, totalCost: 0, responseTime: [] },
+};
+
+// OpenAI GPT-4o pricing per 1K tokens
+const OPENAI_PRICING = {
+  'gpt-4o': { input: 0.005, output: 0.015 } // $5 per 1M input tokens, $15 per 1M output tokens
+};
+
+export function getGlobalUsageStats() {
+  return {
+    openai: {
+      requests: globalUsageStats.openai.requests,
+      tokens: globalUsageStats.openai.totalTokens,
+      cost: Math.round(globalUsageStats.openai.totalCost * 100) / 100,
+      averageResponseTime: globalUsageStats.openai.responseTime.length > 0 
+        ? Math.round(globalUsageStats.openai.responseTime.reduce((a, b) => a + b, 0) / globalUsageStats.openai.responseTime.length)
+        : 0
+    },
+    claude: {
+      requests: globalUsageStats.claude.requests,
+      tokens: globalUsageStats.claude.totalTokens,
+      cost: Math.round(globalUsageStats.claude.totalCost * 100) / 100,
+      averageResponseTime: globalUsageStats.claude.responseTime.length > 0
+        ? Math.round(globalUsageStats.claude.responseTime.reduce((a, b) => a + b, 0) / globalUsageStats.claude.responseTime.length)
+        : 0
+    },
+    gemini: {
+      requests: globalUsageStats.gemini.requests,
+      tokens: globalUsageStats.gemini.totalTokens,
+      cost: Math.round(globalUsageStats.gemini.totalCost * 100) / 100,
+      averageResponseTime: globalUsageStats.gemini.responseTime.length > 0
+        ? Math.round(globalUsageStats.gemini.responseTime.reduce((a, b) => a + b, 0) / globalUsageStats.gemini.responseTime.length)
+        : 0
+    }
+  };
+}
+
 interface AIModelConfig {
   type: 'openai' | 'local';
   openaiApiKey?: string;
@@ -131,6 +181,7 @@ export class AIAnalysisService {
     
     if (this.modelConfig.type === 'openai' && this.openai) {
       try {
+        const startTime = Date.now();
         const response = await this.openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
@@ -147,6 +198,25 @@ export class AIAnalysisService {
           temperature: 0.3,
           response_format: { type: "json_object" },
         });
+
+        // Track usage statistics
+        const responseTime = Date.now() - startTime;
+        const usage = response.usage;
+        if (usage) {
+          globalUsageStats.openai.requests++;
+          globalUsageStats.openai.totalTokens += usage.total_tokens;
+          globalUsageStats.openai.inputTokens += usage.prompt_tokens;
+          globalUsageStats.openai.outputTokens += usage.completion_tokens;
+          
+          // Calculate cost based on token usage
+          const inputCost = (usage.prompt_tokens / 1000) * OPENAI_PRICING['gpt-4o'].input;
+          const outputCost = (usage.completion_tokens / 1000) * OPENAI_PRICING['gpt-4o'].output;
+          globalUsageStats.openai.totalCost += inputCost + outputCost;
+          
+          globalUsageStats.openai.responseTime.push(responseTime);
+          
+          console.log(`OpenAI API Call - Tokens: ${usage.total_tokens}, Cost: $${((inputCost + outputCost) * 100) / 100}, Time: ${responseTime}ms`);
+        }
 
         const result = JSON.parse(response.choices[0].message.content || '{}');
         return {
@@ -178,6 +248,7 @@ export class AIAnalysisService {
     
     if (this.modelConfig.type === 'openai' && this.openai) {
       try {
+        const startTime = Date.now();
         const response = await this.openai.chat.completions.create({
           model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
           messages: [
@@ -193,6 +264,22 @@ export class AIAnalysisService {
           max_tokens: 500,
           temperature: 0.7,
         });
+
+        // Track usage statistics
+        const responseTime = Date.now() - startTime;
+        const usage = response.usage;
+        if (usage) {
+          globalUsageStats.openai.requests++;
+          globalUsageStats.openai.totalTokens += usage.total_tokens;
+          globalUsageStats.openai.inputTokens += usage.prompt_tokens;
+          globalUsageStats.openai.outputTokens += usage.completion_tokens;
+          
+          const inputCost = (usage.prompt_tokens / 1000) * OPENAI_PRICING['gpt-4o'].input;
+          const outputCost = (usage.completion_tokens / 1000) * OPENAI_PRICING['gpt-4o'].output;
+          globalUsageStats.openai.totalCost += inputCost + outputCost;
+          
+          globalUsageStats.openai.responseTime.push(responseTime);
+        }
 
         return response.choices[0].message.content || this.generateRuleBasedOverview(analysisData);
       } catch (error) {
@@ -215,6 +302,7 @@ export class AIAnalysisService {
     const prompt = this.buildModuleAnalysisPrompt(javaClass, context);
     
     try {
+      const startTime = Date.now();
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
@@ -230,6 +318,22 @@ export class AIAnalysisService {
         max_tokens: 300,
         temperature: 0.7,
       });
+
+      // Track usage statistics
+      const responseTime = Date.now() - startTime;
+      const usage = response.usage;
+      if (usage) {
+        globalUsageStats.openai.requests++;
+        globalUsageStats.openai.totalTokens += usage.total_tokens;
+        globalUsageStats.openai.inputTokens += usage.prompt_tokens;
+        globalUsageStats.openai.outputTokens += usage.completion_tokens;
+        
+        const inputCost = (usage.prompt_tokens / 1000) * OPENAI_PRICING['gpt-4o'].input;
+        const outputCost = (usage.completion_tokens / 1000) * OPENAI_PRICING['gpt-4o'].output;
+        globalUsageStats.openai.totalCost += inputCost + outputCost;
+        
+        globalUsageStats.openai.responseTime.push(responseTime);
+      }
 
       const content = response.choices[0].message.content || `Analysis for ${javaClass.name}`;
       
