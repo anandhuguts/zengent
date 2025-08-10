@@ -351,7 +351,7 @@ export default function Home() {
                       <div>
                         {/* Compact header with logo and name */}
                         <div className="flex items-center space-x-2 mb-2">
-                          <div className={`inline-flex items-center justify-center bg-background rounded-lg p-1.5 ${type.id === 'pyspark' ? 'w-10 h-6' : 'w-8 h-8'}`}>
+                          <div className={`inline-flex items-center justify-center bg-background rounded-lg p-1.5 ${type.id === 'pyspark' ? 'w-30 h-18' : 'w-24 h-24'}`}>
                             <img 
                               src={type.logoSrc} 
                               alt={`${type.name} logo`}
@@ -457,7 +457,7 @@ export default function Home() {
                       <div>
                         {/* Compact header with logo and name */}
                         <div className="flex items-center space-x-2 mb-2">
-                          <div className="inline-flex items-center justify-center bg-background rounded-lg p-1.5 w-8 h-8">
+                          <div className="inline-flex items-center justify-center bg-background rounded-lg p-1.5 w-24 h-24">
                             <img 
                               src={type.logoSrc} 
                               alt={`${type.name} logo`}
