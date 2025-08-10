@@ -17,64 +17,72 @@ import TeamBehind from "@/pages/about";
 import ReadmePage from "@/pages/readme";
 import KnowledgeAgent from "@/pages/knowledge-agent";
 import ZenVectorAgent from "@/pages/zenvector-agent";
+import AuthPage from "@/pages/auth-page";
 
 import Layout from "@/components/layout";
 
 function Router() {
-  // Temporarily bypassing authentication - go directly to main app
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Switch>
-      {/* Public routes available without authentication */}
-      <Route path="/terms-of-use" component={TermsOfUse} />
-      <Route path="/privacy-policy" component={PrivacyPolicy} />
-      <Route path="/landing" component={Landing} />
-      
-      {/* Main application routes - temporarily accessible without login */}
-      <Route path="/usage-statistics">
-        {() => (
-          <Layout>
-            <UsageStatistics />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/admin-dashboard">
-        {() => (
-          <Layout>
-            <AdminDashboard />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/profile" component={Profile} />
-      <Route path="/about">
-        {() => (
-          <Layout>
-            <TeamBehind />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/readme">
-        {() => (
-          <Layout>
-            <ReadmePage />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/knowledge-agent">
-        {() => (
-          <Layout>
-            <KnowledgeAgent />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/zenvector-agent">
-        {() => (
-          <Layout>
-            <ZenVectorAgent />
-          </Layout>
-        )}
-      </Route>
-
-      <Route path="/" component={Home} />
+      {isLoading || !isAuthenticated ? (
+        <>
+          <Route path="/" component={AuthPage} />
+          <Route path="/auth" component={AuthPage} />
+          <Route path="/terms-of-use" component={TermsOfUse} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/landing" component={Landing} />
+        </>
+      ) : (
+        <>
+          {/* Main application routes - only accessible after login */}
+          <Route path="/" component={Home} />
+          <Route path="/usage-statistics">
+            {() => (
+              <Layout>
+                <UsageStatistics />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/admin-dashboard">
+            {() => (
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/profile" component={Profile} />
+          <Route path="/about">
+            {() => (
+              <Layout>
+                <TeamBehind />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/readme">
+            {() => (
+              <Layout>
+                <ReadmePage />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/knowledge-agent">
+            {() => (
+              <Layout>
+                <KnowledgeAgent />
+              </Layout>
+            )}
+          </Route>
+          <Route path="/zenvector-agent">
+            {() => (
+              <Layout>
+                <ZenVectorAgent />
+              </Layout>
+            )}
+          </Route>
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );

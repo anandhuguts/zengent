@@ -3,7 +3,7 @@ import { pgTable, text, varchar, jsonb, timestamp, integer, index } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User storage table
+// User storage table - database authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username").notNull().unique(),
@@ -11,9 +11,7 @@ export const users = pgTable("users", {
   email: varchar("email"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  position: varchar("position"),
-  department: varchar("department"),
-  profileImageUrl: text("profile_image_url"),
+  profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

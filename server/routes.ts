@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getSession, isAuthenticated, loginUser, logoutUser } from "./auth";
-import { loginSchema } from "@shared/schema";
+import { loginSchema, insertUserSchema } from "@shared/schema";
 import { insertProjectSchema, githubProjectSchema } from "@shared/schema";
 import { analyzeJavaProject } from "./services/javaAnalyzer";
 import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
@@ -71,19 +71,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(getSession());
 
   // Auth routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(userData.username);
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'Username already exists' });
+      }
+      
+      // Create new user
+      const newUser = await storage.createUser(userData);
+      
+      // Log in the user automatically
+      req.session.userId = newUser.id;
+      
+      const { password, ...userWithoutPassword } = newUser;
+      res.status(201).json({ success: true, user: userWithoutPassword });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(400).json({ success: false, message: 'Registration failed' });
+    }
+  });
+
   app.post('/api/auth/login', async (req, res) => {
     try {
       const loginData = loginSchema.parse(req.body);
       const success = await loginUser(loginData.username, loginData.password, req);
       
       if (success) {
-        res.json({ message: "Login successful" });
+        const user = await storage.getUserByUsername(loginData.username);
+        if (user) {
+          const { password, ...userWithoutPassword } = user;
+          res.json({ success: true, user: userWithoutPassword });
+        } else {
+          res.status(401).json({ success: false, message: "User not found" });
+        }
       } else {
-        res.status(401).json({ message: "Invalid credentials" });
+        res.status(401).json({ success: false, message: "Invalid credentials" });
       }
     } catch (error) {
       console.error("Login error:", error);
-      res.status(400).json({ message: "Invalid request" });
+      res.status(400).json({ success: false, message: "Invalid request" });
     }
   });
 
