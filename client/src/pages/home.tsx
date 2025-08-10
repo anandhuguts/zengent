@@ -395,7 +395,7 @@ export default function Home() {
                   <Brain className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Agents for Amex Diamond</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">AI Agents for Diamond Project</h3>
                   <p className="text-sm text-gray-600">Specialized AI agents for advanced analysis and processing</p>
                 </div>
               </div>
