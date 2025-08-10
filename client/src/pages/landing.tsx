@@ -68,11 +68,11 @@ export default function Landing() {
             </p>
             
             {/* Amex Logo */}
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-4">
               <img 
                 src={amexLogo} 
                 alt="American Express Logo" 
-                className="h-8 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
           </div>
