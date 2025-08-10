@@ -1,5 +1,6 @@
 import zenagentAgents from "@assets/zenagentw_1754761999252.png";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
+import amexLogo from "@assets/amex logo_1754786264214.png";
 import { LoginForm } from "@/components/login-form";
 
 export default function Landing() {
@@ -60,11 +61,20 @@ export default function Landing() {
             <p className="text-xs text-gray-400 mb-2">
               © 2025 | <a href="/terms-of-use" className="hover:text-gray-600">Terms of use</a> | <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 mb-4">
               <a href="https://www.zensar.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600">
                 www.zensar.com
               </a>
             </p>
+            
+            {/* Amex Logo */}
+            <div className="flex justify-center">
+              <img 
+                src={amexLogo} 
+                alt="American Express Logo" 
+                className="h-8 w-auto object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>
