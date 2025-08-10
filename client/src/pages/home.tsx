@@ -291,23 +291,23 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
 
             {/* Enterprise AI Platform Summary */}
-            <div className="bg-gradient-to-r from-gray-900 to-slate-800 rounded-xl p-6 mb-8 border border-gray-700">
+            <div className="bg-gradient-to-r from-blue-900 to-blue-800 rounded-xl p-6 mb-8 border border-blue-600">
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">
                   Enterprise Application Agents
                 </h2>
-                <p className="text-gray-200 text-sm mb-3">
+                <p className="text-blue-100 text-sm mb-3">
                   Transform your codebase understanding with 9 specialized AI agents covering multi-language analysis, 
                   vector database intelligence, and enterprise-grade document processing. Each agent provides unique 
                   capabilities for comprehensive application intelligence and code analysis.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-xs text-emerald-400 border-emerald-400">Java & Spring Boot</Badge>
-                  <Badge variant="outline" className="text-xs text-blue-400 border-blue-400">Python & Django</Badge>
-                  <Badge variant="outline" className="text-xs text-orange-400 border-orange-400">PySpark & Big Data</Badge>
-                  <Badge variant="outline" className="text-xs text-purple-400 border-purple-400">Mainframe & COBOL</Badge>
-                  <Badge variant="outline" className="text-xs text-cyan-400 border-cyan-400">AI/ML Analysis</Badge>
-                  <Badge variant="outline" className="text-xs text-pink-400 border-pink-400">Generative AI</Badge>
+                  <Badge variant="outline" className="text-xs text-emerald-300 border-emerald-300 bg-emerald-900/20">Java & Spring Boot</Badge>
+                  <Badge variant="outline" className="text-xs text-blue-300 border-blue-300 bg-blue-800/30">Python & Django</Badge>
+                  <Badge variant="outline" className="text-xs text-orange-300 border-orange-300 bg-orange-900/20">PySpark & Big Data</Badge>
+                  <Badge variant="outline" className="text-xs text-purple-300 border-purple-300 bg-purple-900/20">Mainframe & COBOL</Badge>
+                  <Badge variant="outline" className="text-xs text-cyan-300 border-cyan-300 bg-cyan-900/20">AI/ML Analysis</Badge>
+                  <Badge variant="outline" className="text-xs text-pink-300 border-pink-300 bg-pink-900/20">Generative AI</Badge>
                 </div>
               </div>
             </div>
