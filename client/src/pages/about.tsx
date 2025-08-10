@@ -16,7 +16,7 @@ import {
   Database,
   Lock
 } from "lucide-react";
-import ullasPhoto from "@assets/ullas pic_1754848174168.png";
+import ullasPhoto from "@assets/ullas_1754848495389.png";
 
 
 export default function About() {
@@ -307,7 +307,7 @@ export default function About() {
                   <img 
                     src={ullasPhoto} 
                     alt="Ullas Krishnan" 
-                    className="w-16 h-16 rounded-lg object-cover border-2 border-blue-400 flex-shrink-0"
+                    className="w-20 h-20 rounded-lg object-cover border-2 border-blue-400 flex-shrink-0"
                   />
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Ullas Krishnan</h3>
@@ -325,7 +325,7 @@ export default function About() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Hrushikesh Nalwade</h3>
                     <p className="text-blue-600 font-medium mb-1">Java Solution Architect</p>
-                    <p className="text-gray-600 text-sm">AI, Frameworks</p>
+                    <p className="text-gray-600 text-sm">AI, Java Frameworks</p>
                   </div>
                 </div>
               </div>
