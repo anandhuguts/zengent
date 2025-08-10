@@ -247,7 +247,7 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="w-6 h-6" />
-                  AI Agents Portfolio
+                  AI Agents
                 </CardTitle>
                 <p className="text-gray-600 mt-2">Specialized AI agents for enterprise application intelligence</p>
               </CardHeader>
