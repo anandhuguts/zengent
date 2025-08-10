@@ -9,14 +9,22 @@ declare module "express-session" {
 }
 
 export function getSession() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction && !process.env.SESSION_SECRET) {
+    console.error('SESSION_SECRET is required in production');
+    process.exit(1);
+  }
+  
   return session({
-    secret: process.env.SESSION_SECRET || "your-secret-key",
+    secret: process.env.SESSION_SECRET || "your-secret-key-development-only",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // Use HTTPS in production
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: isProduction ? 'strict' : 'lax', // Enhanced security in production
     },
   });
 }

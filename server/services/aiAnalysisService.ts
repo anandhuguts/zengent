@@ -147,9 +147,15 @@ export class AIAnalysisService {
   }
 
   async analyzeProject(analysisData: AnalysisData, customPrompt?: string): Promise<AIAnalysisResult> {
-    console.log('Starting AI analysis with OpenAI...');
+    console.log('Starting AI analysis...');
     
     const moduleInsights: Record<string, AIInsight> = {};
+    
+    // Check if AI services are available
+    if (!this.openai && this.modelConfig.type === 'openai') {
+      console.warn('OpenAI API key not provided. Using fallback analysis.');
+      return this.generateFallbackAnalysis(analysisData);
+    }
     
     // Generate comprehensive project details
     const projectDetails = await this.generateProjectDetails(analysisData, customPrompt);
@@ -180,6 +186,47 @@ export class AIAnalysisService {
       moduleInsights,
       suggestions,
       qualityScore
+    };
+  }
+  
+  private generateFallbackAnalysis(analysisData: AnalysisData): AIAnalysisResult {
+    const moduleInsights: Record<string, AIInsight> = {};
+    
+    // Generate basic insights without AI
+    analysisData.classes.slice(0, 5).forEach(javaClass => {
+      moduleInsights[javaClass.name] = {
+        id: javaClass.name,
+        type: 'module_description',
+        title: `${javaClass.name} Analysis`,
+        content: `This ${javaClass.type} class contains ${javaClass.methods.length} methods and ${javaClass.fields.length} fields. Located in package ${javaClass.package}.`,
+        confidence: 0.7,
+        tags: [javaClass.type, javaClass.package.split('.').pop() || 'unknown'],
+        relatedComponents: javaClass.implements
+      };
+    });
+    
+    return {
+      projectOverview: `This project contains ${analysisData.classes.length} classes across multiple packages. AI analysis requires API configuration.`,
+      projectDetails: {
+        projectDescription: 'Static analysis completed. For detailed AI insights, configure OpenAI API key.',
+        businessProblem: 'Analysis pending AI configuration',
+        keyObjective: 'Complete static code analysis',
+        functionalitySummary: `Project contains ${analysisData.classes.length} classes`,
+        implementedFeatures: ['Static code parsing', 'Class structure analysis'],
+        modulesServices: analysisData.classes.map(c => c.name).slice(0, 10)
+      },
+      architectureInsights: [
+        `Project contains ${analysisData.classes.filter(c => c.type === 'controller').length} controllers`,
+        `Project contains ${analysisData.classes.filter(c => c.type === 'service').length} services`,
+        `Project contains ${analysisData.classes.filter(c => c.type === 'repository').length} repositories`
+      ],
+      moduleInsights,
+      suggestions: [
+        'Configure OpenAI API key for detailed AI analysis',
+        'Review class dependencies and relationships',
+        'Consider code organization patterns'
+      ],
+      qualityScore: this.calculateQualityScore(analysisData)
     };
   }
 

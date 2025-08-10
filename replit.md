@@ -192,3 +192,34 @@ Advanced AI and ML integration across all platform components:
 - **clsx**: Utility for constructing className strings conditionally
 
 The architecture supports both development and production environments with appropriate tooling for each, including Replit-specific integrations for cloud development.
+
+## Production Deployment Configuration
+
+### Required Environment Variables
+- `DATABASE_URL` - PostgreSQL connection string for production database
+- `SESSION_SECRET` - Random secret key for session encryption (minimum 32 characters)
+
+### Optional Environment Variables  
+- `OPENAI_API_KEY` - OpenAI API key for GPT-4o analysis (enables full AI features)
+- `OLLAMA_ENDPOINT` - Local LLM endpoint URL (for offline AI analysis)
+- `OLLAMA_MODEL` - Model name for local LLM (e.g., mistral:7b)
+
+### Production Features
+- **Environment Validation**: Automatic validation of required environment variables on startup
+- **Database Integration**: Full PostgreSQL database support with Drizzle ORM migrations
+- **Graceful Fallbacks**: AI analysis works without API keys by providing static analysis
+- **Security Hardening**: Production-ready session configuration with HTTPS support
+- **Error Handling**: Comprehensive error handling for missing dependencies and failed connections
+
+### Deployment Process
+1. Set required environment variables in Replit Deployments
+2. Database schema automatically migrated using `npm run db:push`
+3. Server validates configuration and starts on assigned port
+4. Application provides fallback analysis if AI APIs unavailable
+
+### Recent Production Updates (August 2025)
+- Added environment variable validation for production deployment
+- Implemented graceful fallback analysis when AI APIs unavailable
+- Enhanced session security configuration for HTTPS environments
+- Added comprehensive error handling for production readiness
+- Database schema migration completed for user authentication system
