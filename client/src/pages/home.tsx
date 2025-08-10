@@ -388,14 +388,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* AI Intelligence Agents */}
+            {/* Agents for Amex Diamond */}
             <div className="mb-12">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
                   <Brain className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">AI Intelligence Agents</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Agents for Amex Diamond</h3>
                   <p className="text-sm text-gray-600">Specialized AI agents for advanced analysis and processing</p>
                 </div>
               </div>
