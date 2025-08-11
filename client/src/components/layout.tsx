@@ -1,12 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
-import { useAuth } from "@/hooks/useAuth";
-import type { User } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+
 import { 
   Menu, 
   X, 
@@ -16,8 +12,7 @@ import {
   Users,
   Shield,
   User as UserIcon,
-  LogOut,
-  ChevronDown,
+
   Info,
   FileText,
   HelpCircle
@@ -33,44 +28,9 @@ interface LayoutProps {
 
 export default function Layout({ children, showAIConfig, onAIConfigToggle, aiConfigButton }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [location] = useLocation();
-  const { user } = useAuth() as { user: User | undefined };
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    }
 
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showUserMenu]);
-
-  const handleLogout = async () => {
-    try {
-      await apiRequest("POST", "/api/auth/logout");
-      queryClient.clear();
-      toast({
-        title: "Success",
-        description: "Logged out successfully",
-      });
-      window.location.href = "/";
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to logout",
-        variant: "destructive",
-      });
-    }
-  };
 
   const navigation = [
     {
@@ -144,52 +104,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                 )
               )}
               
-              {/* User Profile Dropdown */}
-              {user && (
-                <div className="relative" ref={userMenuRef}>
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 text-white hover:text-blue-200 transition-colors bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2"
-                  >
-                    <UserIcon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{user?.username}</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  
-                  {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-xs text-gray-500">Signed in as</p>
-                        <p className="text-sm font-medium text-gray-900 truncate">{user?.username}</p>
-                        {user?.email && (
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        )}
-                      </div>
-                      
-                      <Link href="/profile">
-                        <button
-                          onClick={() => setShowUserMenu(false)}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                        >
-                          <UserIcon className="w-4 h-4" />
-                          <span>Profile</span>
-                        </button>
-                      </Link>
-                      
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          handleLogout();
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Sign out</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* No authentication required - removed user profile dropdown */}
               
               <button className="text-blue-200 hover:text-white transition-colors">
                 <HelpCircle className="w-5 h-5" />
@@ -245,44 +160,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                 })}
               </nav>
               
-              {/* Admin Footer */}
-              {user && (
-                <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="flex-shrink-0">
-                      {user.profileImageUrl ? (
-                        <img 
-                          src={user.profileImageUrl} 
-                          alt="Profile" 
-                          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
-                          <span className="text-white text-lg font-semibold">
-                            {user.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0 w-full">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        @{user.username}
-                      </p>
-                      {user.position && (
-                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium truncate">
-                          {user.position}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        Logged in: {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* No authentication - removed admin footer */}
             </div>
           </div>
         </aside>
