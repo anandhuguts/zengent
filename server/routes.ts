@@ -1,9 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { getSession, isAuthenticated, loginUser, logoutUser } from "./auth";
-import { loginSchema, insertUserSchema } from "@shared/schema";
-import { insertProjectSchema, githubProjectSchema } from "@shared/schema";
+import { setupSession, requireAuth, optionalAuth } from "./auth";
+import { loginSchema, registerSchema } from "@shared/schema";
+import { insertProjectSchema } from "@shared/schema";
 import { analyzeJavaProject } from "./services/javaAnalyzer";
 import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
 import { aiAnalysisService, getGlobalUsageStats } from "./services/aiAnalysisService";
@@ -68,12 +68,12 @@ const uploadImage = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Session middleware
-  app.use(getSession());
+  setupSession(app);
 
   // Auth routes
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      const userData = registerSchema.parse(req.body);
       
       // Check if username already exists
       const existingUser = await storage.getUserByUsername(userData.username);
@@ -82,10 +82,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create new user
-      const newUser = await storage.createUser(userData);
+      const newUser = await storage.createUser({
+        username: userData.username,
+        password: userData.password,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        position: userData.position,
+      });
       
       // Log in the user automatically
-      req.session.userId = newUser.id;
+      if (req.session) {
+        req.session.user = newUser;
+      }
       
       const { password, ...userWithoutPassword } = newUser;
       res.status(201).json({ success: true, user: userWithoutPassword });
@@ -98,16 +107,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const loginData = loginSchema.parse(req.body);
-      const success = await loginUser(loginData.username, loginData.password, req);
+      const user = await storage.validateUser(loginData.username, loginData.password);
       
-      if (success) {
-        const user = await storage.getUserByUsername(loginData.username);
-        if (user) {
-          const { password, ...userWithoutPassword } = user;
-          res.json({ success: true, user: userWithoutPassword });
-        } else {
-          res.status(401).json({ success: false, message: "User not found" });
+      if (user) {
+        if (req.session) {
+          req.session.user = user;
         }
+        const { password, ...userWithoutPassword } = user;
+        res.json({ success: true, user: userWithoutPassword });
       } else {
         res.status(401).json({ success: false, message: "Invalid credentials" });
       }
@@ -119,18 +126,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/logout', async (req, res) => {
     try {
-      await logoutUser(req);
-      res.json({ message: "Logout successful" });
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+            return res.status(500).json({ message: "Logout failed" });
+          }
+          res.json({ success: true, message: "Logout successful" });
+        });
+      } else {
+        res.json({ success: true, message: "Already logged out" });
+      }
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Logout failed" });
     }
   });
 
-  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
+  app.get('/api/auth/user', requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
-      const user = await storage.getUser(userId);
+      const user = req.session?.user;
       if (user) {
         const { password, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
@@ -144,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user profile
-  app.patch('/api/auth/user', isAuthenticated, async (req, res) => {
+  app.patch('/api/auth/user', requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
       const updateData = req.body;
@@ -173,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload profile image
-  app.post('/api/auth/upload-avatar', isAuthenticated, uploadImage.single('profileImage'), async (req, res) => {
+  app.post('/api/auth/upload-avatar', requireAuth, uploadImage.single('profileImage'), async (req, res) => {
     try {
       const userId = req.session.userId!;
       const file = req.file;

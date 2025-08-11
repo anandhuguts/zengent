@@ -1,54 +1,47 @@
-import { Request, Response, NextFunction } from "express";
-import session from "express-session";
-import { storage } from "./storage";
+import express from 'express';
+import session from 'express-session';
+import connectPg from 'connect-pg-simple';
+import { storage } from './storage';
+import { loginSchema, registerSchema } from '@shared/schema';
+import type { User } from '@shared/schema';
 
-declare module "express-session" {
-  interface SessionData {
-    userId?: string;
-  }
-}
-
-export function getSession() {
-  const isProduction = process.env.NODE_ENV === 'production';
+// Session configuration
+export function setupSession(app: express.Application) {
+  const pgStore = connectPg(session);
   
-  if (isProduction && !process.env.SESSION_SECRET) {
-    console.error('SESSION_SECRET is required in production');
-    process.exit(1);
-  }
-  
-  return session({
-    secret: process.env.SESSION_SECRET || "your-secret-key-development-only",
+  app.use(session({
+    store: new pgStore({
+      conString: process.env.DATABASE_URL,
+      tableName: 'sessions',
+    }),
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      secure: isProduction, // Use HTTPS in production
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: isProduction ? 'strict' : 'lax', // Enhanced security in production
     },
-  });
+  }));
 }
 
-export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.session.userId) {
-    return next();
+// Auth middleware
+export function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!req.session?.user) {
+    return res.status(401).json({ error: 'Authentication required' });
   }
-  return res.status(401).json({ message: "Unauthorized" });
+  next();
 }
 
-export async function loginUser(username: string, password: string, req: Request): Promise<boolean> {
-  const user = await storage.validateUser(username, password);
-  if (user) {
-    req.session.userId = user.id;
-    return true;
+// Optional auth middleware (doesn't require auth but adds user if available)
+export function optionalAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  // User info is available in req.session.user if logged in
+  next();
+}
+
+// Extend session type
+declare module 'express-session' {
+  interface SessionData {
+    user?: User;
   }
-  return false;
-}
-
-export function logoutUser(req: Request): Promise<void> {
-  return new Promise((resolve) => {
-    req.session.destroy(() => {
-      resolve();
-    });
-  });
 }

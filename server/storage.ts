@@ -5,7 +5,7 @@ import {
   type InsertUser,
   type Project,
   type InsertProject,
-  type GithubProject,
+
   type AIModelConfig,
 } from "@shared/schema";
 import { db } from "./db";

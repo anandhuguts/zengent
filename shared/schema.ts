@@ -1,175 +1,94 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, jsonb, timestamp, integer, index } from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm';
+import {
+  index,
+  jsonb,
+  pgTable,
+  timestamp,
+  varchar,
+  text,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User storage table - database authentication
+// Session storage table for express-session
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User authentication table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: varchar("username").notNull().unique(),
-  password: varchar("password").notNull(),
-  email: varchar("email"),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  position: varchar("position"),
-  department: varchar("department"),
+  username: varchar("username", { length: 50 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  position: varchar("position", { length: 100 }),
   profileImageUrl: varchar("profile_image_url"),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Projects table for storing user projects
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  originalFileName: text("original_file_name"),
-  githubUrl: text("github_url"),
-  githubRepo: text("github_repo"), // format: "owner/repo"
-  githubBranch: text("github_branch").default("main"),
-  sourceType: text("source_type").notNull().default("upload"), // 'upload', 'github'
-  projectType: text("project_type").default("java"), // 'java', 'python', 'pyspark', 'mainframe'
-  status: text("status").notNull().default("processing"), // 'processing', 'completed', 'failed'
-  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  userId: varchar("user_id").references(() => users.id),
+  sourceType: varchar("source_type", { length: 50 }), // 'zip' | 'github'
+  sourceUrl: text("source_url"),
   analysisData: jsonb("analysis_data"),
-  fileCount: integer("file_count").default(0),
-  controllerCount: integer("controller_count").default(0),
-  serviceCount: integer("service_count").default(0),
-  repositoryCount: integer("repository_count").default(0),
-  entityCount: integer("entity_count").default(0),
+  status: varchar("status", { length: 50 }).default("pending"), // 'pending' | 'processing' | 'completed' | 'failed'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  firstName: true,
-  lastName: true,
-  position: true,
-  department: true,
+// Types for TypeScript
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+export type UpsertUser = typeof users.$inferInsert;
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+
+// Zod schemas for validation
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type LoginData = z.infer<typeof loginSchema>;
+export const registerSchema = insertUserSchema.extend({
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
-  uploadedAt: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const githubProjectSchema = z.object({
-  githubUrl: z.string().url(),
   name: z.string().optional(),
-  githubBranch: z.string().default("main"),
+  sourceUrl: z.string().url(),
+  sourceType: z.literal('github'),
 });
-
-export type User = typeof users.$inferSelect;
-export type InsertProject = z.infer<typeof insertProjectSchema>;
-export type Project = typeof projects.$inferSelect;
-export type GithubProject = z.infer<typeof githubProjectSchema>;
-
-// AI Model Configuration Schema
-export const aiModelConfigSchema = z.object({
-  type: z.enum(['openai', 'local']),
-  localEndpoint: z.string().optional(),
-  modelName: z.string().optional(),
-});
-
-export type AIModelConfig = z.infer<typeof aiModelConfigSchema>;
-
-// AI Analysis types
-export interface AIInsight {
-  id: string;
-  type: 'overview' | 'module_description' | 'function_description' | 'architecture_suggestion';
-  title: string;
-  content: string;
-  confidence: number;
-  tags: string[];
-  relatedComponents: string[];
-}
-
-export interface AIAnalysisResult {
-  projectOverview: string;
-  architectureInsights: string[];
-  moduleInsights: Record<string, AIInsight>;
-  suggestions: string[];
-  qualityScore: number;
-}
-
-// Analysis result types
-export const AnalysisDataSchema = z.object({
-  classes: z.array(z.object({
-    name: z.string(),
-    package: z.string(),
-    type: z.enum(['controller', 'service', 'repository', 'entity', 'component', 'configuration', 'other']),
-    annotations: z.array(z.string()),
-    methods: z.array(z.object({
-      name: z.string(),
-      annotations: z.array(z.string()),
-      parameters: z.array(z.string()),
-      returnType: z.string(),
-    })),
-    fields: z.array(z.object({
-      name: z.string(),
-      type: z.string(),
-      annotations: z.array(z.string()),
-    })),
-    extends: z.string().optional(),
-    implements: z.array(z.string()).default([]),
-  })),
-  relationships: z.array(z.object({
-    from: z.string(),
-    to: z.string(),
-    type: z.enum(['calls', 'extends', 'implements', 'injects', 'references']),
-    method: z.string().optional(),
-  })),
-  patterns: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    classes: z.array(z.string()),
-    description: z.string(),
-  })),
-  entities: z.array(z.object({
-    name: z.string(),
-    tableName: z.string().optional(),
-    fields: z.array(z.object({
-      name: z.string(),
-      type: z.string(),
-      columnName: z.string().optional(),
-      relationship: z.string().optional(), // 'OneToMany', 'ManyToOne', 'OneToOne', 'ManyToMany'
-      targetEntity: z.string().optional(),
-    })),
-  })),
-  structure: z.object({
-    packages: z.array(z.string()),
-    sourceFiles: z.array(z.string()),
-  }),
-  aiAnalysis: z.object({
-    projectOverview: z.string(),
-    projectDetails: z.object({
-      projectDescription: z.string(),
-      businessProblem: z.string(),
-      keyObjective: z.string(),
-      functionalitySummary: z.string(),
-      implementedFeatures: z.array(z.string()),
-      modulesServices: z.array(z.string()),
-    }),
-    architectureInsights: z.array(z.string()),
-    moduleInsights: z.record(z.string(), z.object({
-      id: z.string(),
-      type: z.enum(['overview', 'module_description', 'function_description', 'architecture_suggestion']),
-      title: z.string(),
-      content: z.string(),
-      confidence: z.number(),
-      tags: z.array(z.string()),
-      relatedComponents: z.array(z.string()),
-    })),
-    suggestions: z.array(z.string()),
-    qualityScore: z.number(),
-  }).optional(),
-});
-
-export type AnalysisData = z.infer<typeof AnalysisDataSchema>;

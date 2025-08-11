@@ -3,7 +3,9 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
 
+import LoginForm from "@/components/LoginForm";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import TermsOfUse from "@/pages/terms-of-use";
@@ -16,13 +18,31 @@ import ReadmePage from "@/pages/readme";
 import KnowledgeAgent from "@/pages/knowledge-agent";
 import ZenVectorAgent from "@/pages/zenvector-agent";
 
-
 import Layout from "@/components/layout";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show login form if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    return <LoginForm />;
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authenticated routes
   return (
     <Switch>
-      {/* All routes are now accessible without authentication */}
       <Route path="/" component={Home} />
       <Route path="/terms-of-use" component={TermsOfUse} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
