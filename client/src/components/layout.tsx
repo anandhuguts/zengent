@@ -244,6 +244,40 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                   );
                 })}
               </nav>
+              
+              {/* Admin Footer */}
+              {user && (
+                <div className="px-3 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      {user.profileImageUrl ? (
+                        <img 
+                          src={user.profileImageUrl} 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">
+                            {user.username.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        @{user.username}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                        Logged in: {new Date().toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -298,6 +332,40 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                 );
               })}
             </nav>
+            
+            {/* Mobile Admin Footer */}
+            {user && (
+              <div className="px-3 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    {user.profileImageUrl ? (
+                      <img 
+                        src={user.profileImageUrl} 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span className="text-white text-sm font-semibold">
+                          {user.username.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      @{user.username}
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      Logged in: {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
