@@ -22,10 +22,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       return apiRequest("POST", "/api/auth/login", data);
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Logged in successfully!",
-      });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       // Force refetch user data and then redirect
       queryClient.refetchQueries({ queryKey: ["/api/auth/user"] }).then(() => {
