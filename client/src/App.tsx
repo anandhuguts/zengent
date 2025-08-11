@@ -10,6 +10,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicyNew from "@/pages/PrivacyPolicy";
 import UsageStatistics from "@/pages/usage-statistics";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Profile from "@/pages/profile";
@@ -35,63 +37,76 @@ function Router() {
     );
   }
 
-  // Show login form if not authenticated
-  if (!isAuthenticated || !user) {
-    return <LoginForm />;
-  }
-
-  // Show authenticated routes
+  // Public routes (accessible without authentication)
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/terms-of-use" component={TermsOfUse} />
-      <Route path="/privacy-policy" component={PrivacyPolicy} />
-      <Route path="/usage-statistics">
-        {() => (
-          <Layout>
-            <UsageStatistics />
-          </Layout>
-        )}
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/privacy" component={PrivacyPolicyNew} />
+      <Route>
+        {() => {
+          // Show login form if not authenticated
+          if (!isAuthenticated || !user) {
+            return <LoginForm />;
+          }
+          
+          // Authenticated routes
+          return (
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/terms-of-use" component={TermsOfUse} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/usage-statistics">
+                {() => (
+                  <Layout>
+                    <UsageStatistics />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/admin-dashboard">
+                {() => (
+                  <Layout>
+                    <AdminDashboard />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/profile" component={Profile} />
+              <Route path="/about">
+                {() => (
+                  <Layout>
+                    <TeamBehind />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/readme">
+                {() => (
+                  <Layout>
+                    <ReadmePage />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/knowledge-agent">
+                {() => (
+                  <Layout>
+                    <KnowledgeAgent />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/zenvector-agent">
+                {() => (
+                  <Layout>
+                    <ZenVectorAgent />
+                  </Layout>
+                )}
+              </Route>
+              <Route component={NotFound} />
+            </Switch>
+          );
+        }}
       </Route>
-      <Route path="/admin-dashboard">
-        {() => (
-          <Layout>
-            <AdminDashboard />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/profile" component={Profile} />
-      <Route path="/about">
-        {() => (
-          <Layout>
-            <TeamBehind />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/readme">
-        {() => (
-          <Layout>
-            <ReadmePage />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/knowledge-agent">
-        {() => (
-          <Layout>
-            <KnowledgeAgent />
-          </Layout>
-        )}
-      </Route>
-      <Route path="/zenvector-agent">
-        {() => (
-          <Layout>
-            <ZenVectorAgent />
-          </Layout>
-        )}
-      </Route>
-      <Route component={NotFound} />
     </Switch>
   );
+
+
 }
 
 function App() {

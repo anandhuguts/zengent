@@ -10,6 +10,7 @@ import { loginSchema } from '@shared/schema';
 import type { LoginInput } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+
 import zenagentImage from '@assets/zenagentw_1754916187232.png';
 import zensarLogo from '@assets/Zensar_composite_logo_whit_ai_1754917811230.png';
 
@@ -60,7 +61,7 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Blue Background with Zengent AI Agents Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-[70%] bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
         <div className="text-center max-w-lg">
           <img 
             src={zenagentImage} 
@@ -68,16 +69,13 @@ export default function LoginForm() {
             className="mx-auto mb-8 w-full h-auto"
             style={{ maxHeight: '400px' }}
           />
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Zengent AI
-          </h1>
           <p className="text-xl text-blue-100 leading-relaxed mb-12">
             Enterprise Application Intelligence Platform with Advanced AI Agents
           </p>
           <img 
             src={zensarLogo} 
             alt="Zensar - An RPG Company" 
-            className="mx-auto max-w-xs h-auto opacity-90 mt-8"
+            className="mx-auto max-w-[150px] h-auto opacity-90 mt-8"
           />
         </div>
       </div>
@@ -167,6 +165,19 @@ export default function LoginForm() {
                   {loginMutation.isPending ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
+
+              <div className="mt-8 text-center text-sm text-gray-500">
+                <div className="flex justify-center space-x-4 mb-2">
+                  <a href="/terms" className="hover:text-blue-600">
+                    Terms of Service
+                  </a>
+                  <span>•</span>
+                  <a href="/privacy" className="hover:text-blue-600">
+                    Privacy Policy
+                  </a>
+                </div>
+                <p>&copy; 2025 Zensar Technologies. All rights reserved.</p>
+              </div>
             </CardContent>
           </Card>
         </div>
