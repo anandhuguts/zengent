@@ -348,8 +348,8 @@ export default function TeamBehind() {
                     <Users className="w-12 h-12 text-gray-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Pavan Luka</h3>
-                    <p className="text-blue-600 font-medium mb-1">IBM Solution Architect</p>
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">Pavan K Loka</h3>
+                    <p className="text-blue-600 font-medium mb-1">Sr Technical Specialist</p>
                     <p className="text-gray-600 text-sm">Mainframe, COBOL, Batch Processing</p>
                   </div>
                 </div>
