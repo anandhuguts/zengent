@@ -277,7 +277,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Kaushik Saha</h3>
                     <p className="text-blue-600 font-medium mb-1">Distinguished Engineer</p>
-                    <p className="text-gray-600 text-sm">AI, Project Management, Migration Process Expert</p>
+                    <p className="text-gray-600 text-sm">AES Digital Engineering</p>
                   </div>
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Sameer Kumar Sharma</h3>
                     <p className="text-blue-600 font-medium mb-1">Sr Engineering Manager</p>
-                    <p className="text-gray-600 text-sm">AI, Migration Process, Java Framework</p>
+                    <p className="text-gray-600 text-sm">AES Delivery</p>
                   </div>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Piyush Gupta</h3>
                     <p className="text-blue-600 font-medium mb-1">Sr Solution Architect</p>
-                    <p className="text-gray-600 text-sm">Big Data Analyst<br/>Code Lens, Match Lens, Validator Agent</p>
+                    <p className="text-gray-600 text-sm">AS (AD/AMS)</p>
                   </div>
                 </div>
               </div>
@@ -322,7 +322,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Ullas Krishnan</h3>
                     <p className="text-blue-600 font-medium mb-1">Sr Solution Architect</p>
-                    <p className="text-gray-600 text-sm">Agentic AI Solutions, LLM Model, Responsible AI, AI Rules and Regulations</p>
+                    <p className="text-gray-600 text-sm">AES Cloud Strategy & Operations</p>
                   </div>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Hrushikesh Nalwade</h3>
                     <p className="text-blue-600 font-medium mb-1">Sr Technical Specialist</p>
-                    <p className="text-gray-600 text-sm">AI, Migration Process, Java Framework</p>
+                    <p className="text-gray-600 text-sm">AES Digital Engineering</p>
                   </div>
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function TeamBehind() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">Pavan K Loka</h3>
                     <p className="text-blue-600 font-medium mb-1">Sr Technical Specialist</p>
-                    <p className="text-gray-600 text-sm">Mainframe, COBOL, Batch Processing</p>
+                    <p className="text-gray-600 text-sm">AS (AD/AMS)</p>
                   </div>
                 </div>
               </div>
