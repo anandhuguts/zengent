@@ -7,6 +7,7 @@ import {
   varchar,
   text,
   boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -40,15 +41,22 @@ export const users = pgTable("users", {
 // Projects table for storing user projects
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  userId: varchar("user_id").references(() => users.id),
-  sourceType: varchar("source_type", { length: 50 }), // 'zip' | 'github'
-  sourceUrl: text("source_url"),
+  name: text("name").notNull(),
+  originalFileName: text("original_file_name"),
+  githubUrl: text("github_url"),
+  githubRepo: text("github_repo"),
+  githubBranch: text("github_branch").default("main"),
+  sourceType: text("source_type").notNull().default("upload"), // 'upload' | 'github'
+  projectType: text("project_type").default("java"), // 'java' | 'python' | 'pyspark' | 'mainframe'
+  status: text("status").notNull().default("processing"), // 'processing' | 'completed' | 'failed'
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
   analysisData: jsonb("analysis_data"),
-  status: varchar("status", { length: 50 }).default("pending"), // 'pending' | 'processing' | 'completed' | 'failed'
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  fileCount: integer("file_count").default(0),
+  controllerCount: integer("controller_count").default(0),
+  serviceCount: integer("service_count").default(0),
+  repositoryCount: integer("repository_count").default(0),
+  entityCount: integer("entity_count").default(0),
+  description: text("description"),
 });
 
 // Types for TypeScript
