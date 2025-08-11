@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updateData = req.body;
       
       // Validate the update data
-      const allowedFields = ['firstName', 'lastName', 'email', 'position'];
+      const allowedFields = ['firstName', 'lastName', 'email', 'position', 'department'];
       const validData: any = {};
       
       for (const field of allowedFields) {

@@ -139,11 +139,9 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <p>Loading user information...</p>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading user information...</p>
+      </div>
     );
   }
 
