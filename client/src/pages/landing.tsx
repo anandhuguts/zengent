@@ -63,7 +63,7 @@ export default function Landing() {
           
           <div className="text-center mt-6">
             <p className="text-xs text-gray-500 mb-2">
-              Built by the Amex Diamond Zensar Team
+              Built by the Zensar AI Team - Diamond Project
             </p>
             <p className="text-xs text-gray-400 mb-2">
               © 2025 | <a href="/terms-of-use" className="hover:text-gray-600">Terms of use</a> | <a href="/privacy-policy" className="hover:text-gray-600">Privacy Policy</a>
