@@ -27,7 +27,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         description: "Logged in successfully!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      onSuccess?.();
+      // Add a small delay to ensure auth state updates before navigation
+      setTimeout(() => {
+        onSuccess?.();
+      }, 100);
     },
     onError: (error: any) => {
       toast({

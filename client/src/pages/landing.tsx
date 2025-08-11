@@ -8,7 +8,8 @@ export default function Landing() {
   const [, setLocation] = useLocation();
 
   const handleLoginSuccess = () => {
-    setLocation("/");
+    // Force immediate redirect to home page
+    window.location.href = "/";
   };
 
   return (
