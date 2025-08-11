@@ -399,39 +399,15 @@ export default function Home() {
                           {type.description}
                         </p>
                         
-                        {/* Compact feature list - show only first 3 features */}
+                        {/* Complete feature list - show all features */}
                         <div className={`${type.bgColor} rounded-lg p-2`}>
                           <ul className="space-y-0.5">
-                            {type.features.slice(0, 3).map((feature, index) => (
+                            {type.features.map((feature, index) => (
                               <li key={index} className="text-xs text-foreground/70 flex items-start">
                                 <div className="w-1 h-1 bg-primary rounded-full mr-1.5 mt-1 flex-shrink-0"></div>
                                 <span className="line-clamp-1">{feature}</span>
                               </li>
                             ))}
-                            {type.features.length > 3 && (
-                              <li className="text-xs text-muted-foreground/60 italic">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="cursor-help hover:text-muted-foreground underline decoration-dotted">
-                                      +{type.features.length - 3} more features
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs">
-                                    <div className="space-y-1">
-                                      <p className="font-semibold text-sm">All {type.name} Features:</p>
-                                      <ul className="space-y-0.5">
-                                        {type.features.slice(3).map((feature, index) => (
-                                          <li key={index} className="text-xs flex items-start">
-                                            <div className="w-1 h-1 bg-primary rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
-                                            <span>{feature}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </li>
-                            )}
                           </ul>
                         </div>
                       </div>
@@ -505,39 +481,15 @@ export default function Home() {
                           {type.description}
                         </p>
                         
-                        {/* Compact feature list - show only first 3 features */}
+                        {/* Complete feature list - show all features */}
                         <div className={`${type.bgColor} rounded-lg p-2`}>
                           <ul className="space-y-0.5">
-                            {type.features.slice(0, 3).map((feature, index) => (
+                            {type.features.map((feature, index) => (
                               <li key={index} className="text-xs text-foreground/70 flex items-start">
                                 <div className="w-1 h-1 bg-primary rounded-full mr-1.5 mt-1 flex-shrink-0"></div>
                                 <span className="line-clamp-1">{feature}</span>
                               </li>
                             ))}
-                            {type.features.length > 3 && (
-                              <li className="text-xs text-muted-foreground/60 italic">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="cursor-help hover:text-muted-foreground underline decoration-dotted">
-                                      +{type.features.length - 3} more features
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs">
-                                    <div className="space-y-1">
-                                      <p className="font-semibold text-sm">All {type.name} Features:</p>
-                                      <ul className="space-y-0.5">
-                                        {type.features.slice(3).map((feature, index) => (
-                                          <li key={index} className="text-xs flex items-start">
-                                            <div className="w-1 h-1 bg-primary rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
-                                            <span>{feature}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </li>
-                            )}
                           </ul>
                         </div>
                       </div>
