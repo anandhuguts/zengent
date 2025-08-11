@@ -11,7 +11,7 @@ import {
   Settings, 
   Users,
   Shield,
-  User as UserIcon,
+
 
   Info,
   FileText,
@@ -216,44 +216,7 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
               })}
             </nav>
             
-            {/* Mobile Admin Footer */}
-            {user && (
-              <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="flex-shrink-0">
-                    {user.profileImageUrl ? (
-                      <img 
-                        src={user.profileImageUrl} 
-                        alt="Profile" 
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
-                        <span className="text-white text-lg font-semibold">
-                          {user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 w-full">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                      {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      @{user.username}
-                    </p>
-                    {user.position && (
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium truncate">
-                        {user.position}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      Logged in: {new Date().toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* No authentication - removed mobile admin footer */}
           </div>
         </aside>
 
