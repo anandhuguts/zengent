@@ -60,22 +60,40 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Panel - Blue Background with Zengent AI Agents Image */}
-      <div className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
-        <div className="text-center max-w-lg">
-          <p className="text-xl text-white font-semibold leading-relaxed mb-8 uppercase">
-            Enterprise Application Intelligence Platform
-          </p>
-          <img 
-            src={zenagentImage} 
-            alt="Zengent AI Agents" 
-            className="mx-auto mb-12 w-full h-auto"
-            style={{ maxHeight: '400px' }}
-          />
+      {/* Left Panel - Blue Background with Zengent AI Agents Layout */}
+      <div className="hidden lg:flex lg:w-[60%] bg-[#4169E1] items-center justify-center p-12">
+        <div className="text-center max-w-2xl w-full">
+          {/* Main Heading */}
+          <h1 className="text-3xl text-white font-bold mb-16 uppercase tracking-wide">
+            ENTERPRISE APPLICATION INTELLIGENCE
+          </h1>
+          
+          {/* Agents Image */}
+          <div className="mb-16">
+            <img 
+              src={zenagentImage} 
+              alt="Zengent AI Agents" 
+              className="mx-auto w-full h-auto"
+              style={{ maxHeight: '350px' }}
+            />
+          </div>
+          
+          {/* Platform Text */}
+          <div className="mb-8">
+            <h2 className="text-2xl text-white font-bold mb-4 uppercase tracking-wide">
+              PLATFORM POWERED BY AI AGENTS
+            </h2>
+            <p className="text-lg text-white/90 leading-relaxed px-8">
+              Analyze your enterprise applications with powerful AI-driven insights<br />
+              and comprehensive project intelligence for better decision making.
+            </p>
+          </div>
+          
+          {/* Zensar Logo */}
           <img 
             src={zensarLogo} 
             alt="Zensar - An RPG Company" 
-            className="mx-auto max-w-[150px] h-auto opacity-90 mt-8"
+            className="mx-auto max-w-[200px] h-auto opacity-95"
           />
         </div>
       </div>
