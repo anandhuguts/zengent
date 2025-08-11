@@ -2,8 +2,15 @@ import zenagentAgents from "@assets/zenagentw_1754761999252.png";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 import amexLogo from "@assets/amex logo_1754786264214.png";
 import { LoginForm } from "@/components/login-form";
+import { useLocation } from "wouter";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+
+  const handleLoginSuccess = () => {
+    setLocation("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 flex">
       {/* Left Panel - Hero Content */}
@@ -52,7 +59,7 @@ export default function Landing() {
             <p className="text-gray-600">Secure platform access</p>
           </div>
           
-          <LoginForm />
+          <LoginForm onSuccess={handleLoginSuccess} />
           
           <div className="text-center mt-6">
             <p className="text-xs text-gray-500 mb-2">
