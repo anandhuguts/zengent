@@ -61,7 +61,7 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Blue Background with Zengent AI Agents Layout */}
-      <div className="hidden lg:flex lg:w-[60%] bg-[#4169E1] items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-[60%] bg-[#2E4BC7] items-center justify-center p-12">
         <div className="text-center max-w-2xl w-full">
           {/* Main Heading */}
           <h1 className="text-3xl text-white font-bold mb-16 uppercase tracking-wide">
