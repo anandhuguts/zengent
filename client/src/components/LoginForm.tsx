@@ -71,13 +71,13 @@ export default function LoginForm() {
           <h1 className="text-4xl font-bold text-white mb-4">
             Zengent AI
           </h1>
-          <p className="text-xl text-blue-100 leading-relaxed mb-6">
+          <p className="text-xl text-blue-100 leading-relaxed mb-12">
             Enterprise Application Intelligence Platform with Advanced AI Agents
           </p>
           <img 
             src={zensarLogo} 
             alt="Zensar - An RPG Company" 
-            className="mx-auto max-w-xs h-auto opacity-90"
+            className="mx-auto max-w-xs h-auto opacity-90 mt-8"
           />
         </div>
       </div>
