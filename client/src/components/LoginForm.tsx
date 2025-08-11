@@ -69,8 +69,8 @@ export default function LoginForm() {
             className="mx-auto mb-8 w-full h-auto"
             style={{ maxHeight: '400px' }}
           />
-          <p className="text-xl text-blue-100 leading-relaxed mb-12">
-            Enterprise Application Intelligence Platform with Advanced AI Agents
+          <p className="text-xl text-white font-semibold leading-relaxed mb-12 uppercase">
+            Enterprise Application Intelligence Platform
           </p>
           <img 
             src={zensarLogo} 
