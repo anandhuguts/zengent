@@ -11,6 +11,7 @@ import type { LoginInput } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import zenagentImage from '@assets/zenagentw_1754916187232.png';
+import zensarLogo from '@assets/Zensar composite_logo_whit_png_1754917009834.png';
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,9 +71,14 @@ export default function LoginForm() {
           <h1 className="text-4xl font-bold text-white mb-4">
             Zengent AI
           </h1>
-          <p className="text-xl text-blue-100 leading-relaxed">
+          <p className="text-xl text-blue-100 leading-relaxed mb-6">
             Enterprise Application Intelligence Platform with Advanced AI Agents
           </p>
+          <img 
+            src={zensarLogo} 
+            alt="Zensar - An RPG Company" 
+            className="mx-auto max-w-xs h-auto opacity-90"
+          />
         </div>
       </div>
 
