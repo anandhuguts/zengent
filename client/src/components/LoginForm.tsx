@@ -61,7 +61,7 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Blue Background with Zengent AI Agents Image */}
-      <div className="hidden lg:flex lg:w-[70%] bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-[60%] bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12">
         <div className="text-center max-w-lg">
           <img 
             src={zenagentImage} 
