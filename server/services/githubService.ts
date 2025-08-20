@@ -150,7 +150,7 @@ async function findJavaFiles(dirPath: string): Promise<string[]> {
 
 async function createAnalysisBuffer(javaFiles: string[], basePath: string): Promise<Buffer> {
   // Create a simple archive format for the analyzer
-  const JSZip = require('jszip');
+  const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
   
   for (const filePath of javaFiles) {

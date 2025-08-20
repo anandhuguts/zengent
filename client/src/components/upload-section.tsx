@@ -12,9 +12,10 @@ import GithubInput from "@/components/github-input";
 
 interface UploadSectionProps {
   onFileUploaded: (project: Project) => void;
+  onGitHubAnalyzed?: (project: Project) => void;
 }
 
-export default function UploadSection({ onFileUploaded }: UploadSectionProps) {
+export default function UploadSection({ onFileUploaded, onGitHubAnalyzed }: UploadSectionProps) {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -225,7 +226,7 @@ export default function UploadSection({ onFileUploaded }: UploadSectionProps) {
                   Analyze public repositories directly from GitHub
                 </p>
               </div>
-              <GithubInput onRepoAnalyzed={onFileUploaded} />
+              <GithubInput onRepoAnalyzed={onGitHubAnalyzed || onFileUploaded} />
             </CardContent>
           </TabsContent>
         </Tabs>

@@ -68,7 +68,7 @@ export default function GithubInput({ onRepoAnalyzed }: GithubInputProps) {
 
     analyzeGithubMutation.mutate({
       githubUrl: githubUrl.trim(),
-      name: projectName.trim() || undefined,
+      name: projectName.trim() || "Untitled Project",
       githubBranch: branch.trim() || "main",
     });
   };

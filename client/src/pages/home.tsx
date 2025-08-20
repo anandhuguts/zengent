@@ -66,6 +66,30 @@ export default function Home() {
     }, 2000);
   };
 
+  const handleGitHubAnalyzed = (project: Project) => {
+    setCurrentProjectId(project.id);
+    setAppState('processing');
+    
+    // Poll for completion with longer interval for GitHub repos
+    const pollInterval = setInterval(async () => {
+      const { data: updatedProject } = await refetchProject();
+      if (updatedProject && updatedProject.status !== 'processing') {
+        clearInterval(pollInterval);
+        if (updatedProject.status === 'completed') {
+          setAppState('results');
+        } else if (updatedProject.status === 'failed') {
+          toast({
+            title: "Analysis Failed",
+            description: "GitHub repository analysis failed. Please try again.",
+            variant: "destructive",
+          });
+          setAppState('upload');
+          setCurrentProjectId(null);
+        }
+      }
+    }, 3000); // Longer interval for GitHub repos
+  };
+
   const handleNewAnalysis = () => {
     setAppState('upload');
     setCurrentProjectId(null);
@@ -541,7 +565,7 @@ export default function Home() {
                 })()}
               </div>
             </div>
-            <UploadSection onFileUploaded={handleFileUploaded} />
+            <UploadSection onFileUploaded={handleFileUploaded} onGitHubAnalyzed={handleGitHubAnalyzed} />
           </div>
         )}
         
