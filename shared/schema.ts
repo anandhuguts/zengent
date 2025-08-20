@@ -83,12 +83,15 @@ export type LoginInput = z.infer<typeof loginSchema>;
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
+  uploadedAt: true,
 });
 
 export const githubProjectSchema = z.object({
-  name: z.string().optional(),
-  sourceUrl: z.string().url(),
-  sourceType: z.literal('github'),
+  name: z.string().min(1, "Project name is required"),
+  githubUrl: z.string().url("Must be a valid GitHub URL"),
+  githubBranch: z.string().optional().default("main"),
+  projectType: z.enum(["java", "python", "pyspark", "mainframe"]).optional().default("java"),
+  description: z.string().optional(),
 });
+
+export type GithubProject = z.infer<typeof githubProjectSchema>;
