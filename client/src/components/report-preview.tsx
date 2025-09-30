@@ -406,7 +406,9 @@ export default function ReportPreview({
                     {Object.entries(comprehensiveData.methodComments).slice(0, 10).map(([method, comment]: [string, any], idx: number) => (
                       <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
                         <div className="font-semibold">{method}</div>
-                        <div className="text-muted-foreground mt-1">{comment}</div>
+                        <div className="text-muted-foreground mt-1">
+                          {typeof comment === 'string' ? comment : comment?.javadoc || comment?.description || JSON.stringify(comment)}
+                        </div>
                       </div>
                     ))}
                   </div>

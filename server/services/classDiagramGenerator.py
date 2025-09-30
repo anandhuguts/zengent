@@ -62,8 +62,8 @@ def create_class_diagram(analysis_data: Dict[str, Any], output_format: str = 'sv
         label_parts.append(f'<TR><TD BGCOLOR="{color_scheme["border"]}" COLOR="white"><FONT COLOR="white"><B>{stereotype}</B></FONT></TD></TR>')
         label_parts.append(f'<TR><TD><B>{class_name}</B></TD></TR>')
         
-        # Add separator
-        label_parts.append('<TR><TD><HR/></TD></TR>')
+        # Add separator (use line instead of HR tag)
+        label_parts.append('<TR><TD>───────────────</TD></TR>')
         
         # Fields section
         if fields:
@@ -75,8 +75,8 @@ def create_class_diagram(analysis_data: Dict[str, Any], output_format: str = 'sv
             if len(fields) > 8:
                 label_parts.append(f'<TR><TD ALIGN="LEFT"><I>... and {len(fields) - 8} more fields</I></TD></TR>')
         
-        # Add separator
-        label_parts.append('<TR><TD><HR/></TD></TR>')
+        # Add separator (use line instead of HR tag)
+        label_parts.append('<TR><TD>───────────────</TD></TR>')
         
         # Methods section
         if methods:
