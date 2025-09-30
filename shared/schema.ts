@@ -95,3 +95,79 @@ export const githubProjectSchema = z.object({
 });
 
 export type GithubProject = z.infer<typeof githubProjectSchema>;
+
+// Analysis Data Types
+export interface JavaClass {
+  name: string;
+  package: string;
+  type: 'controller' | 'service' | 'repository' | 'entity' | 'config' | 'component' | 'model';
+  annotations: string[];
+  methods?: Array<{
+    name: string;
+    annotations: string[];
+  }>;
+  fields?: Array<{
+    name: string;
+    type: string;
+    annotations: string[];
+  }>;
+  dependencies?: string[];
+}
+
+export interface Relationship {
+  from: string;
+  to: string;
+  type: 'calls' | 'uses' | 'extends' | 'implements' | 'depends';
+}
+
+export interface Pattern {
+  name: string;
+  description: string;
+  classes: string[];
+}
+
+export interface Entity {
+  name: string;
+  tableName: string;
+  fields: Array<{
+    name: string;
+    type: string;
+    annotations: string[];
+  }>;
+}
+
+export interface ProjectDetails {
+  projectDescription: string;
+  projectType: string;
+  implementedFeatures: string[];
+  modulesServices: string[];
+}
+
+export interface AIInsight {
+  description: string;
+  components: string[];
+  patterns: string[];
+  suggestions: string[];
+}
+
+export interface AIAnalysisResult {
+  projectOverview: string;
+  projectDetails: ProjectDetails;
+  architectureInsights: string[];
+  moduleInsights: Record<string, AIInsight>;
+  suggestions: string[];
+  qualityScore: number;
+}
+
+export interface AnalysisData {
+  classes: JavaClass[];
+  relationships: Relationship[];
+  patterns: Pattern[];
+  entities: Entity[];
+  dependencies: Relationship[];
+  structure: {
+    packages: string[];
+    sourceFiles: string[];
+  };
+  aiAnalysis?: AIAnalysisResult;
+}

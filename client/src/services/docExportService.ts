@@ -88,10 +88,10 @@ export class DOCExportService {
       console.log('Logo not available');
     }
 
-    const controllers = analysisData.classes.filter(c => c.type === 'controller');
-    const services = analysisData.classes.filter(c => c.type === 'service');
-    const repositories = analysisData.classes.filter(c => c.type === 'repository');
-    const entities = analysisData.classes.filter(c => c.type === 'entity');
+    const controllers = analysisData.classes.filter((c: any) => c.type === 'controller');
+    const services = analysisData.classes.filter((c: any) => c.type === 'service');
+    const repositories = analysisData.classes.filter((c: any) => c.type === 'repository');
+    const entities = analysisData.classes.filter((c: any) => c.type === 'entity');
 
     // Create document sections
     const sections: any[] = [];
@@ -115,7 +115,8 @@ export class DOCExportService {
                 width: 200,
                 height: 75,
               },
-            }),
+              type: 'png',
+            } as any),
           ],
           alignment: AlignmentType.RIGHT,
         }),
@@ -225,11 +226,11 @@ export class DOCExportService {
           new TableRow({
             children: [
               new TableCell({
-                children: [new Paragraph({ text: "Metric", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Metric", bold: true })] })],
                 width: { size: 50, type: WidthType.PERCENTAGE },
               }),
               new TableCell({
-                children: [new Paragraph({ text: "Count", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Count", bold: true })] })],
                 width: { size: 50, type: WidthType.PERCENTAGE },
               }),
             ],
@@ -309,7 +310,7 @@ export class DOCExportService {
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 200, after: 100 },
         }),
-        ...projectDetails.implementedFeatures.map(feature => 
+        ...projectDetails.implementedFeatures.map((feature: any) => 
           new Paragraph({
             text: `• ${feature}`,
             spacing: { after: 100 },
@@ -320,7 +321,7 @@ export class DOCExportService {
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 200, after: 100 },
         }),
-        ...projectDetails.modulesServices.map(module => 
+        ...projectDetails.modulesServices.map((module: any) => 
           new Paragraph({
             text: `• ${module}`,
             spacing: { after: 100 },
@@ -345,7 +346,7 @@ export class DOCExportService {
         heading: HeadingLevel.HEADING_2,
         spacing: { before: 200, after: 100 },
       }),
-      ...analysisData.patterns.map(pattern => 
+      ...analysisData.patterns.map((pattern: any) => 
         new Paragraph({
           children: [
             new TextRun({
@@ -373,7 +374,7 @@ export class DOCExportService {
         heading: HeadingLevel.HEADING_3,
         spacing: { before: 100, after: 100 },
       }),
-      ...controllers.slice(0, 10).map(ctrl => 
+      ...controllers.slice(0, 10).map((ctrl: any) => 
         new Paragraph({
           text: `• ${ctrl.name}`,
           spacing: { after: 50 },
@@ -384,7 +385,7 @@ export class DOCExportService {
         heading: HeadingLevel.HEADING_3,
         spacing: { before: 100, after: 100 },
       }),
-      ...services.slice(0, 10).map(svc => 
+      ...services.slice(0, 10).map((svc: any) => 
         new Paragraph({
           text: `• ${svc.name}`,
           spacing: { after: 50 },
@@ -395,7 +396,7 @@ export class DOCExportService {
         heading: HeadingLevel.HEADING_3,
         spacing: { before: 100, after: 100 },
       }),
-      ...repositories.slice(0, 10).map(repo => 
+      ...repositories.slice(0, 10).map((repo: any) => 
         new Paragraph({
           text: `• ${repo.name}`,
           spacing: { after: 50 },
@@ -438,15 +439,20 @@ export class DOCExportService {
                 width: 600,
                 height: Math.floor((diagram.height * 600) / diagram.width),
               },
-            }),
+              type: 'png',
+            } as any),
           ],
           alignment: AlignmentType.CENTER,
           spacing: { after: 200 },
         }),
         new Paragraph({
-          text: `Figure: ${diagramName} diagram showing the architectural structure and relationships`,
+          children: [
+            new TextRun({
+              text: `Figure: ${diagramName} diagram showing the architectural structure and relationships`,
+              italics: true,
+            }),
+          ],
           alignment: AlignmentType.CENTER,
-          italics: true,
           spacing: { after: 400 },
         }),
       );
