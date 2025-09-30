@@ -227,15 +227,15 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             <TabsList className="h-auto p-0 bg-transparent w-full justify-start">
               <TabsTrigger value="flow" className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
                 <Podcast className="w-4 h-4" />
-                <span>Flow Chart</span>
+                <span>Architecture Flow</span>
               </TabsTrigger>
               <TabsTrigger value="component" className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
                 <Boxes className="w-4 h-4" />
-                <span>Component Diagram</span>
+                <span>Component View</span>
               </TabsTrigger>
               <TabsTrigger value="class" className="flex items-center space-x-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
                 <Network className="w-4 h-4" />
-                <span>Class Diagram</span>
+                <span>UML Diagram</span>
               </TabsTrigger>
             </TabsList>
           </div>
