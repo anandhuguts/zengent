@@ -103,18 +103,23 @@ export function adaptToFlowChart(analysisData: AnalysisData): { nodes: X6NodeCon
     });
   });
 
-  // Add relationships as edges
+  // Create a set of all node IDs for quick lookup
+  const nodeIds = new Set(nodes.map(n => n.id));
+
+  // Add relationships as edges (only for nodes that exist)
   analysisData.relationships.forEach(rel => {
-    edges.push({
-      source: rel.from,
-      target: rel.to,
-      label: rel.type,
-      attrs: {
-        line: { stroke: '#666', strokeWidth: 2, targetMarker: { name: 'block', size: 6 } },
-        label: { fill: '#666', fontSize: 10 }
-      },
-      router: { name: 'manhattan' }
-    });
+    if (nodeIds.has(rel.from) && nodeIds.has(rel.to)) {
+      edges.push({
+        source: rel.from,
+        target: rel.to,
+        label: rel.type,
+        attrs: {
+          line: { stroke: '#666', strokeWidth: 2, targetMarker: { name: 'block', size: 6 } },
+          label: { fill: '#666', fontSize: 10 }
+        },
+        router: { name: 'manhattan' }
+      });
+    }
   });
 
   return { nodes, edges };
@@ -151,19 +156,24 @@ export function adaptToClassDiagram(analysisData: AnalysisData): { nodes: X6Node
     });
   });
 
-  // Add relationships
+  // Create a set of all node IDs for quick lookup
+  const nodeIds = new Set(nodes.map(n => n.id));
+
+  // Add relationships (only for nodes that exist)
   analysisData.relationships.forEach(rel => {
-    const edgeStyle = getEdgeStyleForRelation(rel.type);
-    edges.push({
-      source: rel.from,
-      target: rel.to,
-      label: rel.type,
-      attrs: {
-        line: { ...edgeStyle, targetMarker: { name: 'block', size: 6 } },
-        label: { fill: '#666', fontSize: 9 }
-      },
-      router: { name: 'orth' }
-    });
+    if (nodeIds.has(rel.from) && nodeIds.has(rel.to)) {
+      const edgeStyle = getEdgeStyleForRelation(rel.type);
+      edges.push({
+        source: rel.from,
+        target: rel.to,
+        label: rel.type,
+        attrs: {
+          line: { ...edgeStyle, targetMarker: { name: 'block', size: 6 } },
+          label: { fill: '#666', fontSize: 9 }
+        },
+        router: { name: 'orth' }
+      });
+    }
   });
 
   return { nodes, edges };
