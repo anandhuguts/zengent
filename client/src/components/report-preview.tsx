@@ -31,7 +31,6 @@ export default function ReportPreview({
 }: ReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
-  const [classDiagramImage, setClassDiagramImage] = useState<string | null>(null);
   const [componentDiagramImage, setComponentDiagramImage] = useState<string | null>(null);
 
   const aiInsights = analysisData.aiAnalysis;
@@ -55,35 +54,14 @@ export default function ReportPreview({
 
   const captureDiagrams = async () => {
     try {
-      // Fetch server-generated class diagram
-      const classDiagramUrl = `/api/projects/${project.id}/diagrams/class?format=png&theme=light`;
-      const classResponse = await fetch(classDiagramUrl);
-      
-      if (classResponse.ok) {
-        const classBlob = await classResponse.blob();
-        const classReader = new FileReader();
-        classReader.onloadend = () => {
-          setClassDiagramImage(classReader.result as string);
-        };
-        classReader.readAsDataURL(classBlob);
-      } else {
-        console.error('Failed to fetch class diagram:', classResponse.status);
-      }
-
       // Capture component diagram using html2canvas
-      const componentTab = document.querySelector('[data-value="component"]');
-      if (componentTab) {
-        (componentTab as HTMLElement).click();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const componentCanvas = document.querySelector('[data-testid="diagram-component"] .x6-graph-svg');
-        if (componentCanvas) {
-          const canvas = await html2canvas(componentCanvas as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2
-          });
-          setComponentDiagramImage(canvas.toDataURL('image/png'));
-        }
+      const diagramElement = document.querySelector('[data-testid="diagram-component"] .x6-graph-svg');
+      if (diagramElement) {
+        const canvas = await html2canvas(diagramElement as HTMLElement, {
+          backgroundColor: '#ffffff',
+          scale: 2
+        });
+        setComponentDiagramImage(canvas.toDataURL('image/png'));
       }
     } catch (error) {
       console.error('Error capturing diagrams:', error);
@@ -361,17 +339,6 @@ export default function ReportPreview({
                 <p className="mb-6 text-muted-foreground">Capturing component diagram...</p>
               )}
 
-              <h3 className="text-xl font-semibold mb-3">Class Diagram</h3>
-              <p className="mb-4 text-muted-foreground">
-                The UML class diagram displays the detailed class structure, relationships, and inheritance hierarchy.
-              </p>
-              {classDiagramImage ? (
-                <div className="mb-6 border rounded-lg overflow-hidden">
-                  <img src={classDiagramImage} alt="Class Diagram" className="w-full" />
-                </div>
-              ) : (
-                <p className="mb-6 text-muted-foreground">Capturing class diagram...</p>
-              )}
             </section>
 
             {/* 10. API Documentation */}
