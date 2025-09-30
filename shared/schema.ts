@@ -143,6 +143,7 @@ export interface ProjectDetails {
   businessProblem?: string;
   keyObjective?: string;
   functionalitySummary?: string;
+  initialFeatures?: string[];
   implementedFeatures: string[];
   modulesServices: string[];
 }

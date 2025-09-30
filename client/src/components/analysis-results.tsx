@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DiagramCanvasX6 from "@/components/diagram-canvas-x6";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
+import UMLClassDiagram from "@/components/uml-class-diagram";
 import { 
   FolderOpen, 
   Download, 
@@ -240,57 +241,59 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             </TabsList>
           </div>
 
-          {/* Diagram Controls */}
-          <div className="p-4 border-b border-border bg-muted">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                    </svg>
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-                    </svg>
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                  </Button>
-                  <div className="text-sm text-muted-foreground px-2">
-                    Zoom: 100%
+          {/* Diagram Controls - Only show for flow and component diagrams */}
+          {activeDiagram !== 'class' && (
+            <div className="p-4 border-b border-border bg-muted">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                      </svg>
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </Button>
+                    <div className="text-sm text-muted-foreground px-2">
+                      Zoom: 100%
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <Download className="mr-1 w-4 h-4" />
-                  Export PNG
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <Code className="mr-1 w-4 h-4" />
-                  Export SVG
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <Download className="mr-1 w-4 h-4" />
+                    Export PNG
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <Code className="mr-1 w-4 h-4" />
+                    Export SVG
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <TabsContent value="flow" className="mt-0">
             <DiagramCanvasX6 
@@ -305,9 +308,8 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             />
           </TabsContent>
           <TabsContent value="class" className="mt-0">
-            <DiagramCanvasX6 
-              type="class" 
-              analysisData={analysisData} 
+            <UMLClassDiagram 
+              projectId={project.id} 
             />
           </TabsContent>
         </Tabs>

@@ -583,6 +583,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate UML class diagram using Python Graphviz
+  app.get("/api/projects/:id/diagrams/class", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project || !project.analysisData) {
+        return res.status(404).json({ error: "Project not found or not analyzed" });
+      }
+
+      const format = (req.query.format as string) || 'svg';
+      const theme = (req.query.theme as string) || 'light';
+
+      // Validate format
+      if (!['svg', 'png', 'pdf'].includes(format)) {
+        return res.status(400).json({ error: "Invalid format. Use svg, png, or pdf" });
+      }
+
+      // Spawn Python process to generate diagram
+      const { spawn } = await import('child_process');
+      const python = spawn('python3', ['server/services/classDiagramGenerator.py']);
+
+      const inputData = JSON.stringify({
+        analysisData: project.analysisData,
+        format,
+        theme
+      });
+
+      let outputData = '';
+      let errorData = '';
+
+      python.stdout.on('data', (data) => {
+        outputData += data.toString();
+      });
+
+      python.stderr.on('data', (data) => {
+        errorData += data.toString();
+      });
+
+      python.on('close', async (code) => {
+        if (code !== 0) {
+          console.error('Python error:', errorData);
+          return res.status(500).json({ error: 'Failed to generate diagram', details: errorData });
+        }
+
+        try {
+          const result = JSON.parse(outputData);
+          if (result.success) {
+            const fs = await import('fs');
+            const filePath = result.path;
+            
+            // Set appropriate content type
+            const contentTypes: Record<string, string> = {
+              svg: 'image/svg+xml',
+              png: 'image/png',
+              pdf: 'application/pdf'
+            };
+            
+            res.setHeader('Content-Type', contentTypes[format]);
+            res.setHeader('Content-Disposition', `inline; filename="class-diagram.${format}"`);
+            
+            // Stream the file
+            const fileStream = fs.createReadStream(filePath);
+            fileStream.pipe(res);
+            
+            // Clean up file after sending
+            fileStream.on('end', () => {
+              fs.unlink(filePath, (err) => {
+                if (err) console.error('Error deleting temp file:', err);
+              });
+            });
+          } else {
+            res.status(500).json({ error: result.error });
+          }
+        } catch (parseError) {
+          console.error('Parse error:', parseError, 'Output:', outputData);
+          res.status(500).json({ error: 'Failed to parse diagram generation result' });
+        }
+      });
+
+      // Send input data to Python process
+      python.stdin.write(inputData);
+      python.stdin.end();
+
+    } catch (error) {
+      console.error('Error generating class diagram:', error);
+      res.status(500).json({ error: 'Failed to generate class diagram' });
+    }
+  });
+
   // Swagger UI endpoint
   app.use('/api-docs', swaggerUi.serve);
   app.get('/api-docs', swaggerUi.setup(null, {

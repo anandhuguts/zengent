@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["glibcLocales", "python311", "python311Packages.pip"]
+packages = ["freefont_ttf", "glibcLocales", "python311", "python311Packages.pip", "xdg-utils", "graphviz"]
 
 [deployment]
 deploymentTarget = "gce"
@@ -16,7 +16,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 42205
+localPort = 45409
 externalPort = 3000
 
 [env]
