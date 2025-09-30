@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -6,6 +6,7 @@ import { Download, FileText, X } from "lucide-react";
 import type { Project, AnalysisData } from "@shared/schema";
 import { pdfExportService } from "@/services/pdfExportService";
 import { docExportService } from "@/services/docExportService";
+import html2canvas from "html2canvas";
 
 interface ReportPreviewProps {
   open: boolean;
@@ -30,6 +31,8 @@ export default function ReportPreview({
 }: ReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
+  const [classDiagramImage, setClassDiagramImage] = useState<string | null>(null);
+  const [componentDiagramImage, setComponentDiagramImage] = useState<string | null>(null);
 
   const aiInsights = analysisData.aiAnalysis;
   const projectDetails = aiInsights?.projectDetails;
@@ -42,6 +45,51 @@ export default function ReportPreview({
   const annotations = analysisData.classes
     .flatMap((c: any) => c.annotations || [])
     .filter((a: string, i: number, arr: string[]) => arr.indexOf(a) === i);
+
+  // Capture diagrams when modal opens
+  useEffect(() => {
+    if (open) {
+      captureDiagrams();
+    }
+  }, [open]);
+
+  const captureDiagrams = async () => {
+    try {
+      // Capture class diagram
+      const classTab = document.querySelector('[data-value="class"]');
+      if (classTab) {
+        (classTab as HTMLElement).click();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const classCanvas = document.querySelector('[data-testid="diagram-class"] .react-flow__viewport');
+        if (classCanvas) {
+          const canvas = await html2canvas(classCanvas as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2
+          });
+          setClassDiagramImage(canvas.toDataURL('image/png'));
+        }
+      }
+
+      // Capture component diagram
+      const componentTab = document.querySelector('[data-value="component"]');
+      if (componentTab) {
+        (componentTab as HTMLElement).click();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const componentCanvas = document.querySelector('[data-testid="diagram-component"] .react-flow__viewport');
+        if (componentCanvas) {
+          const canvas = await html2canvas(componentCanvas as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2
+          });
+          setComponentDiagramImage(canvas.toDataURL('image/png'));
+        }
+      }
+    } catch (error) {
+      console.error('Error capturing diagrams:', error);
+    }
+  };
 
   const handlePDFExport = async () => {
     setIsExportingPDF(true);
@@ -182,6 +230,27 @@ export default function ReportPreview({
                 
                 <h3 className="text-xl font-semibold mb-2">Project Type</h3>
                 <p className="mb-4">{projectDetails.projectType}</p>
+
+                {projectDetails.businessProblem && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">Business Problem Addressed</h3>
+                    <p className="mb-4">{projectDetails.businessProblem}</p>
+                  </>
+                )}
+
+                {projectDetails.keyObjective && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">Key Objective</h3>
+                    <p className="mb-4">{projectDetails.keyObjective}</p>
+                  </>
+                )}
+
+                {projectDetails.functionalitySummary && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">Summary of Functionality</h3>
+                    <p className="mb-4">{projectDetails.functionalitySummary}</p>
+                  </>
+                )}
                 
                 <h3 className="text-xl font-semibold mb-2">Implemented Features</h3>
                 <ul className="list-disc pl-6 mb-4">
@@ -278,9 +347,48 @@ export default function ReportPreview({
               </div>
             </section>
 
-            {/* 4. Project Structure */}
+            {/* 4. Visual Diagrams */}
             <section className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">4. Project Structure</h2>
+              <h2 className="text-2xl font-bold mb-4">4. Visual Diagrams</h2>
+              
+              <h3 className="text-xl font-semibold mb-3">Class Diagram</h3>
+              {classDiagramImage ? (
+                <div className="mb-6 border rounded-lg overflow-hidden">
+                  <img src={classDiagramImage} alt="Class Diagram" className="w-full" />
+                </div>
+              ) : (
+                <p className="mb-6 text-muted-foreground">Capturing class diagram...</p>
+              )}
+
+              <h3 className="text-xl font-semibold mb-3">Component Diagram</h3>
+              {componentDiagramImage ? (
+                <div className="mb-6 border rounded-lg overflow-hidden">
+                  <img src={componentDiagramImage} alt="Component Diagram" className="w-full" />
+                </div>
+              ) : (
+                <p className="mb-6 text-muted-foreground">Capturing component diagram...</p>
+              )}
+            </section>
+
+            {/* 5. Technology Stack */}
+            {analysisData.dependencies && analysisData.dependencies.length > 0 && (
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold mb-4">5. Technology Stack</h2>
+                <h3 className="text-xl font-semibold mb-2">Dependencies</h3>
+                <ul className="list-disc pl-6 mb-4">
+                  {analysisData.dependencies.slice(0, 20).map((dep, idx) => (
+                    <li key={idx} className="text-sm">{dep.from} → {dep.to} ({dep.type})</li>
+                  ))}
+                  {analysisData.dependencies.length > 20 && (
+                    <li>... and {analysisData.dependencies.length - 20} more dependencies</li>
+                  )}
+                </ul>
+              </section>
+            )}
+
+            {/* 6. Project Structure */}
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">6. Project Structure</h2>
               <p className="mb-4">Overview of the project directory organization:</p>
               {structureData && structureData.structure ? (
                 <div className="bg-muted p-4 rounded-lg font-mono text-sm">
@@ -291,10 +399,10 @@ export default function ReportPreview({
               )}
             </section>
 
-            {/* 5. Comprehensive Analysis */}
+            {/* 7. Comprehensive Analysis */}
             {comprehensiveData && (
               <section className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">5. Comprehensive Analysis</h2>
+                <h2 className="text-2xl font-bold mb-4">7. Comprehensive Analysis</h2>
                 
                 {comprehensiveData.projectOverview && (
                   <>
@@ -319,10 +427,10 @@ export default function ReportPreview({
               </section>
             )}
 
-            {/* 6. Code Quality Analysis */}
+            {/* 8. Code Quality Analysis */}
             {sonarData && sonarData.issues && sonarData.issues.length > 0 && (
               <section className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">6. Code Quality Analysis</h2>
+                <h2 className="text-2xl font-bold mb-4">8. Code Quality Analysis</h2>
                 <p className="mb-4">
                   This section contains automated code quality metrics and issue detection results 
                   from static code analysis.
@@ -342,10 +450,10 @@ export default function ReportPreview({
               </section>
             )}
 
-            {/* 7. API Documentation */}
+            {/* 9. API Documentation */}
             {swaggerData && swaggerData.paths && (
               <section className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">7. API Documentation</h2>
+                <h2 className="text-2xl font-bold mb-4">9. API Documentation</h2>
                 
                 <h3 className="text-xl font-semibold mb-2">API Endpoints</h3>
                 <div className="space-y-4">

@@ -118,6 +118,7 @@ export interface Relationship {
   from: string;
   to: string;
   type: 'calls' | 'uses' | 'extends' | 'implements' | 'depends';
+  method?: string;
 }
 
 export interface Pattern {
@@ -139,6 +140,9 @@ export interface Entity {
 export interface ProjectDetails {
   projectDescription: string;
   projectType: string;
+  businessProblem?: string;
+  keyObjective?: string;
+  functionalitySummary?: string;
   implementedFeatures: string[];
   modulesServices: string[];
 }
