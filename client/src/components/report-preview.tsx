@@ -345,46 +345,215 @@ export default function ReportPreview({
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4">10. API Documentation</h2>
               
-              <h3 className="text-xl font-semibold mb-3">Request Mapping Overview</h3>
-              {swaggerData && swaggerData.paths ? (
+              <h3 className="text-xl font-semibold mb-3">API Endpoints</h3>
+              {comprehensiveData?.requestMappings && comprehensiveData.requestMappings.length > 0 ? (
                 <div className="space-y-4 mb-6">
-                  {Object.entries(swaggerData.paths).slice(0, 20).map(([path, methods]: [string, any], idx: number) => (
-                    <div key={idx} className="p-3 bg-muted rounded-lg">
-                      <div className="font-bold mb-2">{path}</div>
+                  {comprehensiveData.requestMappings.slice(0, 15).map((mapping: any, idx: number) => (
+                    <div key={idx} className="border-l-4 border-l-blue-500 pl-4 mb-4">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded font-semibold text-sm">
+                          {mapping.httpMethod}
+                        </span>
+                        <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                          {mapping.endpoint}
+                        </code>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="font-medium">Description: </span>
+                          <span className="text-muted-foreground">{mapping.description}</span>
+                        </div>
+                        
+                        <div>
+                          <span className="font-medium">Controller: </span>
+                          <code className="text-xs bg-muted px-1 rounded">{mapping.controllerClass}.{mapping.controllerMethod}()</code>
+                        </div>
+                        
+                        {mapping.serviceCalled && (
+                          <div>
+                            <span className="font-medium">Service Called: </span>
+                            <code className="text-xs bg-muted px-1 rounded">{mapping.serviceCalled}</code>
+                          </div>
+                        )}
+                        
+                        {mapping.returnType && (
+                          <div>
+                            <span className="font-medium">Return Type: </span>
+                            <code className="text-xs bg-muted px-1 rounded">{mapping.returnType}</code>
+                          </div>
+                        )}
+                        
+                        {mapping.parameters && mapping.parameters.length > 0 && (
+                          <div>
+                            <span className="font-medium">Parameters:</span>
+                            <table className="w-full mt-2 border-collapse border border-gray-300">
+                              <thead>
+                                <tr className="bg-muted">
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Name</th>
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Type</th>
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Description</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {mapping.parameters.map((param: any, pidx: number) => (
+                                  <tr key={pidx}>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                                      <code>{param.name}</code>
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                                      <code className="text-blue-600">{param.type}</code>
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs text-muted-foreground">
+                                      {param.description || 'No description'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {comprehensiveData.requestMappings.length > 15 && (
+                    <p className="text-sm text-muted-foreground">... and {comprehensiveData.requestMappings.length - 15} more endpoints</p>
+                  )}
+                </div>
+              ) : swaggerData && swaggerData.paths ? (
+                <div className="space-y-4 mb-6">
+                  {Object.entries(swaggerData.paths).slice(0, 15).map(([path, methods]: [string, any], idx: number) => (
+                    <div key={idx} className="border-l-4 border-l-blue-500 pl-4 mb-4">
+                      <code className="text-sm font-mono font-semibold mb-2 block">{path}</code>
                       {Object.entries(methods).map(([method, details]: [string, any], midx: number) => (
-                        <div key={midx} className="ml-4 text-sm">
-                          <span className="font-semibold uppercase">{method}:</span> {details.summary || 'No description'}
+                        <div key={midx} className="ml-4 mb-3 text-sm">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded font-semibold text-xs uppercase">
+                              {method}
+                            </span>
+                            <span className="text-muted-foreground">{details.summary || details.description || 'No description'}</span>
+                          </div>
+                          
+                          {details.parameters && details.parameters.length > 0 && (
+                            <div className="mt-2">
+                              <span className="font-medium text-xs">Parameters:</span>
+                              <table className="w-full mt-1 border-collapse border border-gray-300">
+                                <thead>
+                                  <tr className="bg-muted">
+                                    <th className="border border-gray-300 px-2 py-1 text-left text-xs font-semibold">Name</th>
+                                    <th className="border border-gray-300 px-2 py-1 text-left text-xs font-semibold">Type</th>
+                                    <th className="border border-gray-300 px-2 py-1 text-left text-xs font-semibold">In</th>
+                                    <th className="border border-gray-300 px-2 py-1 text-left text-xs font-semibold">Required</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {details.parameters.map((param: any, pidx: number) => (
+                                    <tr key={pidx}>
+                                      <td className="border border-gray-300 px-2 py-1 text-xs"><code>{param.name}</code></td>
+                                      <td className="border border-gray-300 px-2 py-1 text-xs"><code className="text-blue-600">{param.schema?.type || param.type || 'any'}</code></td>
+                                      <td className="border border-gray-300 px-2 py-1 text-xs">{param.in}</td>
+                                      <td className="border border-gray-300 px-2 py-1 text-xs">{param.required ? 'Yes' : 'No'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                          
+                          {details.responses && (
+                            <div className="mt-2">
+                              <span className="font-medium text-xs">Response: </span>
+                              <code className="text-xs bg-muted px-1 rounded">
+                                {Object.keys(details.responses)[0]} - {details.responses[Object.keys(details.responses)[0]]?.description || 'Success'}
+                              </code>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   ))}
-                  {Object.keys(swaggerData.paths).length > 20 && (
-                    <p className="text-sm text-muted-foreground">... and {Object.keys(swaggerData.paths).length - 20} more endpoints</p>
+                  {Object.keys(swaggerData.paths).length > 15 && (
+                    <p className="text-sm text-muted-foreground">... and {Object.keys(swaggerData.paths).length - 15} more endpoints</p>
                   )}
                 </div>
               ) : (
                 <p className="mb-6 text-muted-foreground">No API endpoints detected in the analysis.</p>
               )}
 
-              <h3 className="text-xl font-semibold mb-3">Method &amp; Class Comments</h3>
-              <div className="mb-4">
-                {comprehensiveData?.methodComments && Object.keys(comprehensiveData.methodComments).length > 0 ? (
-                  <div className="space-y-3">
-                    {Object.entries(comprehensiveData.methodComments).slice(0, 10).map(([method, comment]: [string, any], idx: number) => (
-                      <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
-                        <div className="font-semibold">{method}</div>
-                        <div className="text-muted-foreground mt-1">
-                          {typeof comment === 'string' ? comment : comment?.javadoc || comment?.description || JSON.stringify(comment)}
-                        </div>
+              <h3 className="text-xl font-semibold mb-3 mt-6">Method Documentation</h3>
+              {comprehensiveData?.methodComments && Array.isArray(comprehensiveData.methodComments) && comprehensiveData.methodComments.length > 0 ? (
+                <div className="space-y-4">
+                  {comprehensiveData.methodComments.slice(0, 15).map((comment: any, idx: number) => (
+                    <div key={idx} className="border rounded-lg p-4">
+                      <div className="font-semibold mb-2">
+                        <code className="text-sm bg-muted px-2 py-1 rounded">
+                          {comment.className}.{comment.methodName}()
+                        </code>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">
-                    Method and class documentation extracted from source code comments and annotations.
-                  </p>
-                )}
-              </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="font-medium">Description: </span>
+                          <span className="text-muted-foreground">{comment.javadoc || comment.description || 'No description available'}</span>
+                        </div>
+                        
+                        <div>
+                          <span className="font-medium">Return Type: </span>
+                          <code className="text-xs bg-muted px-1 rounded text-blue-600">{comment.returnType || 'void'}</code>
+                        </div>
+                        
+                        {comment.parameters && comment.parameters.length > 0 && (
+                          <div>
+                            <span className="font-medium">Parameters:</span>
+                            <table className="w-full mt-2 border-collapse border border-gray-300">
+                              <thead>
+                                <tr className="bg-muted">
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Name</th>
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Type</th>
+                                  <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Description</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {comment.parameters.map((param: any, pidx: number) => (
+                                  <tr key={pidx}>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                                      <code>{param.name}</code>
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                                      <code className="text-blue-600">{param.type}</code>
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2 text-xs text-muted-foreground">
+                                      {param.description || 'No description'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {comprehensiveData.methodComments.length > 15 && (
+                    <p className="text-sm text-muted-foreground">... and {comprehensiveData.methodComments.length - 15} more methods</p>
+                  )}
+                </div>
+              ) : comprehensiveData?.methodComments && Object.keys(comprehensiveData.methodComments).length > 0 ? (
+                <div className="space-y-3">
+                  {Object.entries(comprehensiveData.methodComments).slice(0, 10).map(([method, comment]: [string, any], idx: number) => (
+                    <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
+                      <div className="font-semibold">{method}</div>
+                      <div className="text-muted-foreground mt-1">
+                        {typeof comment === 'string' ? comment : comment?.javadoc || comment?.description || JSON.stringify(comment)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">
+                  Method and class documentation extracted from source code comments and annotations.
+                </p>
+              )}
             </section>
 
             {/* 11. Codebase & Technology Summary */}
