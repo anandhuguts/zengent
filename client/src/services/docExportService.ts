@@ -22,16 +22,10 @@ interface CapturedDiagram {
 export class DOCExportService {
   private async captureDiagram(type: string): Promise<CapturedDiagram | null> {
     try {
-      // Trigger diagram type change - Radix UI uses data-value attribute
-      const tabTrigger = document.querySelector(`[data-value="${type}"]`) as HTMLElement;
-      if (tabTrigger) {
-        tabTrigger.click();
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for diagram to render
-      } else {
-        console.warn(`Could not find tab trigger for diagram type: ${type}`);
-      }
+      // Wait for diagram to be fully rendered
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const diagramElement = document.querySelector('.react-flow') as HTMLElement;
+      const diagramElement = document.querySelector('[data-testid="diagram-component"] .x6-graph-svg') as HTMLElement;
       if (diagramElement) {
         const canvas = await html2canvas(diagramElement, {
           backgroundColor: '#ffffff',
@@ -72,7 +66,7 @@ export class DOCExportService {
       console.log('Capturing diagrams...');
       const diagrams: CapturedDiagram[] = [];
       try {
-        for (const type of ['flow', 'component', 'class']) {
+        for (const type of ['component']) {
           const diagram = await this.captureDiagram(type);
           if (diagram) {
             diagrams.push(diagram);
@@ -361,7 +355,7 @@ export class DOCExportService {
               bold: true,
             }),
             new TextRun({
-              text: `${pattern.description} (${pattern.classes.length} classes)`,
+              text: `${pattern.description}${pattern.classes?.length ? ` (${pattern.classes.length} classes)` : ''}`,
             }),
           ],
           spacing: { after: 100 },
