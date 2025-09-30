@@ -63,21 +63,26 @@ export class DOCExportService {
   }
 
   async exportProjectAnalysis(options: DOCExportOptions): Promise<void> {
-    const { project, analysisData, sonarAnalysis, swaggerData, comprehensiveData, structureData } = options;
-    const aiInsights = analysisData.aiAnalysis;
-    const projectDetails = aiInsights?.projectDetails;
+    try {
+      const { project, analysisData, sonarAnalysis, swaggerData, comprehensiveData, structureData } = options;
+      const aiInsights = analysisData.aiAnalysis;
+      const projectDetails = aiInsights?.projectDetails;
 
-    // Capture diagrams first
-    console.log('Capturing diagrams...');
-    const diagrams: CapturedDiagram[] = [];
-    for (const type of ['flow', 'component', 'class']) {
-      const diagram = await this.captureDiagram(type);
-      if (diagram) {
-        diagrams.push(diagram);
+      // Capture diagrams first
+      console.log('Capturing diagrams...');
+      const diagrams: CapturedDiagram[] = [];
+      try {
+        for (const type of ['flow', 'component', 'class']) {
+          const diagram = await this.captureDiagram(type);
+          if (diagram) {
+            diagrams.push(diagram);
+          }
+        }
+      } catch (diagramError) {
+        console.warn('Some diagrams could not be captured:', diagramError);
       }
-    }
 
-    console.log('Generating document...');
+      console.log('Generating document...');
 
     // Get logo as base64
     let logoImage: Uint8Array | undefined;
@@ -364,6 +369,27 @@ export class DOCExportService {
       ),
     );
 
+    // Annotations Found
+    const annotations = analysisData.classes
+      .flatMap((c: any) => c.annotations || [])
+      .filter((a: string, i: number, arr: string[]) => arr.indexOf(a) === i); // unique
+    
+    if (annotations.length > 0) {
+      sections.push(
+        new Paragraph({
+          text: "Annotations Found",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 200, after: 100 },
+        }),
+        ...annotations.map((annotation: string) => 
+          new Paragraph({
+            text: `• ${annotation}`,
+            spacing: { after: 50 },
+          })
+        ),
+      );
+    }
+
     // Components by Type
     sections.push(
       new Paragraph({
@@ -534,7 +560,58 @@ export class DOCExportService {
       }
     }
 
-    // 6. Code Quality Analysis
+    // 6. Project Structure
+    if (structureData) {
+      sections.push(
+        new Paragraph({
+          text: "",
+          pageBreakBefore: true,
+        }),
+        new Paragraph({
+          text: "6. Project Structure",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 200, after: 200 },
+        }),
+        new Paragraph({
+          text: "This section provides an overview of the project's directory structure and organization.",
+          spacing: { after: 200 },
+        }),
+      );
+
+      if (structureData.structure) {
+        const renderStructure = (item: any, level: number = 0): Paragraph[] => {
+          const paragraphs: Paragraph[] = [];
+          const indent = "  ".repeat(level);
+          
+          if (item.type === 'file') {
+            paragraphs.push(
+              new Paragraph({
+                text: `${indent}📄 ${item.name}`,
+                spacing: { after: 50 },
+              })
+            );
+          } else if (item.type === 'directory') {
+            paragraphs.push(
+              new Paragraph({
+                text: `${indent}📁 ${item.name}/`,
+                spacing: { after: 50 },
+              })
+            );
+            if (item.children && item.children.length > 0) {
+              item.children.forEach((child: any) => {
+                paragraphs.push(...renderStructure(child, level + 1));
+              });
+            }
+          }
+          
+          return paragraphs;
+        };
+
+        sections.push(...renderStructure(structureData.structure).slice(0, 100)); // Limit to 100 items
+      }
+    }
+
+    // 7. Code Quality Analysis
     if (sonarAnalysis) {
       sections.push(
         new Paragraph({
@@ -577,7 +654,7 @@ export class DOCExportService {
       }
     }
 
-    // 7. API Documentation
+    // 8. API Documentation
     if (swaggerData && swaggerData.paths) {
       sections.push(
         new Paragraph({
@@ -585,7 +662,7 @@ export class DOCExportService {
           pageBreakBefore: true,
         }),
         new Paragraph({
-          text: "7. API Documentation",
+          text: "8. API Documentation",
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 200, after: 200 },
         }),
@@ -645,6 +722,11 @@ export class DOCExportService {
     window.URL.revokeObjectURL(url);
 
     console.log('Document exported successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred during document generation';
+      console.error('Failed to export DOC:', errorMessage, error);
+      throw new Error(`Failed to generate document: ${errorMessage}`);
+    }
   }
 }
 
