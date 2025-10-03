@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DiagramCanvasX6 from "@/components/diagram-canvas-x6";
+import MermaidClassDiagram from "@/components/mermaid-class-diagram";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
 import { 
@@ -306,41 +307,12 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             <div className="p-4 border-b border-border bg-muted">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
-                  Interactive UML Class Diagram with fields, methods, and relationships
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
-                      window.dispatchEvent(event);
-                    }}
-                    data-testid="button-export-class-png"
-                  >
-                    <Download className="mr-1 w-4 h-4" />
-                    Export PNG
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
-                      window.dispatchEvent(event);
-                    }}
-                    data-testid="button-export-class-svg"
-                  >
-                    <Code className="mr-1 w-4 h-4" />
-                    Export SVG
-                  </Button>
+                  UML Class Diagram generated with Mermaid.js - Professional UML notation
                 </div>
               </div>
             </div>
 
-            <DiagramCanvasX6 
-              type="class" 
-              analysisData={analysisData} 
-            />
+            <MermaidClassDiagram analysisData={analysisData} />
           </TabsContent>
         </Tabs>
       </Card>
