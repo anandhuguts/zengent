@@ -136,21 +136,56 @@ export function adaptToClassDiagram(analysisData: AnalysisData): { nodes: X6Node
     const row = Math.floor(idx / 4);
     const col = idx % 4;
     
-    // Build UML content
-    const methods = cls.methods?.slice(0, 5).map(m => `+ ${m.name}()`).join('\\n') || '';
-    const fields = cls.fields?.slice(0, 5).map(f => `- ${f.name}: ${f.type}`).join('\\n') || '';
+    // Build UML HTML markup for better formatting
+    const fieldsHTML = cls.fields?.slice(0, 6).map(f => {
+      // Truncate long types for display
+      const displayType = f.type.length > 25 ? f.type.substring(0, 22) + '...' : f.type;
+      return `<div style="text-align: left; padding: 2px 8px; font-size: 10px;">- ${f.name}: ${displayType}</div>`;
+    }).join('') || '<div style="text-align: left; padding: 2px 8px; font-size: 10px; color: #999;">No fields</div>';
+    
+    const methodsHTML = cls.methods?.slice(0, 6).map(m => {
+      return `<div style="text-align: left; padding: 2px 8px; font-size: 10px;">+ ${m.name}()</div>`;
+    }).join('') || '<div style="text-align: left; padding: 2px 8px; font-size: 10px; color: #999;">No methods</div>';
+    
+    const moreFields = cls.fields && cls.fields.length > 6 ? `<div style="text-align: left; padding: 2px 8px; font-size: 9px; color: #666; font-style: italic;">... ${cls.fields.length - 6} more fields</div>` : '';
+    const moreMethods = cls.methods && cls.methods.length > 6 ? `<div style="text-align: left; padding: 2px 8px; font-size: 9px; color: #666; font-style: italic;">... ${cls.methods.length - 6} more methods</div>` : '';
+    
+    // Calculate dynamic height based on content
+    const baseHeight = 40; // Header height
+    const fieldsHeight = Math.min((cls.fields?.length || 0), 6) * 16 + (cls.fields && cls.fields.length > 6 ? 16 : 0) + 10;
+    const methodsHeight = Math.min((cls.methods?.length || 0), 6) * 16 + (cls.methods && cls.methods.length > 6 ? 16 : 0) + 10;
+    const totalHeight = Math.max(baseHeight + fieldsHeight + methodsHeight, 120);
+    
+    const htmlLabel = `
+      <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: ${colors.fill}; border: 2px solid ${colors.stroke}; border-radius: 4px; overflow: hidden;">
+        <div style="background: ${colors.stroke}; color: white; padding: 6px; text-align: center; font-weight: bold; font-size: 11px;">
+          «${cls.type}»
+        </div>
+        <div style="padding: 6px; text-align: center; font-weight: bold; font-size: 12px; border-bottom: 1px solid ${colors.stroke}; color: ${colors.text};">
+          ${cls.name}
+        </div>
+        <div style="flex: 1; border-bottom: 1px solid ${colors.stroke}; overflow: hidden;">
+          ${fieldsHTML}
+          ${moreFields}
+        </div>
+        <div style="flex: 1; overflow: hidden;">
+          ${methodsHTML}
+          ${moreMethods}
+        </div>
+      </div>
+    `;
     
     nodes.push({
       id: cls.name,
-      x: 50 + (col * 280),
-      y: 50 + (row * 200),
-      width: 250,
-      height: 150,
-      label: `«${cls.type}»\n${cls.name}\n---\n${fields}\n---\n${methods}`,
-      shape: 'rect',
+      x: 50 + (col * 300),
+      y: 50 + (row * (totalHeight + 30)),
+      width: 280,
+      height: totalHeight,
+      label: '',
+      shape: 'html',
+      html: htmlLabel,
       attrs: {
-        body: { fill: colors.fill, stroke: colors.stroke, strokeWidth: 2, rx: 4, ry: 4 },
-        label: { fill: colors.text, fontSize: 10, textAnchor: 'middle', textVerticalAnchor: 'top', refY: 10 }
+        body: { fill: 'transparent', stroke: 'none' }
       },
       data: cls
     });

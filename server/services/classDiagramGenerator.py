@@ -3,6 +3,11 @@ import json
 import sys
 from graphviz import Digraph
 from typing import Dict, List, Any
+import html
+
+def escape_html(text: str) -> str:
+    """Escape HTML special characters for use in Graphviz HTML labels."""
+    return html.escape(str(text))
 
 def create_class_diagram(analysis_data: Dict[str, Any], output_format: str = 'svg', theme: str = 'light') -> str:
     """
@@ -68,8 +73,8 @@ def create_class_diagram(analysis_data: Dict[str, Any], output_format: str = 'sv
         # Fields section
         if fields:
             for field in fields[:8]:  # Limit to 8 fields
-                field_name = field.get('name', '')
-                field_type = field.get('type', '')
+                field_name = escape_html(field.get('name', ''))
+                field_type = escape_html(field.get('type', ''))
                 field_label = f'- {field_name}: {field_type}'
                 label_parts.append(f'<TR><TD ALIGN="LEFT">{field_label}</TD></TR>')
             if len(fields) > 8:
@@ -81,7 +86,7 @@ def create_class_diagram(analysis_data: Dict[str, Any], output_format: str = 'sv
         # Methods section
         if methods:
             for method in methods[:8]:  # Limit to 8 methods
-                method_name = method.get('name', '')
+                method_name = escape_html(method.get('name', ''))
                 method_label = f'+ {method_name}()'
                 label_parts.append(f'<TR><TD ALIGN="LEFT">{method_label}</TD></TR>')
             if len(methods) > 8:

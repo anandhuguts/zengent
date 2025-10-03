@@ -306,14 +306,15 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             <div className="p-4 border-b border-border bg-muted">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
-                  UML Class Diagram generated with Python Graphviz
+                  Interactive UML Class Diagram with fields, methods, and relationships
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => {
-                      window.open(`/api/projects/${project.id}/diagrams/class?format=png`, '_blank');
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
+                      window.dispatchEvent(event);
                     }}
                     data-testid="button-export-class-png"
                   >
@@ -324,36 +325,22 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
                     variant="ghost" 
                     size="sm"
                     onClick={() => {
-                      window.open(`/api/projects/${project.id}/diagrams/class?format=svg`, '_blank');
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
+                      window.dispatchEvent(event);
                     }}
                     data-testid="button-export-class-svg"
                   >
                     <Code className="mr-1 w-4 h-4" />
                     Export SVG
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      window.open(`/api/projects/${project.id}/diagrams/class?format=pdf`, '_blank');
-                    }}
-                    data-testid="button-export-class-pdf"
-                  >
-                    <FileText className="mr-1 w-4 h-4" />
-                    Export PDF
-                  </Button>
                 </div>
               </div>
             </div>
 
-            <div className="p-6" data-testid="class-diagram-container">
-              <img 
-                src={`/api/projects/${project.id}/diagrams/class?format=svg`} 
-                alt="UML Class Diagram" 
-                className="w-full h-auto border rounded"
-                data-testid="img-class-diagram"
-              />
-            </div>
+            <DiagramCanvasX6 
+              type="class" 
+              analysisData={analysisData} 
+            />
           </TabsContent>
         </Tabs>
       </Card>
