@@ -225,66 +225,137 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
         <div className="border-b border-border p-4">
           <div className="flex items-center space-x-2">
             <Boxes className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Component Diagram</h3>
+            <h3 className="text-lg font-semibold">Architecture Diagrams</h3>
           </div>
         </div>
 
-        {/* Diagram Controls */}
-        <div className="p-4 border-b border-border bg-muted">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                  </svg>
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-                  </svg>
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                </Button>
-                <div className="text-sm text-muted-foreground px-2">
-                  Zoom: 100%
+        <Tabs defaultValue="component" className="w-full">
+          <div className="border-b border-border bg-muted px-4">
+            <TabsList className="bg-transparent">
+              <TabsTrigger value="component" className="data-[state=active]:bg-background">
+                <Boxes className="w-4 h-4 mr-2" />
+                Component Diagram
+              </TabsTrigger>
+              <TabsTrigger value="class" className="data-[state=active]:bg-background">
+                <FileCode className="w-4 h-4 mr-2" />
+                Class Diagram
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="component">
+            {/* Diagram Controls */}
+            <div className="p-4 border-b border-border bg-muted">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                      </svg>
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </Button>
+                    <div className="text-sm text-muted-foreground px-2">
+                      Zoom: 100%
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <Download className="mr-1 w-4 h-4" />
+                    Export PNG
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <Code className="mr-1 w-4 h-4" />
+                    Export SVG
+                  </Button>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  const event = new CustomEvent('exportDiagram', { detail: { format: 'png' } });
-                  window.dispatchEvent(event);
-                }}
-              >
-                <Download className="mr-1 w-4 h-4" />
-                Export PNG
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  const event = new CustomEvent('exportDiagram', { detail: { format: 'svg' } });
-                  window.dispatchEvent(event);
-                }}
-              >
-                <Code className="mr-1 w-4 h-4" />
-                Export SVG
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        <DiagramCanvasX6 
-          type="component" 
-          analysisData={analysisData} 
-        />
+            <DiagramCanvasX6 
+              type="component" 
+              analysisData={analysisData} 
+            />
+          </TabsContent>
+
+          <TabsContent value="class">
+            <div className="p-4 border-b border-border bg-muted">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  UML Class Diagram generated with Python Graphviz
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      window.open(`/api/projects/${project.id}/diagrams/class?format=png`, '_blank');
+                    }}
+                    data-testid="button-export-class-png"
+                  >
+                    <Download className="mr-1 w-4 h-4" />
+                    Export PNG
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      window.open(`/api/projects/${project.id}/diagrams/class?format=svg`, '_blank');
+                    }}
+                    data-testid="button-export-class-svg"
+                  >
+                    <Code className="mr-1 w-4 h-4" />
+                    Export SVG
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      window.open(`/api/projects/${project.id}/diagrams/class?format=pdf`, '_blank');
+                    }}
+                    data-testid="button-export-class-pdf"
+                  >
+                    <FileText className="mr-1 w-4 h-4" />
+                    Export PDF
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6" data-testid="class-diagram-container">
+              <img 
+                src={`/api/projects/${project.id}/diagrams/class?format=svg`} 
+                alt="UML Class Diagram" 
+                className="w-full h-auto border rounded"
+                data-testid="img-class-diagram"
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </Card>
 
       {/* Analysis Details */}
