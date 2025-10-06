@@ -364,17 +364,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Zenagent Banner */}
-      <div className="flex justify-center py-4 bg-white">
-        <div className="w-[60%] h-[30vw] max-h-60">
-          <img 
-            src={zenagentBanner} 
-            alt="Zengent AI Agents" 
-            className="w-full h-full object-contain rounded-lg"
-          />
-        </div>
-      </div>
-
       <div className="container mx-auto px-6 py-8">
         {appState === 'upload' && !selectedProjectType && (
           <div className="max-w-6xl mx-auto">
