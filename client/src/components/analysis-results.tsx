@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DiagramCanvasX6 from "@/components/diagram-canvas-x6";
 import MermaidClassDiagram from "@/components/mermaid-class-diagram";
+import MermaidFlowDiagram from "@/components/mermaid-flow-diagram";
+import MermaidSequenceDiagram from "@/components/mermaid-sequence-diagram";
+import DemographicScanTab from "@/components/demographic-scan-tab";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
 import { 
@@ -28,7 +31,9 @@ import {
   FileText,
   Shield,
   Leaf,
-  Cog
+  Cog,
+  GitBranch,
+  Activity
 } from "lucide-react";
 import type { DiagramType } from "@/types/analysis";
 
@@ -230,19 +235,43 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
           </div>
         </div>
 
-        <Tabs defaultValue="component" className="w-full">
+        <Tabs defaultValue="flow" className="w-full">
           <div className="border-b border-border bg-muted px-4">
             <TabsList className="bg-transparent">
+              <TabsTrigger value="flow" className="data-[state=active]:bg-background">
+                <GitBranch className="w-4 h-4 mr-2" />
+                Flow Diagram
+              </TabsTrigger>
               <TabsTrigger value="component" className="data-[state=active]:bg-background">
                 <Boxes className="w-4 h-4 mr-2" />
                 Component Diagram
+              </TabsTrigger>
+              <TabsTrigger value="sequence" className="data-[state=active]:bg-background">
+                <Activity className="w-4 h-4 mr-2" />
+                Sequence Diagram
               </TabsTrigger>
               <TabsTrigger value="class" className="data-[state=active]:bg-background">
                 <FileCode className="w-4 h-4 mr-2" />
                 Class Diagram
               </TabsTrigger>
+              <TabsTrigger value="demographic" className="data-[state=active]:bg-background">
+                <Database className="w-4 h-4 mr-2" />
+                Demographic Scan
+              </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="flow">
+            <div className="p-4 border-b border-border bg-muted">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Flow Diagram (Flowchart) - Shows application request flow and data processing
+                </div>
+              </div>
+            </div>
+
+            <MermaidFlowDiagram analysisData={analysisData} />
+          </TabsContent>
 
           <TabsContent value="component">
             {/* Diagram Controls */}
@@ -303,6 +332,18 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             />
           </TabsContent>
 
+          <TabsContent value="sequence">
+            <div className="p-4 border-b border-border bg-muted">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Sequence Diagram - Shows interaction flow between components over time
+                </div>
+              </div>
+            </div>
+
+            <MermaidSequenceDiagram analysisData={analysisData} />
+          </TabsContent>
+
           <TabsContent value="class">
             <div className="p-4 border-b border-border bg-muted">
               <div className="flex items-center justify-between">
@@ -313,6 +354,10 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
             </div>
 
             <MermaidClassDiagram analysisData={analysisData} />
+          </TabsContent>
+
+          <TabsContent value="demographic">
+            <DemographicScanTab projectId={project.id} />
           </TabsContent>
         </Tabs>
       </Card>
