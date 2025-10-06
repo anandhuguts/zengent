@@ -14,10 +14,8 @@ import {
   FileText, 
   Users, 
   GitBranch,
-  FolderTree,
   Bug,
   Shield,
-  FileCode,
   Activity,
   Layers,
   BookOpen,
@@ -41,11 +39,6 @@ export default function ComprehensiveAnalysis({ project }: ComprehensiveAnalysis
 
   const { data: swaggerData } = useQuery({
     queryKey: ['/api/projects', project.id, 'swagger'],
-    enabled: !!project.id,
-  });
-
-  const { data: structureData } = useQuery({
-    queryKey: ['/api/projects', project.id, 'structure'],
     enabled: !!project.id,
   });
 
@@ -86,32 +79,6 @@ export default function ComprehensiveAnalysis({ project }: ComprehensiveAnalysis
     }
   };
 
-  const renderProjectStructure = (directories: any[], level = 0) => {
-    return directories.map((item, index) => (
-      <div key={index} className={`ml-${level * 4}`}>
-        <div className="flex items-center space-x-2 py-1">
-          {item.type === 'directory' ? (
-            <FolderTree className="w-4 h-4 text-blue-500" />
-          ) : (
-            <FileCode className="w-4 h-4 text-gray-500" />
-          )}
-          <span className={`text-sm ${item.importance === 'high' ? 'font-semibold' : ''}`}>
-            {item.name}
-          </span>
-          <Badge variant="outline" className="text-xs">
-            {item.importance}
-          </Badge>
-        </div>
-        {item.description && (
-          <div className={`ml-6 text-xs text-gray-600 mb-2`}>
-            {item.description}
-          </div>
-        )}
-        {item.children && renderProjectStructure(item.children, level + 1)}
-      </div>
-    ));
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -123,11 +90,10 @@ export default function ComprehensiveAnalysis({ project }: ComprehensiveAnalysis
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="sonar">Code Quality</TabsTrigger>
               <TabsTrigger value="api">API Docs</TabsTrigger>
-              <TabsTrigger value="structure">Structure</TabsTrigger>
               <TabsTrigger value="modules">Modules</TabsTrigger>
               <TabsTrigger value="technology">Technology</TabsTrigger>
             </TabsList>
@@ -396,72 +362,6 @@ export default function ComprehensiveAnalysis({ project }: ComprehensiveAnalysis
                     </div>
                   </CardContent>
                 </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="structure" className="space-y-6">
-              {structureData && (
-                <>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Project Structure Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">{structureData.fileCount}</div>
-                          <div className="text-sm text-gray-600">Total Files</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{structureData.directoryCount}</div>
-                          <div className="text-sm text-gray-600">Directories</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-600">{structureData.buildFiles?.length || 0}</div>
-                          <div className="text-sm text-gray-600">Build Files</div>
-                        </div>
-                      </div>
-                      
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h4 className="font-semibold mb-3">Directory Structure</h4>
-                        <div className="space-y-1">
-                          {renderProjectStructure(structureData.directories)}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {structureData.buildFiles && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Build Configuration</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {structureData.buildFiles.map((buildFile: any, index: number) => (
-                            <div key={index} className="border rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="font-semibold">{buildFile.name}</h4>
-                                <Badge variant="secondary">{buildFile.type.toUpperCase()}</Badge>
-                              </div>
-                              <div className="text-sm text-gray-600 mb-3">{buildFile.purpose}</div>
-                              <div>
-                                <span className="text-sm font-medium">Dependencies: </span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {buildFile.dependencies?.map((dep: string, depIndex: number) => (
-                                    <Badge key={depIndex} variant="outline" className="text-xs">
-                                      {dep}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </>
               )}
             </TabsContent>
 
