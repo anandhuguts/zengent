@@ -50,9 +50,7 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
   });
 
   const scanMutation = useMutation({
-    mutationFn: () => apiRequest(`/api/projects/${projectId}/scan-demographics`, {
-      method: 'POST',
-    }),
+    mutationFn: () => apiRequest('POST', `/api/projects/${projectId}/scan-demographics`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'demographics'] });
       toast({
