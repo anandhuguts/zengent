@@ -68,19 +68,20 @@ interface AIModelConfig {
 interface JavaClass {
   name: string;
   package: string;
-  type: 'controller' | 'service' | 'repository' | 'entity' | 'component' | 'configuration' | 'other';
+  type: 'controller' | 'service' | 'repository' | 'entity' | 'config' | 'component' | 'model';
   annotations: string[];
-  methods: JavaMethod[];
-  fields: JavaField[];
+  methods?: JavaMethod[];
+  fields?: JavaField[];
   extends?: string;
-  implements: string[];
+  implements?: string[];
+  dependencies?: string[];
 }
 
 interface JavaMethod {
   name: string;
   annotations: string[];
-  parameters: string[];
-  returnType: string;
+  parameters?: string[];
+  returnType?: string;
 }
 
 interface JavaField {
@@ -90,13 +91,10 @@ interface JavaField {
 }
 
 interface AIInsight {
-  id: string;
-  type: 'overview' | 'module_description' | 'function_description' | 'architecture_suggestion';
-  title: string;
-  content: string;
-  confidence: number;
-  tags: string[];
-  relatedComponents: string[];
+  description: string;
+  components: string[];
+  patterns: string[];
+  suggestions: string[];
 }
 
 interface ProjectDetails {
@@ -194,14 +192,17 @@ export class AIAnalysisService {
     
     // Generate basic insights without AI
     analysisData.classes.slice(0, 5).forEach(javaClass => {
+      const methodCount = javaClass.methods?.length || 0;
+      const fieldCount = javaClass.fields?.length || 0;
+      
       moduleInsights[javaClass.name] = {
-        id: javaClass.name,
-        type: 'module_description',
-        title: `${javaClass.name} Analysis`,
-        content: `This ${javaClass.type} class contains ${javaClass.methods.length} methods and ${javaClass.fields.length} fields. Located in package ${javaClass.package}.`,
-        confidence: 0.7,
-        tags: [javaClass.type, javaClass.package.split('.').pop() || 'unknown'],
-        relatedComponents: javaClass.implements
+        description: `## ${javaClass.name}\n\nThis **${javaClass.type}** class is located in the \`${javaClass.package}\` package.\n\n### Structure\n- **Methods**: ${methodCount}\n- **Fields**: ${fieldCount}\n- **Annotations**: ${javaClass.annotations.join(', ') || 'None'}\n\n### Purpose\nThis class serves as a ${javaClass.type} component in the application architecture.`,
+        components: javaClass.dependencies || [],
+        patterns: [javaClass.type.charAt(0).toUpperCase() + javaClass.type.slice(1) + ' Pattern'],
+        suggestions: [
+          methodCount > 10 ? 'Consider breaking down this class into smaller, more focused components' : 'Class size is appropriate',
+          javaClass.annotations.length === 0 ? 'Add appropriate annotations for better framework integration' : 'Annotations are properly configured'
+        ]
       };
     });
     
@@ -353,6 +354,10 @@ export class AIAnalysisService {
   }
 
   private async analyzeModule(javaClass: JavaClass, context: AnalysisData): Promise<AIInsight> {
+    if (!this.openai) {
+      return this.generateRuleBasedModuleInsight(javaClass, context);
+    }
+    
     const prompt = this.buildModuleAnalysisPrompt(javaClass, context);
     
     try {
@@ -392,13 +397,10 @@ export class AIAnalysisService {
       const content = response.choices[0].message.content || `Analysis for ${javaClass.name}`;
       
       return {
-        id: `${javaClass.name}-analysis`,
-        type: this.determineInsightType(javaClass),
-        title: `${javaClass.name} Analysis`,
-        content,
-        confidence: 0.85,
-        tags: this.extractTags(javaClass),
-        relatedComponents: this.findRelatedComponents(javaClass, context)
+        description: content,
+        components: this.findRelatedComponents(javaClass, context),
+        patterns: this.extractPatterns(javaClass),
+        suggestions: this.generateModuleSuggestions(javaClass)
       };
     } catch (error) {
       console.error('OpenAI API error for module analysis:', error);
@@ -407,6 +409,10 @@ export class AIAnalysisService {
   }
 
   private async generateArchitectureInsights(analysisData: AnalysisData, customPrompt?: string): Promise<string[]> {
+    if (!this.openai) {
+      return this.generateRuleBasedArchitectureInsights(analysisData);
+    }
+    
     try {
       let prompt = `Analyze this Java project architecture and provide 3-5 key architectural insights:
 
@@ -447,6 +453,10 @@ Please provide specific insights about architecture patterns, design quality, an
   }
 
   private async generateSuggestions(analysisData: AnalysisData, customPrompt?: string): Promise<string[]> {
+    if (!this.openai) {
+      return this.generateRuleBasedSuggestions(analysisData);
+    }
+    
     try {
       let prompt = `Review this Java project and provide 3-5 specific improvement suggestions:
 
@@ -505,7 +515,7 @@ Project Statistics:
 - Relationships: ${analysisData.relationships.length}
 
 Key Classes:
-${analysisData.classes.slice(0, 5).map(c => `- ${c.name} (${c.type}): ${c.methods.length} methods`).join('\n')}
+${analysisData.classes.slice(0, 5).map(c => `- ${c.name} (${c.type}): ${c.methods?.length || 0} methods`).join('\n')}
 
 Please provide a detailed overview of the project's architecture, main patterns used, and overall design quality.`;
 
@@ -525,11 +535,11 @@ Class: ${javaClass.name}
 Package: ${javaClass.package}
 Type: ${javaClass.type}
 Annotations: ${javaClass.annotations.join(', ')}
-Methods: ${javaClass.methods.length}
-Fields: ${javaClass.fields.length}
+Methods: ${javaClass.methods?.length || 0}
+Fields: ${javaClass.fields?.length || 0}
 
 Key Methods:
-${javaClass.methods.slice(0, 3).map(m => `- ${m.name}(${m.parameters.join(', ')}): ${m.returnType}`).join('\n')}
+${(javaClass.methods || []).slice(0, 3).map(m => `- ${m.name}(${(m.parameters || []).join(', ')}): ${m.returnType || 'void'}`).join('\n')}
 
 Related Classes: ${relatedClasses.slice(0, 3).join(', ')}
 
@@ -605,7 +615,7 @@ Please provide specific insights about this class's role, responsibilities, desi
       suggestions.push("Consider adding repository layer for better data access abstraction");
     }
     
-    const largeClasses = analysisData.classes.filter(c => c.methods.length > 20);
+    const largeClasses = analysisData.classes.filter(c => (c.methods?.length || 0) > 20);
     if (largeClasses.length > 0) {
       suggestions.push(`Consider refactoring large classes: ${largeClasses.map(c => c.name).join(', ')}`);
     }
@@ -614,49 +624,72 @@ Please provide specific insights about this class's role, responsibilities, desi
   }
 
   private generateRuleBasedModuleInsight(javaClass: JavaClass, context: AnalysisData): AIInsight {
-    let content = `${javaClass.name} is a ${javaClass.type} class in the ${javaClass.package} package. `;
+    const methodCount = javaClass.methods?.length || 0;
+    const fieldCount = javaClass.fields?.length || 0;
+    
+    let description = `## ${javaClass.name}\n\n`;
+    description += `This **${javaClass.type}** class is located in the \`${javaClass.package}\` package.\n\n`;
     
     if (javaClass.annotations.length > 0) {
-      content += `It uses annotations: ${javaClass.annotations.join(', ')}. `;
+      description += `### Annotations\n`;
+      description += javaClass.annotations.map(a => `- \`${a}\``).join('\n') + '\n\n';
     }
     
-    content += `This class contains ${javaClass.methods.length} methods and ${javaClass.fields.length} fields.`;
+    description += `### Structure\n`;
+    description += `- **Methods**: ${methodCount}\n`;
+    description += `- **Fields**: ${fieldCount}\n\n`;
+    description += `### Role\n`;
+    description += `This class serves as a ${javaClass.type} component in the application architecture.`;
     
     return {
-      id: `${javaClass.name}-analysis`,
-      type: this.determineInsightType(javaClass),
-      title: `${javaClass.name} Analysis`,
-      content,
-      confidence: 0.7,
-      tags: this.extractTags(javaClass),
-      relatedComponents: this.findRelatedComponents(javaClass, context)
+      description,
+      components: this.findRelatedComponents(javaClass, context),
+      patterns: this.extractPatterns(javaClass),
+      suggestions: this.generateModuleSuggestions(javaClass)
     };
   }
 
-  private determineInsightType(javaClass: JavaClass): AIInsight['type'] {
-    if (javaClass.type === 'controller' || javaClass.type === 'service') {
-      return 'module_description';
+  private extractPatterns(javaClass: JavaClass): string[] {
+    const patterns: string[] = [];
+    
+    if (javaClass.type === 'controller') {
+      patterns.push('MVC Pattern', 'RESTful API');
+    } else if (javaClass.type === 'service') {
+      patterns.push('Service Layer Pattern', 'Business Logic Separation');
+    } else if (javaClass.type === 'repository') {
+      patterns.push('Repository Pattern', 'Data Access Layer');
+    } else if (javaClass.type === 'entity') {
+      patterns.push('Domain Model', 'JPA Entity');
     }
-    return 'function_description';
+    
+    if (javaClass.annotations.some(a => a.includes('Transactional'))) {
+      patterns.push('Transaction Management');
+    }
+    
+    return patterns.length > 0 ? patterns : ['Standard Component'];
   }
 
-  private extractTags(javaClass: JavaClass): string[] {
-    const tags: string[] = [javaClass.type];
+  private generateModuleSuggestions(javaClass: JavaClass): string[] {
+    const suggestions: string[] = [];
+    const methodCount = javaClass.methods?.length || 0;
     
-    if (javaClass.annotations.some(a => a.includes('Controller'))) {
-      tags.push('web-layer');
-    }
-    if (javaClass.annotations.some(a => a.includes('Service'))) {
-      tags.push('business-logic');
-    }
-    if (javaClass.annotations.some(a => a.includes('Repository'))) {
-      tags.push('data-access');
-    }
-    if (javaClass.annotations.some(a => a.includes('Entity'))) {
-      tags.push('data-model');
+    if (methodCount > 15) {
+      suggestions.push('Consider breaking this class into smaller, more focused components');
     }
     
-    return tags;
+    if (javaClass.annotations.length === 0) {
+      suggestions.push('Add appropriate Spring annotations for better framework integration');
+    }
+    
+    if (javaClass.type === 'service' && methodCount < 3) {
+      suggestions.push('Service class has few methods - consider if it provides sufficient abstraction');
+    }
+    
+    if (suggestions.length === 0) {
+      suggestions.push('Class structure follows best practices');
+    }
+    
+    return suggestions;
   }
 
   private findRelatedComponents(javaClass: JavaClass, context: AnalysisData): string[] {
@@ -688,7 +721,7 @@ Please provide specific insights about this class's role, responsibilities, desi
     }
     
     // Class size distribution
-    const averageMethodsPerClass = analysisData.classes.reduce((sum, c) => sum + c.methods.length, 0) / analysisData.classes.length;
+    const averageMethodsPerClass = analysisData.classes.reduce((sum, c) => sum + (c.methods?.length || 0), 0) / analysisData.classes.length;
     if (averageMethodsPerClass <= 15) {
       score += 15; // Reasonable class sizes
     }

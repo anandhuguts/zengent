@@ -613,13 +613,15 @@ Example: 'Focus on security vulnerabilities and performance bottlenecks' or 'Ana
             <div>
               <h3 className="text-lg font-semibold mb-4">Module Insights</h3>
               <ScrollArea className="h-96">
-                {aiAnalysis?.moduleInsights ? Object.entries(aiAnalysis.moduleInsights).map(([moduleName, insight]) => (
-                  <AIInsightCard
-                    key={moduleName}
-                    moduleName={moduleName}
-                    insight={insight}
-                  />
-                )) : (
+                {aiAnalysis?.moduleInsights && Object.keys(aiAnalysis.moduleInsights).length > 0 ? (
+                  Object.entries(aiAnalysis.moduleInsights).map(([moduleName, insight]) => (
+                    <AIInsightCard
+                      key={moduleName}
+                      moduleName={moduleName}
+                      insight={insight}
+                    />
+                  ))
+                ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Code className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Generate AI analysis to see module insights</p>
