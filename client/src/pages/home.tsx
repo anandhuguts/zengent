@@ -347,13 +347,13 @@ export default function Home() {
         <div className="bg-white font-sans text-foreground min-h-screen">
 
       {/* C360 Integration Process */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-8">
+      <div className="bg-white py-6">
         <div className="container mx-auto px-6">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+          <h2 className="text-xl font-bold text-center text-gray-900 mb-4">
             End to End C360 Integration - Discovery to Deployment
           </h2>
           <div className="flex justify-center">
-            <div className="w-full max-w-5xl bg-white rounded-lg shadow-lg p-4">
+            <div className="w-full max-w-3xl">
               <img 
                 src={c360ProcessImage} 
                 alt="End to End C360 Integration Process" 
