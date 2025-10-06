@@ -28,6 +28,7 @@ import agentLogo from "@assets/agent_1754854183020.png";
 import pythonLogo from "@assets/pyth_1754703124415.png";
 import pysparkLogo from "@assets/pyspark-lang_1754703714412.png";
 import ibmLogo from "@assets/ibm_1754703124415.png";
+import c360ProcessImage from "@assets/image_1759751581406.png";
 
 type AppState = 'upload' | 'processing' | 'results';
 type ProjectType = 'java' | 'pyspark' | 'mainframe' | 'python' | 'responsible-ai' | 'code-lens' | 'match-lens' | 'validator' | 'zenvector' | 'knowledge' | 'datalens' | 'codeshift';
@@ -345,7 +346,23 @@ export default function Home() {
       <Layout aiConfigButton={aiConfigButton}>
         <div className="bg-white font-sans text-foreground min-h-screen">
 
-
+      {/* C360 Integration Process */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-8">
+        <div className="container mx-auto px-6">
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+            End to End C360 Integration - Discovery to Deployment
+          </h2>
+          <div className="flex justify-center">
+            <div className="w-full max-w-5xl bg-white rounded-lg shadow-lg p-4">
+              <img 
+                src={c360ProcessImage} 
+                alt="End to End C360 Integration Process" 
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Zenagent Banner */}
       <div className="flex justify-center py-4 bg-white">
