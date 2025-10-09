@@ -54,6 +54,27 @@ export async function analyzeJavaProject(projectId: string, zipBuffer: Buffer): 
     // Analyze Java files
     const analysisData = await performAnalysis(javaFiles, tempDir);
     
+    // Store source files in database before cleanup
+    const sourceFilesToStore = javaFiles.map(filePath => {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const relativePath = path.relative(tempDir, filePath);
+      const fileSize = Buffer.byteLength(content, 'utf-8');
+      
+      return {
+        projectId,
+        relativePath,
+        content,
+        fileSize,
+        language: 'java',
+      };
+    });
+    
+    // Batch insert source files
+    if (sourceFilesToStore.length > 0) {
+      await storage.createSourceFiles(sourceFilesToStore);
+      console.log(`Stored ${sourceFilesToStore.length} source files for project ${projectId}`);
+    }
+    
     // Update project with analysis results
     await storage.updateProject(projectId, {
       status: 'completed',
