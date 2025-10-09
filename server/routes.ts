@@ -828,36 +828,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Project not found' });
       }
 
-      // Get project files from parsed data
-      const parsedData = project.parsedData as any;
-      const files: { path: string; content: string }[] = [];
-
-      // Extract file information from classes, methods, etc.
-      if (parsedData?.classes) {
-        console.log('[GET demographics] Total classes in parsed data:', parsedData.classes.length);
-        parsedData.classes.forEach((cls: any) => {
-          console.log('[GET demographics] Class:', cls.name, 'Fields:', cls.fields?.length || 0);
-          const content = [
-            `class ${cls.name} {`,
-            ...cls.fields?.map((f: any) => `  ${f.type} ${f.name};`) || [],
-            ...cls.methods?.map((m: any) => `  ${m.returnType || 'void'} ${m.name}();`) || [],
-            '}'
-          ].join('\n');
-          
-          console.log('[GET demographics] Generated content for', cls.name, ':', content);
-          
-          files.push({
-            path: `${cls.package || 'unknown'}/${cls.name}.java`,
-            content
-          });
+      // Get actual source files from database
+      const sourceFiles = await storage.getProjectSourceFiles(id);
+      
+      if (sourceFiles.length === 0) {
+        return res.json({
+          success: true,
+          projectId: id,
+          projectName: project.name,
+          report: {
+            summary: {
+              totalFiles: 0,
+              totalMatches: 0,
+              fieldsFound: 0,
+              scanDate: new Date().toISOString()
+            },
+            fieldResults: {},
+            coverage: {
+              foundFields: [],
+              missingFields: demographicScanner.getFieldDefinitions().map(f => f.fieldName)
+            }
+          }
         });
-      } else {
-        console.log('[GET demographics] No classes found in parsed data');
       }
 
-      console.log('[GET demographics] Files to scan:', files.length);
+      // Convert to format expected by scanner
+      const files = sourceFiles.map(sf => ({
+        path: sf.relativePath,
+        content: sf.content
+      }));
+
+      console.log(`[GET demographics] Scanning ${files.length} source files for project ${id}`);
       const scanReport = await demographicScanner.scanRepository(files);
-      console.log('[GET demographics] Scan report:', JSON.stringify(scanReport, null, 2));
       
       res.json({
         success: true,
@@ -880,27 +882,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Project not found' });
       }
 
-      // Get project files from parsed data
-      const parsedData = project.parsedData as any;
-      const files: { path: string; content: string }[] = [];
-
-      // Extract file information from classes, methods, etc.
-      if (parsedData?.classes) {
-        parsedData.classes.forEach((cls: any) => {
-          const content = [
-            `class ${cls.name} {`,
-            ...cls.fields?.map((f: any) => `  ${f.type} ${f.name};`) || [],
-            ...cls.methods?.map((m: any) => `  ${m.returnType || 'void'} ${m.name}();`) || [],
-            '}'
-          ].join('\n');
-          
-          files.push({
-            path: `${cls.package || 'unknown'}/${cls.name}.java`,
-            content
-          });
+      // Get actual source files from database
+      const sourceFiles = await storage.getProjectSourceFiles(id);
+      
+      if (sourceFiles.length === 0) {
+        return res.json({
+          success: true,
+          projectId: id,
+          projectName: project.name,
+          report: {
+            summary: {
+              totalFiles: 0,
+              totalMatches: 0,
+              fieldsFound: 0,
+              scanDate: new Date().toISOString()
+            },
+            fieldResults: {},
+            coverage: {
+              foundFields: [],
+              missingFields: demographicScanner.getFieldDefinitions().map(f => f.fieldName)
+            }
+          }
         });
       }
 
+      // Convert to format expected by scanner
+      const files = sourceFiles.map(sf => ({
+        path: sf.relativePath,
+        content: sf.content
+      }));
+
+      console.log(`[POST demographics] Scanning ${files.length} source files for project ${id}`);
       const scanReport = await demographicScanner.scanRepository(files);
       
       res.json({

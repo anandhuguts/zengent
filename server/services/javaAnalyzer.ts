@@ -54,6 +54,9 @@ export async function analyzeJavaProject(projectId: string, zipBuffer: Buffer): 
     // Analyze Java files
     const analysisData = await performAnalysis(javaFiles, tempDir);
     
+    // Delete existing source files for this project to avoid duplicates on re-analysis
+    await storage.deleteProjectSourceFiles(projectId);
+    
     // Store source files in database before cleanup
     const sourceFilesToStore = javaFiles.map(filePath => {
       const content = fs.readFileSync(filePath, 'utf-8');
