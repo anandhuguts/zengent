@@ -59,6 +59,19 @@ export const projects = pgTable("projects", {
   description: text("description"),
 });
 
+// Source files table for storing actual source code content
+export const sourceFiles = pgTable("source_files", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  relativePath: text("relative_path").notNull(),
+  content: text("content").notNull(), // Actual source code content
+  fileSize: integer("file_size").notNull(),
+  language: text("language").default("java"), // 'java' | 'python' | 'scala' | 'cobol' etc.
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_source_files_project_id").on(table.projectId),
+]);
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -66,6 +79,9 @@ export type UpsertUser = typeof users.$inferInsert;
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = typeof projects.$inferInsert;
+
+export type SourceFile = typeof sourceFiles.$inferSelect;
+export type InsertSourceFile = typeof sourceFiles.$inferInsert;
 
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -95,6 +111,13 @@ export const githubProjectSchema = z.object({
 });
 
 export type GithubProject = z.infer<typeof githubProjectSchema>;
+
+export const insertSourceFileSchema = createInsertSchema(sourceFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSourceFileInput = z.infer<typeof insertSourceFileSchema>;
 
 // Analysis Data Types
 export interface JavaClass {

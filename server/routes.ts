@@ -834,7 +834,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Extract file information from classes, methods, etc.
       if (parsedData?.classes) {
+        console.log('[GET demographics] Total classes in parsed data:', parsedData.classes.length);
         parsedData.classes.forEach((cls: any) => {
+          console.log('[GET demographics] Class:', cls.name, 'Fields:', cls.fields?.length || 0);
           const content = [
             `class ${cls.name} {`,
             ...cls.fields?.map((f: any) => `  ${f.type} ${f.name};`) || [],
@@ -842,14 +844,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             '}'
           ].join('\n');
           
+          console.log('[GET demographics] Generated content for', cls.name, ':', content);
+          
           files.push({
             path: `${cls.package || 'unknown'}/${cls.name}.java`,
             content
           });
         });
+      } else {
+        console.log('[GET demographics] No classes found in parsed data');
       }
 
+      console.log('[GET demographics] Files to scan:', files.length);
       const scanReport = await demographicScanner.scanRepository(files);
+      console.log('[GET demographics] Scan report:', JSON.stringify(scanReport, null, 2));
       
       res.json({
         success: true,
