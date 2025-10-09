@@ -1,11 +1,13 @@
 import {
   users,
   projects,
+  sourceFiles,
   type User,
   type InsertUser,
   type Project,
   type InsertProject,
-
+  type SourceFile,
+  type InsertSourceFile,
   type AIModelConfig,
 } from "@shared/schema";
 import { db } from "./db";
@@ -30,6 +32,12 @@ export interface IStorage {
   
   // GitHub operations
   createGithubProject(githubData: GithubProject): Promise<Project>;
+  
+  // Source file operations
+  createSourceFile(sourceFile: InsertSourceFile): Promise<SourceFile>;
+  createSourceFiles(sourceFiles: InsertSourceFile[]): Promise<SourceFile[]>;
+  getProjectSourceFiles(projectId: string): Promise<SourceFile[]>;
+  deleteProjectSourceFiles(projectId: string): Promise<boolean>;
   
   // AI Configuration
   getAIConfig(): Promise<AIModelConfig>;
@@ -115,6 +123,27 @@ export class DatabaseStorage implements IStorage {
     };
     
     return this.createProject(projectData);
+  }
+
+  // Source file operations
+  async createSourceFile(sourceFile: InsertSourceFile): Promise<SourceFile> {
+    const [newSourceFile] = await db.insert(sourceFiles).values(sourceFile).returning();
+    return newSourceFile;
+  }
+
+  async createSourceFiles(sourceFileList: InsertSourceFile[]): Promise<SourceFile[]> {
+    if (sourceFileList.length === 0) return [];
+    const created = await db.insert(sourceFiles).values(sourceFileList).returning();
+    return created;
+  }
+
+  async getProjectSourceFiles(projectId: string): Promise<SourceFile[]> {
+    return await db.select().from(sourceFiles).where(eq(sourceFiles.projectId, projectId));
+  }
+
+  async deleteProjectSourceFiles(projectId: string): Promise<boolean> {
+    const result = await db.delete(sourceFiles).where(eq(sourceFiles.projectId, projectId));
+    return result.rowCount > 0;
   }
 
   // AI Configuration
