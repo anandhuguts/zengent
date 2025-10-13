@@ -215,11 +215,13 @@ function parseJavaFile(content: string, filePath: string): AnalysisData['classes
 
 function extractAnnotations(content: string): string[] {
   const annotations: string[] = [];
-  const annotationRegex = /@(\w+)(?:\([^)]*\))?/g;
+  const annotationRegex = /@(\w+)(\([^)]*\))?/g;
   let match;
   
   while ((match = annotationRegex.exec(content)) !== null) {
-    annotations.push(`@${match[1]}`);
+    // Include the full annotation with parameters if present
+    const fullAnnotation = `@${match[1]}${match[2] || ''}`;
+    annotations.push(fullAnnotation);
   }
   
   return Array.from(new Set(annotations)); // Remove duplicates
