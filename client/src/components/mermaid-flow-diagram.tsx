@@ -75,9 +75,10 @@ export default function MermaidFlowDiagram({ analysisData }: MermaidFlowDiagramP
 }
 
 function generateFlowchart(analysisData: AnalysisData): string {
-  const controllers = analysisData.classes.filter(c => c.type === 'controller').slice(0, 8);
-  const services = analysisData.classes.filter(c => c.type === 'service').slice(0, 8);
-  const repositories = analysisData.classes.filter(c => c.type === 'repository').slice(0, 8);
+  // Show ALL analyzed components, not just a subset
+  const controllers = analysisData.classes.filter(c => c.type === 'controller');
+  const services = analysisData.classes.filter(c => c.type === 'service');
+  const repositories = analysisData.classes.filter(c => c.type === 'repository');
   
   let flowchart = 'flowchart TB\n';
   

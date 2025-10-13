@@ -63,8 +63,8 @@ export default function MermaidClassDiagram({ analysisData }: MermaidClassDiagra
 function generateMermaidClassDiagram(analysisData: AnalysisData): string {
   const lines: string[] = ['classDiagram'];
 
-  // Limit number of classes for better rendering
-  const classesToShow = analysisData.classes.slice(0, 15);
+  // Show all analyzed classes from the source code
+  const classesToShow = analysisData.classes.slice(0, 30); // Increased limit to show more actual classes
 
   // Add classes with their members
   classesToShow.forEach(cls => {
