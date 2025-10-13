@@ -91,7 +91,7 @@ function generateSequenceDiagram(analysisData: AnalysisData): string {
   const flows = findActualFlows(analysisData);
   
   if (flows.length > 0) {
-    // Use the first identified flow
+    // Use the first identified flow (most representative)
     const flow = flows[0];
     
     // Add participants based on actual flow
