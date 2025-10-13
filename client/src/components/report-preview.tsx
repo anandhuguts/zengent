@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Download, FileText, X } from "lucide-react";
 import type { Project, AnalysisData } from "@shared/schema";
 import { htmlExportService } from "@/services/htmlExportService";
-import html2canvas from "html2canvas";
+import { generateAllDiagramImages, type DiagramImages } from "@/services/diagramExportService";
 
 interface ReportPreviewProps {
   open: boolean;
@@ -30,10 +30,12 @@ export default function ReportPreview({
 }: ReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
-  const [flowDiagramImage, setFlowDiagramImage] = useState<string | null>(null);
-  const [componentDiagramImage, setComponentDiagramImage] = useState<string | null>(null);
-  const [sequenceDiagramImage, setSequenceDiagramImage] = useState<string | null>(null);
-  const [classDiagramImage, setClassDiagramImage] = useState<string | null>(null);
+  const [diagramImages, setDiagramImages] = useState<DiagramImages>({
+    flow: null,
+    component: null,
+    sequence: null,
+    class: null
+  });
 
   const aiInsights = analysisData.aiAnalysis;
   const projectDetails = aiInsights?.projectDetails;
@@ -56,43 +58,9 @@ export default function ReportPreview({
 
   const captureDiagrams = async () => {
     try {
-      // Helper function to capture SVG diagram as image
-      const captureSvgDiagram = async (selector: string): Promise<string | null> => {
-        const element = document.querySelector(selector);
-        if (element) {
-          const canvas = await html2canvas(element as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            logging: false
-          });
-          return canvas.toDataURL('image/png');
-        }
-        return null;
-      };
-
-      // Capture Flow Diagram (Mermaid)
-      const flowDiagram = await captureSvgDiagram('.mermaid-container svg');
-      if (flowDiagram) setFlowDiagramImage(flowDiagram);
-
-      // Capture Component Diagram (AntV X6)
-      const componentDiagram = await captureSvgDiagram('[data-testid="diagram-component"] .x6-graph-svg');
-      if (componentDiagram) setComponentDiagramImage(componentDiagram);
-
-      // Give time for tab switches to render other diagrams
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Capture Sequence Diagram (Mermaid)
-      const sequenceDiagram = await captureSvgDiagram('.mermaid-container svg');
-      if (sequenceDiagram && sequenceDiagram !== flowDiagram) {
-        setSequenceDiagramImage(sequenceDiagram);
-      }
-
-      // Capture Class Diagram (Mermaid)
-      const classDiagram = await captureSvgDiagram('.mermaid-container svg');
-      if (classDiagram && classDiagram !== flowDiagram && classDiagram !== sequenceDiagram) {
-        setClassDiagramImage(classDiagram);
-      }
+      // Generate all diagram images using the diagram export service
+      const images = await generateAllDiagramImages(analysisData);
+      setDiagramImages(images);
     } catch (error) {
       console.error('Error capturing diagrams:', error);
     }
@@ -339,9 +307,9 @@ export default function ReportPreview({
               <p className="mb-4 text-muted-foreground">
                 The flow diagram illustrates the data and control flow through the application layers, showing how requests flow from controllers through services to repositories.
               </p>
-              {flowDiagramImage ? (
+              {diagramImages.flow ? (
                 <div className="mb-6 border rounded-lg overflow-hidden bg-white p-4">
-                  <img src={flowDiagramImage} alt="Flow Diagram" className="w-full" />
+                  <img src={diagramImages.flow} alt="Flow Diagram" className="w-full" />
                 </div>
               ) : (
                 <p className="mb-6 text-muted-foreground">Capturing flow diagram...</p>
@@ -351,9 +319,9 @@ export default function ReportPreview({
               <p className="mb-4 text-muted-foreground">
                 The component diagram shows the high-level architecture and relationships between system components, organized by architectural layers.
               </p>
-              {componentDiagramImage ? (
+              {diagramImages.component ? (
                 <div className="mb-6 border rounded-lg overflow-hidden bg-white p-4">
-                  <img src={componentDiagramImage} alt="Component Diagram" className="w-full" />
+                  <img src={diagramImages.component} alt="Component Diagram" className="w-full" />
                 </div>
               ) : (
                 <p className="mb-6 text-muted-foreground">Capturing component diagram...</p>
@@ -363,9 +331,9 @@ export default function ReportPreview({
               <p className="mb-4 text-muted-foreground">
                 The sequence diagram shows the interaction flow between components over time, demonstrating how different parts of the system communicate.
               </p>
-              {sequenceDiagramImage ? (
+              {diagramImages.sequence ? (
                 <div className="mb-6 border rounded-lg overflow-hidden bg-white p-4">
-                  <img src={sequenceDiagramImage} alt="Sequence Diagram" className="w-full" />
+                  <img src={diagramImages.sequence} alt="Sequence Diagram" className="w-full" />
                 </div>
               ) : (
                 <p className="mb-6 text-muted-foreground">Capturing sequence diagram...</p>
@@ -375,9 +343,9 @@ export default function ReportPreview({
               <p className="mb-4 text-muted-foreground">
                 The UML class diagram represents the static structure of the application, showing classes, their attributes, methods, and relationships.
               </p>
-              {classDiagramImage ? (
+              {diagramImages.class ? (
                 <div className="mb-6 border rounded-lg overflow-hidden bg-white p-4">
-                  <img src={classDiagramImage} alt="UML Class Diagram" className="w-full" />
+                  <img src={diagramImages.class} alt="UML Class Diagram" className="w-full" />
                 </div>
               ) : (
                 <p className="mb-6 text-muted-foreground">Capturing class diagram...</p>
