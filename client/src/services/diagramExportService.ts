@@ -345,36 +345,61 @@ function sanitizeName(name: string): string {
 }
 
 // Helper to render SVG to data URL
-async function svgToDataUrl(svg: string): Promise<string> {
+async function svgToDataUrl(svgString: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.innerHTML = svg;
-    document.body.appendChild(container);
-    
-    const svgElement = container.querySelector('svg');
-    if (!svgElement) {
-      document.body.removeChild(container);
-      reject(new Error('No SVG element found'));
-      return;
-    }
-    
-    html2canvas(svgElement as unknown as HTMLElement, {
-      backgroundColor: '#ffffff',
-      scale: 2,
-      useCORS: true,
-      logging: false
-    })
-      .then(canvas => {
+    try {
+      // Create a container to parse the SVG
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgString, 'image/svg+xml');
+      const svgElement = doc.documentElement;
+      
+      if (!svgElement || svgElement.nodeName !== 'svg') {
+        reject(new Error('Invalid SVG'));
+        return;
+      }
+      
+      // Get SVG dimensions
+      const svgWidth = svgElement.getAttribute('width') || '800';
+      const svgHeight = svgElement.getAttribute('height') || '600';
+      const width = parseInt(svgWidth);
+      const height = parseInt(svgHeight);
+      
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width * 2; // 2x for better quality
+      canvas.height = height * 2;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      // Fill white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Create image from SVG
+      const img = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/png');
-        document.body.removeChild(container);
+        URL.revokeObjectURL(url);
         resolve(dataUrl);
-      })
-      .catch(error => {
-        document.body.removeChild(container);
-        reject(error);
-      });
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load SVG image'));
+      };
+      
+      img.src = url;
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
