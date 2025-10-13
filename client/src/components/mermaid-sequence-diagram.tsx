@@ -229,52 +229,59 @@ function generateSequenceDiagram(analysisData: AnalysisData): string {
 function findActualFlows(analysisData: AnalysisData): any[] {
   const flows: any[] = [];
   const controllers = analysisData.classes.filter(c => c.type === 'controller');
+  const relationships = analysisData.relationships || [];
   
   controllers.forEach(controller => {
-    // Find services this controller depends on
-    const controllerDeps = controller.dependencies || [];
-    const services = analysisData.classes.filter(c => 
-      c.type === 'service' && controllerDeps.some(dep => dep.includes(c.name))
+    // Find services this controller calls (via relationships)
+    const controllerCalls = relationships.filter(r => 
+      r.from === controller.name && r.type === 'calls'
     );
     
-    services.forEach(service => {
-      // Find repositories this service depends on
-      const serviceDeps = service.dependencies || [];
-      const repositories = analysisData.classes.filter(c => 
-        c.type === 'repository' && serviceDeps.some(dep => dep.includes(c.name))
-      );
-      
-      if (repositories.length > 0) {
-        const repo = repositories[0];
-        // Find related entity
-        const entity = analysisData.entities?.find(e => 
-          repo.name.toLowerCase().includes(e.name.toLowerCase()) ||
-          e.name.toLowerCase().includes(repo.name.toLowerCase().replace('repository', ''))
+    const services = analysisData.classes.filter(c => 
+      c.type === 'service' && controllerCalls.some(call => call.to === c.name || call.to.includes(c.name))
+    );
+    
+    if (services.length > 0) {
+      services.forEach(service => {
+        // Find repositories this service calls
+        const serviceCalls = relationships.filter(r => 
+          r.from === service.name && r.type === 'calls'
         );
         
-        flows.push({
-          controller,
-          controllerMethod: controller.methods?.[0],
-          service,
-          serviceMethod: service.methods?.[0],
-          repository: repo,
-          repositoryMethod: repo.methods?.[0],
-          entity
-        });
-      } else {
-        flows.push({
-          controller,
-          controllerMethod: controller.methods?.[0],
-          service,
-          serviceMethod: service.methods?.[0]
-        });
-      }
-    });
-    
-    // If controller has no service dependencies, check for direct repository access
-    if (services.length === 0) {
+        const repositories = analysisData.classes.filter(c => 
+          c.type === 'repository' && serviceCalls.some(call => call.to === c.name || call.to.includes(c.name))
+        );
+        
+        if (repositories.length > 0) {
+          const repo = repositories[0];
+          // Find related entity
+          const entity = analysisData.entities?.find(e => 
+            repo.name.toLowerCase().includes(e.name.toLowerCase()) ||
+            e.name.toLowerCase().includes(repo.name.toLowerCase().replace('repository', ''))
+          );
+          
+          flows.push({
+            controller,
+            controllerMethod: controller.methods?.[0],
+            service,
+            serviceMethod: service.methods?.[0],
+            repository: repo,
+            repositoryMethod: repo.methods?.[0],
+            entity
+          });
+        } else {
+          flows.push({
+            controller,
+            controllerMethod: controller.methods?.[0],
+            service,
+            serviceMethod: service.methods?.[0]
+          });
+        }
+      });
+    } else {
+      // If controller has no service dependencies, check for direct repository access via relationships
       const repositories = analysisData.classes.filter(c => 
-        c.type === 'repository' && controllerDeps.some(dep => dep.includes(c.name))
+        c.type === 'repository' && controllerCalls.some(call => call.to === c.name || call.to.includes(c.name))
       );
       
       if (repositories.length > 0) {
@@ -283,6 +290,12 @@ function findActualFlows(analysisData: AnalysisData): any[] {
           controllerMethod: controller.methods?.[0],
           repository: repositories[0],
           repositoryMethod: repositories[0].methods?.[0]
+        });
+      } else {
+        // No relationships found - create basic flow for this controller
+        flows.push({
+          controller,
+          controllerMethod: controller.methods?.[0]
         });
       }
     }
