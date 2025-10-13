@@ -161,10 +161,15 @@ export class SwaggerGenerator {
     const mappings: RequestMapping[] = [];
     const controllers = analysisData.classes.filter(c => c.type === 'controller');
 
+    console.log('[SwaggerGenerator] Found controllers:', controllers.length);
+    
     controllers.forEach(controller => {
+      console.log('[SwaggerGenerator] Processing controller:', controller.name, 'annotations:', controller.annotations);
       const baseMapping = this.extractBaseMapping(controller);
+      console.log('[SwaggerGenerator] Base mapping:', baseMapping);
       
       controller.methods.forEach(method => {
+        console.log('[SwaggerGenerator] Processing method:', method.name, 'annotations:', method.annotations);
         const mapping = this.extractMethodMapping(method, controller, baseMapping);
         if (mapping) {
           mappings.push(mapping);
@@ -172,6 +177,7 @@ export class SwaggerGenerator {
       });
     });
 
+    console.log('[SwaggerGenerator] Total mappings extracted:', mappings.length);
     return mappings;
   }
 
@@ -363,6 +369,16 @@ export class SwaggerGenerator {
     const httpMethod = this.extractHttpMethod(annotation);
     const path = this.extractPath(annotation);
     const endpoint = `${baseMapping}${path}`.replace(/\/+/g, '/');
+
+    console.log('[SwaggerGenerator] Extracted mapping:', {
+      controller: controller.name,
+      method: method.name,
+      annotation,
+      httpMethod,
+      path,
+      baseMapping,
+      endpoint
+    });
 
     return {
       httpMethod,
