@@ -590,6 +590,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get API documentation with comprehensive details
+  app.get("/api/projects/:id/api-docs", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project || !project.analysisData) {
+        return res.status(404).json({ error: "Project not found or not analyzed" });
+      }
+
+      const requestMappings = swaggerGenerator.extractRequestMappings(project.analysisData);
+      
+      const endpoints = requestMappings.map(mapping => ({
+        apiName: `${mapping.controllerClass}.${mapping.controllerMethod}`,
+        httpMethod: mapping.httpMethod,
+        path: mapping.endpoint,
+        description: mapping.description,
+        requestParameters: mapping.parameters,
+        requestBody: mapping.parameters.some(p => p.location === 'body') 
+          ? JSON.stringify({ [mapping.controllerMethod]: "request data" }, null, 2)
+          : "",
+        responseBody: mapping.responseType !== 'void' 
+          ? JSON.stringify({ type: mapping.responseType }, null, 2)
+          : "",
+        statusCodes: [
+          { code: 200, description: "Success" },
+          { code: 400, description: "Bad Request" },
+          { code: 500, description: "Internal Server Error" }
+        ],
+        authRequired: true,
+        module: mapping.controllerClass
+      }));
+
+      res.json({ endpoints });
+    } catch (error) {
+      console.error('Error getting API documentation:', error);
+      res.status(500).json({ error: 'Failed to get API documentation' });
+    }
+  });
+
   // Generate UML class diagram using Python Graphviz
   app.get("/api/projects/:id/diagrams/class", async (req, res) => {
     try {

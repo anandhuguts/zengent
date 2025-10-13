@@ -12,6 +12,7 @@ import MermaidSequenceDiagram from "@/components/mermaid-sequence-diagram";
 import DemographicScanTab from "@/components/demographic-scan-tab";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
+import APIDocumentation from "@/pages/api-documentation";
 import { 
   FolderOpen, 
   Download, 
@@ -33,7 +34,8 @@ import {
   Leaf,
   Cog,
   GitBranch,
-  Activity
+  Activity,
+  BookOpen
 } from "lucide-react";
 import type { DiagramType } from "@/types/analysis";
 
@@ -258,6 +260,10 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
                 <Database className="w-4 h-4 mr-2" />
                 Demographic Scan
               </TabsTrigger>
+              <TabsTrigger value="api-docs" className="data-[state=active]:bg-background">
+                <BookOpen className="w-4 h-4 mr-2" />
+                API Documentation
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -358,6 +364,12 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
 
           <TabsContent value="demographic">
             <DemographicScanTab projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="api-docs">
+            <div className="p-6">
+              <APIDocumentation />
+            </div>
           </TabsContent>
         </Tabs>
       </Card>
