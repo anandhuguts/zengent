@@ -13,6 +13,7 @@ import DemographicScanTab from "@/components/demographic-scan-tab";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
 import DemographicReportPreview from "@/components/demographic-report-preview";
+import AIInsightsReportPreview from "@/components/ai-insights-report-preview";
 import { 
   FolderOpen, 
   Download, 
@@ -47,6 +48,7 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
   const [activeDiagram, setActiveDiagram] = useState<DiagramType>('flow');
   const [showReportPreview, setShowReportPreview] = useState(false);
   const [showDemographicReport, setShowDemographicReport] = useState(false);
+  const [showAIInsightsReport, setShowAIInsightsReport] = useState(false);
   const analysisData = project.analysisData as AnalysisData | null;
 
   // Fetch comprehensive analysis data
@@ -122,6 +124,16 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Demographic Report
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => setShowAIInsightsReport(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                data-testid="button-view-ai-insights-report"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                AI Insights
               </Button>
               <Button variant="ghost" size="sm">
                 <Share2 className="w-4 h-4" />
@@ -527,6 +539,13 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
       <DemographicReportPreview
         open={showDemographicReport}
         onClose={() => setShowDemographicReport(false)}
+        project={project}
+      />
+
+      {/* AI Insights Report Preview Dialog */}
+      <AIInsightsReportPreview
+        open={showAIInsightsReport}
+        onClose={() => setShowAIInsightsReport(false)}
         project={project}
       />
     </div>
