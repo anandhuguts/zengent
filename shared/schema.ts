@@ -72,6 +72,17 @@ export const sourceFiles = pgTable("source_files", {
   index("idx_source_files_project_id").on(table.projectId),
 ]);
 
+// Custom demographic patterns table
+export const customDemographicPatterns = pgTable("custom_demographic_patterns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category").notNull(),
+  fieldName: text("field_name").notNull(),
+  patterns: jsonb("patterns").notNull(), // Array of regex pattern strings
+  description: text("description").notNull(),
+  examples: jsonb("examples").notNull(), // Array of example strings
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -82,6 +93,9 @@ export type InsertProject = typeof projects.$inferInsert;
 
 export type SourceFile = typeof sourceFiles.$inferSelect;
 export type InsertSourceFile = typeof sourceFiles.$inferInsert;
+
+export type CustomDemographicPattern = typeof customDemographicPatterns.$inferSelect;
+export type InsertCustomDemographicPattern = typeof customDemographicPatterns.$inferInsert;
 
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).omit({

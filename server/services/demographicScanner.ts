@@ -577,6 +577,49 @@ export class DemographicScanner {
 
     return doc;
   }
+
+  /**
+   * Add a custom demographic pattern
+   */
+  addCustomPattern(pattern: DemographicField & { id?: string }): void {
+    this.demographicFields.push(pattern);
+  }
+
+  /**
+   * Remove a custom demographic pattern
+   */
+  removeCustomPattern(patternId: string): void {
+    this.demographicFields = this.demographicFields.filter(
+      (field: any) => field.id !== patternId
+    );
+  }
+
+  /**
+   * Initialize custom patterns from storage
+   */
+  async initializeCustomPatterns(patterns: Array<{ 
+    id: string; 
+    category: string; 
+    fieldName: string; 
+    patterns: any; 
+    description: string; 
+    examples: any; 
+  }>): Promise<void> {
+    for (const pattern of patterns) {
+      const regexPatterns = Array.isArray(pattern.patterns) 
+        ? pattern.patterns.map((p: string) => new RegExp(p, 'i'))
+        : [];
+      
+      this.addCustomPattern({
+        id: pattern.id,
+        category: pattern.category,
+        fieldName: pattern.fieldName,
+        patterns: regexPatterns,
+        description: pattern.description,
+        examples: Array.isArray(pattern.examples) ? pattern.examples : []
+      });
+    }
+  }
 }
 
 export const demographicScanner = new DemographicScanner();

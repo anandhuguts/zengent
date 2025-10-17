@@ -963,11 +963,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Custom Demographic Patterns API
+  app.get('/api/demographic/custom-patterns', requireAuth, async (req, res) => {
+    try {
+      const patterns = await storage.getCustomPatterns();
+      res.json({
+        success: true,
+        patterns: patterns.map(p => ({
+          id: p.id,
+          category: p.category,
+          fieldName: p.fieldName,
+          description: p.description,
+          examples: p.examples,
+          patternCount: Array.isArray(p.patterns) ? p.patterns.length : 0,
+          isCustom: true
+        }))
+      });
+    } catch (error) {
+      console.error('Error getting custom patterns:', error);
+      res.status(500).json({ error: 'Failed to get custom patterns' });
+    }
+  });
+
+  app.post('/api/demographic/custom-patterns', requireAuth, async (req, res) => {
+    try {
+      const { category, fieldName, patterns, description, examples } = req.body;
+
+      if (!category || !fieldName || !patterns || !description || !examples) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      if (!Array.isArray(patterns) || patterns.length === 0) {
+        return res.status(400).json({ error: 'Patterns must be a non-empty array' });
+      }
+
+      if (!Array.isArray(examples) || examples.length === 0) {
+        return res.status(400).json({ error: 'Examples must be a non-empty array' });
+      }
+
+      // Validate regex patterns
+      const validRegexPatterns: RegExp[] = [];
+      for (const pattern of patterns) {
+        try {
+          validRegexPatterns.push(new RegExp(pattern, 'i'));
+        } catch (regexError) {
+          return res.status(400).json({ 
+            error: `Invalid regex pattern: ${pattern}`,
+            details: regexError.message 
+          });
+        }
+      }
+
+      const newPattern = await storage.createCustomPattern({
+        category,
+        fieldName,
+        patterns,
+        description,
+        examples
+      });
+
+      // Add to demographic scanner with ID
+      demographicScanner.addCustomPattern({
+        id: newPattern.id,
+        category: newPattern.category,
+        fieldName: newPattern.fieldName,
+        patterns: validRegexPatterns,
+        description: newPattern.description,
+        examples: newPattern.examples as string[]
+      });
+
+      res.json({
+        success: true,
+        pattern: newPattern
+      });
+    } catch (error) {
+      console.error('Error creating custom pattern:', error);
+      res.status(500).json({ error: 'Failed to create custom pattern' });
+    }
+  });
+
+  app.delete('/api/demographic/custom-patterns/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteCustomPattern(id);
+      
+      if (success) {
+        // Remove from demographic scanner
+        demographicScanner.removeCustomPattern(id);
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: 'Pattern not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting custom pattern:', error);
+      res.status(500).json({ error: 'Failed to delete custom pattern' });
+    }
+  });
+
   // ZenVector Agent routes
   app.use('/api/zenvector', zenVectorRoutes);
 
   // Knowledge Agent routes
   app.use('/api/knowledge', knowledgeAgentRoutes);
+
+  // Initialize custom demographic patterns on server start
+  (async () => {
+    try {
+      const customPatterns = await storage.getCustomPatterns();
+      await demographicScanner.initializeCustomPatterns(customPatterns);
+      console.log(`✓ Loaded ${customPatterns.length} custom demographic patterns`);
+    } catch (error) {
+      console.error('Failed to load custom demographic patterns:', error);
+    }
+  })();
 
   const httpServer = createServer(app);
   return httpServer;

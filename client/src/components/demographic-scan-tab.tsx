@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Search, FileText, CheckCircle, XCircle, RefreshCw, Users } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Search, FileText, CheckCircle, XCircle, RefreshCw, Users, Settings } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import DemographicPatternsManager from '@/components/demographic-patterns-manager';
 
 interface DemographicScanTabProps {
   projectId: string;
@@ -96,42 +98,55 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
     : 0;
 
   return (
-    <div className="p-6 bg-white space-y-6">
-      {/* Header and Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Users className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold">Demographic Field Scanner</h3>
-        </div>
-        <Button
-          onClick={() => scanMutation.mutate()}
-          disabled={scanMutation.isPending}
-          size="sm"
-          data-testid="button-run-scan"
-        >
-          {scanMutation.isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Scanning...
-            </>
+    <div className="p-6 bg-white">
+      <Tabs defaultValue="scan" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="scan" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Scan Results
+          </TabsTrigger>
+          <TabsTrigger value="patterns" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Pattern Management
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="scan" className="space-y-6">
+          {/* Header and Actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-semibold">Demographic Field Scanner</h3>
+            </div>
+            <Button
+              onClick={() => scanMutation.mutate()}
+              disabled={scanMutation.isPending}
+              size="sm"
+              data-testid="button-run-scan"
+            >
+              {scanMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Run Scan
+                </>
+              )}
+            </Button>
+          </div>
+
+          {!report ? (
+            <Alert>
+              <AlertDescription>
+                No demographic scan has been performed yet. Click "Run Scan" to analyze this project for demographic fields.
+              </AlertDescription>
+            </Alert>
           ) : (
             <>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Run Scan
-            </>
-          )}
-        </Button>
-      </div>
-
-      {!report ? (
-        <Alert>
-          <AlertDescription>
-            No demographic scan has been performed yet. Click "Run Scan" to analyze this project for demographic fields.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <>
-          {/* Summary Cards */}
+              {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
@@ -285,9 +300,15 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
                 )}
               </div>
             </CardContent>
-          </Card>
-        </>
-      )}
-    </div>
+            </Card>
+          </>
+        )}
+      </TabsContent>
+
+      <TabsContent value="patterns">
+        <DemographicPatternsManager />
+      </TabsContent>
+    </Tabs>
+  </div>
   );
 }

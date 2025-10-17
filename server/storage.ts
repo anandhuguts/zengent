@@ -2,12 +2,15 @@ import {
   users,
   projects,
   sourceFiles,
+  customDemographicPatterns,
   type User,
   type InsertUser,
   type Project,
   type InsertProject,
   type SourceFile,
   type InsertSourceFile,
+  type CustomDemographicPattern,
+  type InsertCustomDemographicPattern,
   type AIModelConfig,
 } from "@shared/schema";
 import { db } from "./db";
@@ -42,6 +45,11 @@ export interface IStorage {
   // AI Configuration
   getAIConfig(): Promise<AIModelConfig>;
   setAIConfig(config: AIModelConfig): Promise<void>;
+  
+  // Custom demographic patterns
+  createCustomPattern(pattern: InsertCustomDemographicPattern): Promise<CustomDemographicPattern>;
+  getCustomPatterns(): Promise<CustomDemographicPattern[]>;
+  deleteCustomPattern(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -155,6 +163,21 @@ export class DatabaseStorage implements IStorage {
 
   async setAIConfig(config: AIModelConfig): Promise<void> {
     this.aiConfig = config;
+  }
+
+  // Custom demographic patterns
+  async createCustomPattern(pattern: InsertCustomDemographicPattern): Promise<CustomDemographicPattern> {
+    const [newPattern] = await db.insert(customDemographicPatterns).values(pattern).returning();
+    return newPattern;
+  }
+
+  async getCustomPatterns(): Promise<CustomDemographicPattern[]> {
+    return await db.select().from(customDemographicPatterns);
+  }
+
+  async deleteCustomPattern(id: string): Promise<boolean> {
+    const result = await db.delete(customDemographicPatterns).where(eq(customDemographicPatterns.id, id));
+    return result.rowCount > 0;
   }
 }
 
