@@ -12,7 +12,6 @@ interface ReportPreviewProps {
   onClose: () => void;
   project: Project;
   analysisData: AnalysisData;
-  sonarData?: any;
   swaggerData?: any;
   comprehensiveData?: any;
   structureData?: any;
@@ -23,7 +22,6 @@ export default function ReportPreview({
   onClose,
   project,
   analysisData,
-  sonarData,
   swaggerData,
   comprehensiveData,
   structureData,
@@ -739,86 +737,8 @@ export default function ReportPreview({
                     </div>
                   </div>
                 </>
-              ) : null}
-              
-              {sonarData?.summary ? (
-                <>
-                  <h3 className="text-xl font-semibold mb-3">SonarQube Analysis</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="p-4 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">Bugs</div>
-                      <div className="text-2xl font-bold text-red-600">{sonarData.summary.bugs || 0}</div>
-                    </div>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">Vulnerabilities</div>
-                      <div className="text-2xl font-bold text-orange-600">{sonarData.summary.vulnerabilities || 0}</div>
-                    </div>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">Code Smells</div>
-                      <div className="text-2xl font-bold text-yellow-600">{sonarData.summary.codeSmells || 0}</div>
-                    </div>
-                    <div className="p-4 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">Quality Gate</div>
-                      <div className="text-lg font-bold text-green-600">{sonarData.summary.qualityGate || 'N/A'}</div>
-                    </div>
-                  </div>
-                  
-                  {sonarData.metrics && (
-                    <>
-                      <h3 className="text-xl font-semibold mb-3">Detailed Metrics</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Lines of Code</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.linesOfCode?.toLocaleString() || 'N/A'}</div>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Complexity</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.complexity || 'N/A'}</div>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Test Coverage</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.testCoverage || 0}%</div>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Duplications</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.duplications || 0}%</div>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Technical Debt</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.technicalDebt || 'N/A'}</div>
-                        </div>
-                        <div className="p-3 bg-muted rounded-lg">
-                          <div className="text-sm text-muted-foreground">Security Rating</div>
-                          <div className="text-xl font-semibold">{sonarData.metrics.securityRating || 'N/A'}</div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </>
               ) : (
-                <p className="text-muted-foreground">No SonarQube analysis data available.</p>
-              )}
-              
-              {sonarData?.issues && sonarData.issues.length > 0 && (
-                <>
-                  <h3 className="text-xl font-semibold mb-3">Top Issues</h3>
-                  <div className="space-y-2">
-                    {sonarData.issues.slice(0, 10).map((issue: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <span className="font-bold text-red-600">[{issue.severity}]</span>
-                            <span className="ml-2">{issue.message}</span>
-                          </div>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">{issue.component}</div>
-                      </div>
-                    ))}
-                    {sonarData.issues.length > 10 && (
-                      <p className="text-sm text-muted-foreground">... and {sonarData.issues.length - 10} more issues</p>
-                    )}
-                  </div>
-                </>
+                <p className="text-muted-foreground">No code quality analysis data available.</p>
               )}
             </section>
 
@@ -952,28 +872,8 @@ export default function ReportPreview({
                     <li><strong>Maintainability:</strong> Clear separation of concerns with {analysisData.patterns?.length || 0} design patterns implemented</li>
                     <li><strong>Performance:</strong> Optimized data access through repository pattern and service layer</li>
                     <li><strong>Security:</strong> Framework-based security annotations and authentication mechanisms</li>
-                    {sonarData && sonarData.issues && (
-                      <li><strong>Code Quality:</strong> {sonarData.issues.length} issues identified for improvement</li>
-                    )}
                   </ul>
                 </div>
-              )}
-
-              {/* Code Quality Metrics */}
-              {sonarData && sonarData.issues && sonarData.issues.length > 0 && (
-                <>
-                  <h3 className="text-xl font-semibold mb-3 mt-6">Code Quality Metrics</h3>
-                  <div className="space-y-2">
-                    {sonarData.issues.slice(0, 10).map((issue: any, idx: number) => (
-                      <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
-                        <span className="font-bold">[{issue.severity}]</span> {issue.message} - {issue.component}
-                      </div>
-                    ))}
-                    {sonarData.issues.length > 10 && (
-                      <p className="text-sm text-muted-foreground">... and {sonarData.issues.length - 10} more quality issues</p>
-                    )}
-                  </div>
-                </>
               )}
             </section>
 
