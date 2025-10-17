@@ -21,16 +21,28 @@ export interface ScanResult {
   context: string;
 }
 
+export interface SQLQueryFinding {
+  file: string;
+  line: number;
+  query: string;
+  tables: string[];
+  demographicFields: string[];
+  queryType: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'UNKNOWN';
+}
+
 export interface DemographicScanReport {
   summary: {
     totalFiles: number;
     totalMatches: number;
     fieldsFound: number;
     scanDate: string;
+    sqlQueriesFound: number;
+    tablesAccessed: number;
   };
   fieldResults: {
     [fieldName: string]: ScanResult[];
   };
+  sqlFindings: SQLQueryFinding[];
   coverage: {
     foundFields: string[];
     missingFields: string[];
@@ -487,14 +499,29 @@ export class DemographicScanner {
     const allFieldNames = this.demographicFields.map(f => f.fieldName);
     const missingFields = allFieldNames.filter(f => !foundFieldsSet.has(f));
 
+    // Scan for SQL queries that use demographic fields
+    const sqlFindings: SQLQueryFinding[] = [];
+    const tablesSet = new Set<string>();
+
+    for (const file of files) {
+      const fileSqlFindings = this.scanFileForSQL(file.path, file.content, foundFields);
+      sqlFindings.push(...fileSqlFindings);
+      fileSqlFindings.forEach(finding => {
+        finding.tables.forEach(table => tablesSet.add(table));
+      });
+    }
+
     return {
       summary: {
         totalFiles: files.length,
         totalMatches,
         fieldsFound: foundFields.length,
-        scanDate: new Date().toISOString()
+        scanDate: new Date().toISOString(),
+        sqlQueriesFound: sqlFindings.length,
+        tablesAccessed: tablesSet.size
       },
       fieldResults: results,
+      sqlFindings,
       coverage: {
         foundFields,
         missingFields
@@ -529,6 +556,165 @@ export class DemographicScanner {
   }
 
   /**
+   * Scan a file for SQL queries that use demographic fields
+   */
+  private scanFileForSQL(filePath: string, content: string, foundFields: string[]): SQLQueryFinding[] {
+    const findings: SQLQueryFinding[] = [];
+    const lines = content.split('\n');
+
+    // SQL query patterns - captures multi-line queries
+    const sqlPatterns = [
+      // String-based SQL (Java, Python, etc.) - uses [\s\S] to match across newlines
+      /["'`](SELECT|INSERT|UPDATE|DELETE)[\s\S]*?["'`]/gi,
+      // JPA/Hibernate @Query annotations - uses [\s\S] to match across newlines
+      /@Query\s*\(\s*["'`](SELECT|INSERT|UPDATE|DELETE)[\s\S]*?["'`]\s*\)/gi,
+      // MyBatis XML queries - uses [\s\S] to match across newlines
+      /<(select|insert|update|delete)[^>]*>[\s\S]*?<\/\1>/gi,
+      // Raw SQL in comments or strings
+      /--\s*(SELECT|INSERT|UPDATE|DELETE)\s+.*?$/gim,
+    ];
+
+    for (const pattern of sqlPatterns) {
+      const matches = Array.from(content.matchAll(pattern));
+      
+      for (const match of matches) {
+        const query = match[0];
+        const queryType = this.getQueryType(query);
+        const tables = this.extractTableNames(query);
+        const demographicFields = this.findDemographicFieldsInQuery(query, foundFields);
+
+        // Only include if demographic fields are found
+        if (demographicFields.length > 0) {
+          // Find line number
+          const lineNumber = this.findLineNumber(content, match.index || 0);
+          
+          findings.push({
+            file: filePath,
+            line: lineNumber,
+            query: query.substring(0, 200) + (query.length > 200 ? '...' : ''), // Truncate long queries
+            tables,
+            demographicFields,
+            queryType
+          });
+        }
+      }
+    }
+
+    return findings;
+  }
+
+  /**
+   * Determine the SQL query type
+   */
+  private getQueryType(query: string): 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'UNKNOWN' {
+    const upperQuery = query.toUpperCase();
+    if (upperQuery.includes('SELECT')) return 'SELECT';
+    if (upperQuery.includes('INSERT')) return 'INSERT';
+    if (upperQuery.includes('UPDATE')) return 'UPDATE';
+    if (upperQuery.includes('DELETE')) return 'DELETE';
+    return 'UNKNOWN';
+  }
+
+  /**
+   * Extract table names from SQL query
+   */
+  private extractTableNames(query: string): string[] {
+    const tables = new Set<string>();
+    
+    // FROM clause pattern
+    const fromPattern = /FROM\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)/gi;
+    const fromMatches = Array.from(query.matchAll(fromPattern));
+    for (const match of fromMatches) {
+      tables.add(match[1].trim());
+    }
+
+    // JOIN clause pattern
+    const joinPattern = /JOIN\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)/gi;
+    const joinMatches = Array.from(query.matchAll(joinPattern));
+    for (const match of joinMatches) {
+      tables.add(match[1].trim());
+    }
+
+    // UPDATE table pattern
+    const updatePattern = /UPDATE\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)/gi;
+    const updateMatches = Array.from(query.matchAll(updatePattern));
+    for (const match of updateMatches) {
+      tables.add(match[1].trim());
+    }
+
+    // INSERT INTO table pattern
+    const insertPattern = /INSERT\s+INTO\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)/gi;
+    const insertMatches = Array.from(query.matchAll(insertPattern));
+    for (const match of insertMatches) {
+      tables.add(match[1].trim());
+    }
+
+    const tablesArray: string[] = [];
+    tables.forEach(table => tablesArray.push(table));
+    return tablesArray;
+  }
+
+  /**
+   * Find demographic fields referenced in SQL query
+   */
+  private findDemographicFieldsInQuery(query: string, foundFields: string[]): string[] {
+    const fieldsFound = new Set<string>();
+    
+    // Create patterns from found field names
+    for (const fieldName of foundFields) {
+      // Convert field name to possible SQL column patterns
+      const patterns = this.generateSQLColumnPatterns(fieldName);
+      
+      for (const pattern of patterns) {
+        if (query.match(pattern)) {
+          fieldsFound.add(fieldName);
+          break;
+        }
+      }
+    }
+
+    return Array.from(fieldsFound);
+  }
+
+  /**
+   * Generate SQL column name patterns from demographic field name
+   */
+  private generateSQLColumnPatterns(fieldName: string): RegExp[] {
+    const patterns: RegExp[] = [];
+    
+    // Convert display name to various SQL naming conventions
+    const baseNames = [
+      fieldName.replace(/\s+/g, '_').toLowerCase(),  // snake_case
+      fieldName.replace(/\s+/g, '_').toUpperCase(),  // UPPER_SNAKE_CASE
+      fieldName.replace(/\s+/g, ''),                 // remove spaces
+      fieldName.replace(/\s+/g, '').toLowerCase(),   // lowercase no spaces
+      fieldName.replace(/\s/g, '_'),                 // preserve case with underscores
+    ];
+
+    for (const name of baseNames) {
+      // Match as column name in SELECT, WHERE, SET, etc.
+      patterns.push(new RegExp(`\\b${this.escapeRegExp(name)}\\b`, 'i'));
+    }
+
+    return patterns;
+  }
+
+  /**
+   * Escape special regex characters
+   */
+  private escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
+   * Find line number from character position
+   */
+  private findLineNumber(content: string, position: number): number {
+    const beforeMatch = content.substring(0, position);
+    return beforeMatch.split('\n').length;
+  }
+
+  /**
    * Get all demographic field definitions
    */
   getFieldDefinitions(): DemographicField[] {
@@ -551,7 +737,8 @@ export class DemographicScanner {
     doc += `Generated: ${new Date().toISOString()}\n\n`;
     doc += `Total Fields: ${this.demographicFields.length}\n\n`;
 
-    const categories = [...new Set(this.demographicFields.map(f => f.category))];
+    const categoriesSet = new Set(this.demographicFields.map(f => f.category));
+    const categories = Array.from(categoriesSet);
 
     for (const category of categories) {
       doc += `## ${category} Fields\n\n`;

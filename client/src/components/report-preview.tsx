@@ -1064,6 +1064,68 @@ export default function ReportPreview({
                           </div>
                         </div>
                       </div>
+
+                      {/* SQL Query Analysis */}
+                      {demographicData.report.sqlFindings && demographicData.report.sqlFindings.length > 0 && (
+                        <>
+                          <h3 className="text-xl font-semibold mt-6 mb-3">SQL Query Analysis</h3>
+                          <p className="mb-4 text-sm text-muted-foreground">
+                            SQL queries that access demographic fields and their associated database tables.
+                          </p>
+                          
+                          <div className="grid grid-cols-3 gap-4 mb-4">
+                            <div className="p-3 bg-cyan-50 dark:bg-cyan-950 rounded-lg border border-cyan-200">
+                              <div className="text-xs text-muted-foreground">SQL Queries</div>
+                              <div className="text-2xl font-bold text-cyan-600">{demographicData.report.sqlFindings.length}</div>
+                            </div>
+                            <div className="p-3 bg-indigo-50 dark:bg-indigo-950 rounded-lg border border-indigo-200">
+                              <div className="text-xs text-muted-foreground">Tables Accessed</div>
+                              <div className="text-2xl font-bold text-indigo-600">{demographicData.report.summary.tablesAccessed || 0}</div>
+                            </div>
+                            <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg border border-purple-200">
+                              <div className="text-xs text-muted-foreground">Query Types</div>
+                              <div className="text-2xl font-bold text-purple-600">
+                                {Array.from(new Set(demographicData.report.sqlFindings.map((f: any) => f.queryType))).length}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {demographicData.report.sqlFindings.slice(0, 5).map((finding: any, idx: number) => (
+                              <div key={idx} className="border-l-4 border-l-cyan-500 pl-3 py-2 bg-muted rounded">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="text-sm">
+                                    <span className="font-semibold">{finding.queryType}</span> query in {finding.file}
+                                  </div>
+                                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                    finding.queryType === 'SELECT' ? 'bg-blue-100 text-blue-800' :
+                                    finding.queryType === 'INSERT' ? 'bg-green-100 text-green-800' :
+                                    finding.queryType === 'UPDATE' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {finding.queryType}
+                                  </span>
+                                </div>
+                                <div className="text-xs mb-1">
+                                  <span className="font-medium">Fields:</span>{' '}
+                                  {finding.demographicFields.join(', ')}
+                                </div>
+                                {finding.tables.length > 0 && (
+                                  <div className="text-xs">
+                                    <span className="font-medium">Tables:</span>{' '}
+                                    {finding.tables.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {demographicData.report.sqlFindings.length > 5 && (
+                              <div className="text-xs text-muted-foreground text-center">
+                                +{demographicData.report.sqlFindings.length - 5} more SQL queries (view full report for details)
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   ) : (
                     <div className="p-4 bg-muted rounded-lg text-center">

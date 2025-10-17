@@ -352,6 +352,95 @@ export default function DemographicReportPreview({
                         })}
                       </div>
                     </section>
+
+                    {/* SQL Query Analysis */}
+                    {demographicData.report.sqlFindings && demographicData.report.sqlFindings.length > 0 && (
+                      <section className="mb-8">
+                        <h2 className="text-2xl font-bold mb-4">SQL Query Analysis</h2>
+                        <p className="mb-4">
+                          This section identifies SQL queries that access demographic fields and shows which database tables 
+                          are being queried. Understanding data flow is crucial for compliance and security auditing.
+                        </p>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                          <div className="p-4 bg-cyan-50 dark:bg-cyan-950 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                            <div className="text-sm text-muted-foreground">SQL Queries Found</div>
+                            <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
+                              {demographicData.report.sqlFindings.length}
+                            </div>
+                          </div>
+                          <div className="p-4 bg-indigo-50 dark:bg-indigo-950 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                            <div className="text-sm text-muted-foreground">Tables Accessed</div>
+                            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                              {demographicData.report.summary.tablesAccessed || 0}
+                            </div>
+                          </div>
+                          <div className="p-4 bg-teal-50 dark:bg-teal-950 rounded-lg border border-teal-200 dark:border-teal-800">
+                            <div className="text-sm text-muted-foreground">SQL Queries</div>
+                            <div className="text-3xl font-bold text-teal-600 dark:text-teal-400">
+                              {demographicData.report.summary.sqlQueriesFound || 0}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          {demographicData.report.sqlFindings.map((finding: any, idx: number) => (
+                            <div key={idx} className="border-l-4 border-l-cyan-500 pl-4 pb-4 border rounded-lg p-4 bg-muted">
+                              <div className="flex items-start justify-between mb-3">
+                                <div>
+                                  <h3 className="text-lg font-semibold mb-1">
+                                    {finding.queryType} Query
+                                  </h3>
+                                  <div className="text-sm text-muted-foreground">
+                                    📄 {finding.file} (Line {finding.line})
+                                  </div>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                  finding.queryType === 'SELECT' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' :
+                                  finding.queryType === 'INSERT' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                                  finding.queryType === 'UPDATE' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
+                                  finding.queryType === 'DELETE' ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' :
+                                  'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200'
+                                }`}>
+                                  {finding.queryType}
+                                </span>
+                              </div>
+
+                              <div className="mb-3">
+                                <div className="text-sm font-medium mb-1">Demographic Fields Referenced:</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {finding.demographicFields.map((field: string, fidx: number) => (
+                                    <span key={fidx} className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded text-xs font-medium">
+                                      {field}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {finding.tables.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="text-sm font-medium mb-1">Tables Accessed:</div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {finding.tables.map((table: string, tidx: number) => (
+                                      <span key={tidx} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded text-xs font-medium">
+                                        {table}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="mt-3">
+                                <div className="text-xs text-muted-foreground mb-1">SQL Query:</div>
+                                <code className="text-xs bg-background dark:bg-gray-900 px-3 py-2 rounded block font-mono overflow-x-auto">
+                                  {finding.query}
+                                </code>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
                   </>
                 ) : (
                   <section className="mb-8">
