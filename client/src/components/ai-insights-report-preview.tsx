@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, FileText, X, Brain, Lightbulb, Target, Award } from "lucide-react";
+import { Download, FileText, X, Brain, Lightbulb, Target, Award, CheckCircle2 } from "lucide-react";
 import type { Project, AnalysisData } from "@shared/schema";
 import { htmlExportService } from "@/services/htmlExportService";
 
@@ -11,6 +11,30 @@ interface AIInsightsReportPreviewProps {
   onClose: () => void;
   project: Project;
 }
+
+// Utility function to clean markdown and format text properly
+const cleanMarkdown = (text: string): string => {
+  if (!text) return '';
+  
+  return text
+    // Remove bold markers
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Remove italic markers
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    // Remove numbered lists markers and keep clean text
+    .replace(/^\d+\.\s+/gm, '')
+    // Remove bullet points
+    .replace(/^[-*]\s+/gm, '')
+    // Clean up extra whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Component to render formatted text
+const FormattedText = ({ content }: { content: string }) => {
+  const cleaned = cleanMarkdown(content);
+  return <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: cleaned }} />;
+};
 
 export default function AIInsightsReportPreview({
   open,
@@ -71,7 +95,7 @@ export default function AIInsightsReportPreview({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl flex items-center gap-2">
               <Brain className="w-6 h-6 text-purple-600" />
@@ -113,59 +137,88 @@ export default function AIInsightsReportPreview({
         <ScrollArea className="flex-1 p-6">
           <div id="ai-insights-report-content" className="max-w-5xl mx-auto space-y-8 py-4">
             {/* Header */}
-            <div className="text-center border-b pb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Insights & Analysis Report</h1>
-              <p className="text-lg text-gray-600">{project.name}</p>
-              <p className="text-sm text-gray-500 mt-2">Generated on {new Date().toLocaleDateString()}</p>
+            <div className="text-center border-b-2 border-purple-200 pb-6">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3">
+                AI Insights & Analysis Report
+              </h1>
+              <p className="text-xl font-semibold text-gray-700">{project.name}</p>
+              <p className="text-sm text-gray-500 mt-2">Generated on {new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</p>
             </div>
 
             {/* Project Overview */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b pb-2">
-                <Target className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center gap-3 pb-3 border-b-2 border-blue-200">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <Target className="w-6 h-6 text-blue-600" />
+                </div>
                 <h2 className="text-2xl font-bold text-gray-900">Project Overview</h2>
               </div>
-              <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                <p className="text-gray-700 leading-relaxed">{aiInsights.projectOverview}</p>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                <FormattedText content={aiInsights.projectOverview} />
               </div>
             </div>
 
             {/* Architecture Insights */}
-            {aiInsights.architectureInsights && (
+            {aiInsights.architectureInsights && Array.isArray(aiInsights.architectureInsights) && aiInsights.architectureInsights.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b pb-2">
-                  <Brain className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-3 pb-3 border-b-2 border-purple-200">
+                  <div className="bg-purple-100 p-2 rounded-lg">
+                    <Brain className="w-6 h-6 text-purple-600" />
+                  </div>
                   <h2 className="text-2xl font-bold text-gray-900">Architecture Insights</h2>
                 </div>
-                <div className="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-500">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{aiInsights.architectureInsights}</p>
+                <div className="space-y-3">
+                  {aiInsights.architectureInsights.map((insight: string, index: number) => (
+                    <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border-l-4 border-purple-500 shadow-sm">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-md">
+                          {index + 1}
+                        </div>
+                        <FormattedText content={insight} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Quality Score */}
-            {aiInsights.qualityScore && (
+            {aiInsights.qualityScore !== undefined && aiInsights.qualityScore !== null && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b pb-2">
-                  <Award className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-3 pb-3 border-b-2 border-green-200">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <Award className="w-6 h-6 text-green-600" />
+                  </div>
                   <h2 className="text-2xl font-bold text-gray-900">Quality Assessment</h2>
                 </div>
-                <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-                  <div className="flex items-center gap-6">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-xl border-l-4 border-green-500 shadow-sm">
+                  <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="text-center">
-                      <div className="text-5xl font-bold text-green-600">{aiInsights.qualityScore}/10</div>
-                      <div className="text-sm text-gray-600 mt-2">Overall Quality Score</div>
+                      <div className="text-6xl font-bold text-green-600">{aiInsights.qualityScore}<span className="text-3xl text-gray-500">/10</span></div>
+                      <div className="text-sm font-semibold text-gray-600 mt-3">Overall Quality Score</div>
                     </div>
-                    <div className="flex-1">
-                      <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div className="flex-1 w-full">
+                      <div className="w-full bg-gray-200 rounded-full h-6 shadow-inner">
                         <div 
-                          className="bg-green-600 h-4 rounded-full" 
-                          style={{ width: `${(aiInsights.qualityScore / 10) * 100}%` }}
-                        />
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3 shadow-md" 
+                          style={{ width: `${Math.min((aiInsights.qualityScore / 10) * 100, 100)}%` }}
+                        >
+                          <span className="text-white text-xs font-bold">{Math.round((aiInsights.qualityScore / 10) * 100)}%</span>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-600 mt-2">
-                        This score reflects the overall quality of the codebase based on architecture, 
-                        maintainability, and best practices.
+                      <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
+                        <span>Poor</span>
+                        <span>Fair</span>
+                        <span>Good</span>
+                        <span>Excellent</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-4 leading-relaxed">
+                        This score reflects the overall quality of the codebase based on architecture patterns, 
+                        code maintainability, and adherence to best practices.
                       </p>
                     </div>
                   </div>
@@ -174,20 +227,22 @@ export default function AIInsightsReportPreview({
             )}
 
             {/* AI Recommendations */}
-            {aiInsights.suggestions && aiInsights.suggestions.length > 0 && (
+            {aiInsights.suggestions && Array.isArray(aiInsights.suggestions) && aiInsights.suggestions.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b pb-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-600" />
+                <div className="flex items-center gap-3 pb-3 border-b-2 border-yellow-200">
+                  <div className="bg-yellow-100 p-2 rounded-lg">
+                    <Lightbulb className="w-6 h-6 text-yellow-600" />
+                  </div>
                   <h2 className="text-2xl font-bold text-gray-900">AI Recommendations</h2>
                 </div>
                 <div className="space-y-3">
                   {aiInsights.suggestions.map((suggestion: string, index: number) => (
-                    <div key={index} className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    <div key={index} className="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-xl border-l-4 border-yellow-400 shadow-sm">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-md">
                           {index + 1}
                         </div>
-                        <p className="text-gray-700 leading-relaxed flex-1">{suggestion}</p>
+                        <FormattedText content={suggestion} />
                       </div>
                     </div>
                   ))}
@@ -196,29 +251,40 @@ export default function AIInsightsReportPreview({
             )}
 
             {/* Module-Level Insights */}
-            {aiInsights.moduleInsights && aiInsights.moduleInsights.length > 0 && (
+            {aiInsights.moduleInsights && Object.keys(aiInsights.moduleInsights).length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b pb-2">
-                  <FileText className="w-5 h-5 text-indigo-600" />
+                <div className="flex items-center gap-3 pb-3 border-b-2 border-indigo-200">
+                  <div className="bg-indigo-100 p-2 rounded-lg">
+                    <FileText className="w-6 h-6 text-indigo-600" />
+                  </div>
                   <h2 className="text-2xl font-bold text-gray-900">Module-Level Insights</h2>
                 </div>
-                <div className="space-y-4">
-                  {aiInsights.moduleInsights.map((insight: any, index: number) => (
-                    <div key={index} className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">{insight.className}</h3>
-                      <div className="space-y-2 text-sm">
-                        <div>
-                          <span className="font-medium text-gray-700">Role: </span>
-                          <span className="text-gray-600">{insight.role}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700">Responsibilities: </span>
-                          <span className="text-gray-600">{insight.responsibilities}</span>
-                        </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {Object.entries(aiInsights.moduleInsights).map(([className, insight]: [string, any], index: number) => (
+                    <div key={index} className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-indigo-300 transition-colors shadow-sm">
+                      <div className="flex items-start gap-3 mb-4">
+                        <CheckCircle2 className="w-5 h-5 text-indigo-600 mt-1 flex-shrink-0" />
+                        <h3 className="text-xl font-bold text-gray-900">{className}</h3>
+                      </div>
+                      <div className="space-y-3 pl-8">
+                        {insight.role && (
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-sm text-indigo-600 uppercase tracking-wide">Role</span>
+                            <FormattedText content={insight.role} />
+                          </div>
+                        )}
+                        {insight.responsibilities && (
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-sm text-indigo-600 uppercase tracking-wide">Responsibilities</span>
+                            <FormattedText content={insight.responsibilities} />
+                          </div>
+                        )}
                         {insight.improvements && (
-                          <div className="mt-3 pt-3 border-t">
-                            <span className="font-medium text-gray-700">Improvement Opportunities: </span>
-                            <p className="text-gray-600 mt-1">{insight.improvements}</p>
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <span className="font-semibold text-sm text-orange-600 uppercase tracking-wide block mb-2">
+                              💡 Improvement Opportunities
+                            </span>
+                            <FormattedText content={insight.improvements} />
                           </div>
                         )}
                       </div>
@@ -229,9 +295,9 @@ export default function AIInsightsReportPreview({
             )}
 
             {/* Footer */}
-            <div className="text-center text-sm text-gray-500 pt-8 border-t">
-              <p>Generated by Zengent AI - Enterprise Application Intelligence Platform</p>
-              <p className="mt-1">Powered by Advanced AI Analysis</p>
+            <div className="text-center text-sm text-gray-500 pt-8 border-t-2 border-gray-200 mt-12">
+              <p className="font-semibold">Generated by Zengent AI - Enterprise Application Intelligence Platform</p>
+              <p className="mt-2">Powered by Advanced AI Analysis Engine</p>
             </div>
           </div>
         </ScrollArea>
