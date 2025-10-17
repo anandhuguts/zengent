@@ -127,7 +127,7 @@ export default function TeamBehind() {
     { category: "Frontend", items: ["React", "TypeScript", "Tailwind CSS", "React Flow", "shadcn/ui"] },
     { category: "Backend", items: ["Express.js", "Node.js", "PostgreSQL", "Drizzle ORM", "bcrypt"] },
     { category: "AI Integration", items: ["OpenAI API", "Ollama", "AWS Claude", "Google Gemini"] },
-    { category: "Analysis Tools", items: ["SonarQube", "Swagger", "JavaDoc", "Custom Parsers"] }
+    { category: "Analysis Tools", items: ["Swagger", "JavaDoc", "Custom Parsers", "HuggingFace CodeBERT"] }
   ];
 
   return (
@@ -182,7 +182,7 @@ export default function TeamBehind() {
                   Code Quality Assessment
                 </h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Static analysis with SonarQube integration</li>
+                  <li>• AI-powered code quality analysis</li>
                   <li>• Performance bottleneck identification</li>
                   <li>• Security vulnerability scanning</li>
                   <li>• Technical debt evaluation</li>

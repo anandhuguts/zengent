@@ -214,10 +214,10 @@ export default function TechnologyFlow() {
                   Enterprise Tools
                 </h4>
                 <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-6">
-                  <li>• SonarQube code analysis</li>
                   <li>• IBM Doclinq PDF processing</li>
                   <li>• Confluence integration</li>
                   <li>• Swagger API documentation</li>
+                  <li>• Demographic scanning & compliance</li>
                 </ul>
               </div>
             </CardContent>
@@ -405,7 +405,7 @@ export default function TechnologyFlow() {
                 <div className="flex-1">
                   <h4 className="font-semibold text-sm mb-1">Quality Assessment</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    SonarQube integration provides static code analysis, security vulnerabilities, code coverage metrics, and technical debt quantification.
+                    AI-powered code quality analysis with HuggingFace CodeBERT for code assessment, security scanning, and technical debt identification.
                   </p>
                 </div>
               </div>
