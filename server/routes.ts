@@ -391,60 +391,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get SonarQube analysis for a project
-  app.get("/api/projects/:id/sonar", async (req, res) => {
-    try {
-      const project = await storage.getProject(req.params.id);
-      if (!project) {
-        return res.status(404).json({ error: "Project not found" });
-      }
-
-      // For demonstration, return mock SonarQube analysis
-      // In production, this would integrate with actual SonarQube server
-      const sonarAnalysis = {
-        summary: {
-          qualityGate: 'PASSED',
-          bugs: 2,
-          vulnerabilities: 0,
-          codeSmells: 15,
-          securityHotspots: 1,
-          reliabilityRating: 'A',
-          securityRating: 'A',
-          maintainabilityRating: 'B'
-        },
-        metrics: {
-          linesOfCode: project.analysisData?.classes?.reduce((acc, c) => acc + c.methods.length * 5, 0) || 0,
-          complexity: project.analysisData?.classes?.length * 3 || 0,
-          duplicatedLinesPercentage: 2.1,
-          testCoverage: 78.5
-        },
-        issues: [
-          {
-            rule: 'java:S106',
-            severity: 'MINOR',
-            type: 'CODE_SMELL',
-            message: 'Replace this use of System.out by a logger.',
-            component: 'UserController.java',
-            line: 45
-          },
-          {
-            rule: 'java:S1181',
-            severity: 'MAJOR', 
-            type: 'CODE_SMELL',
-            message: 'Catch a more specific exception instead of Exception.',
-            component: 'UserService.java',
-            line: 23
-          }
-        ]
-      };
-
-      res.json(sonarAnalysis);
-    } catch (error) {
-      console.error('Error getting SonarQube analysis:', error);
-      res.status(500).json({ error: 'Failed to get SonarQube analysis' });
-    }
-  });
-
   // Get Swagger documentation for a project
   app.get("/api/projects/:id/swagger", async (req, res) => {
     try {
