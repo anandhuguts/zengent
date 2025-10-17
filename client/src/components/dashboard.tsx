@@ -33,6 +33,7 @@ import FormattedAIContent from './formatted-ai-content';
 
 interface DashboardProps {
   analysisData: AnalysisData;
+  onAIAnalysisComplete?: (analysis: AIAnalysisResult) => void;
 }
 
 interface StatCardProps {
@@ -158,7 +159,7 @@ function AIInsightCard({ moduleName, insight }: AIInsightCardProps) {
   );
 }
 
-export default function Dashboard({ analysisData }: DashboardProps) {
+export default function Dashboard({ analysisData, onAIAnalysisComplete }: DashboardProps) {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
@@ -327,6 +328,10 @@ export default function Dashboard({ analysisData }: DashboardProps) {
         setTimeout(() => {
           setShowProgressModal(false);
           setAiAnalysis(result);
+          // Notify parent component of AI analysis completion
+          if (onAIAnalysisComplete) {
+            onAIAnalysisComplete(result);
+          }
         }, 1500);
       }, 7500);
       

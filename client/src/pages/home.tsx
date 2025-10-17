@@ -7,7 +7,8 @@ import AnalysisResults from "@/components/analysis-results";
 import Dashboard from "@/components/dashboard";
 import AIModelSelector, { type AIModelConfig } from "@/components/ai-model-selector";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { AIAnalysisResult } from "@shared/schema";
 import { GitBranch, HelpCircle, Settings, Upload, Github, Code2, Database, Cpu, FileCode, Eye, GitMerge, Shield, Bot, Brain, Zap, Info, Search, BarChart4, ArrowRightLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,6 +104,25 @@ export default function Home() {
       setShowAIConfig(false);
     } catch (error) {
       console.error('Failed to configure AI model:', error);
+    }
+  };
+
+  const handleAIAnalysisComplete = (analysis: AIAnalysisResult) => {
+    if (currentProject && currentProject.analysisData) {
+      // Update the project's analysisData with AI analysis
+      const updatedAnalysisData = {
+        ...currentProject.analysisData,
+        aiAnalysis: analysis
+      };
+      
+      // Update the query cache
+      queryClient.setQueryData(
+        ['/api/projects', currentProjectId],
+        {
+          ...currentProject,
+          analysisData: updatedAnalysisData
+        }
+      );
     }
   };
 
@@ -583,7 +603,10 @@ export default function Home() {
           <div className="space-y-8">
             {currentProject.analysisData && typeof currentProject.analysisData === 'object' && (
               <>
-                <Dashboard analysisData={currentProject.analysisData as any} />
+                <Dashboard 
+                  analysisData={currentProject.analysisData as any} 
+                  onAIAnalysisComplete={handleAIAnalysisComplete}
+                />
                 <AnalysisResults 
                   project={currentProject} 
                   onNewAnalysis={handleNewAnalysis}
