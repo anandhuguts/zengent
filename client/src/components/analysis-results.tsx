@@ -50,11 +50,6 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
   const analysisData = project.analysisData as AnalysisData | null;
 
   // Fetch comprehensive analysis data
-  const { data: sonarData } = useQuery({
-    queryKey: ['/api/projects', project.id, 'sonar'],
-    enabled: !!project.id,
-  });
-
   const { data: swaggerData } = useQuery({
     queryKey: ['/api/projects', project.id, 'swagger'],
     enabled: !!project.id,
@@ -523,7 +518,6 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
         onClose={() => setShowReportPreview(false)}
         project={project}
         analysisData={analysisData}
-        sonarData={sonarData}
         swaggerData={swaggerData}
         comprehensiveData={comprehensiveData}
         structureData={structureData}

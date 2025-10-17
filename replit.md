@@ -1,7 +1,7 @@
 # Zengent AI - Enterprise Application Intelligence Platform
 
 ## Overview
-Zengent AI is an enterprise application intelligence platform that analyzes multi-language project architectures from ZIP uploads and GitHub repositories. It supports Java, Python, PySpark, and Mainframe codebases, extracting and parsing source files to identify architectural patterns, dependencies, and relationships. The platform provides interactive visual diagrams and AI-powered analysis using various LLMs, delivering intelligent insights and recommendations. It includes enterprise features such as SonarQube integration, Swagger API documentation, and professional PDF report generation with corporate branding. The vision is to provide comprehensive, AI-driven insights into complex enterprise applications to aid development, refactoring, and strategic planning.
+Zengent AI is an enterprise application intelligence platform that analyzes multi-language project architectures from ZIP uploads and GitHub repositories. It supports Java, Python, PySpark, and Mainframe codebases, extracting and parsing source files to identify architectural patterns, dependencies, and relationships. The platform provides interactive visual diagrams and AI-powered analysis using various LLMs, delivering intelligent insights and recommendations. It includes enterprise features such as Swagger API documentation, demographic field scanning with compliance reporting, and professional PDF report generation with corporate branding. The vision is to provide comprehensive, AI-driven insights into complex enterprise applications to aid development, refactoring, and strategic planning.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -30,10 +30,10 @@ This advanced AI agent uses ChromaDB for persistent vector storage, enabling cod
 This agent provides comprehensive document scraping (including Confluence integration, IBM Doclinq for PDF processing), intelligent Q&A, and enterprise AI integration. It uses LangChain for document processing, LangGraph for workflow orchestration, Langfuse for observability, and Redis for caching. ChromaDB stores the persistent knowledge base. It supports multi-model AI responses and a chat interface for context-aware interactions.
 
 ### ZenVector Agent - Advanced Code Intelligence
-An enhanced AI agent for enterprise-grade code analysis. It integrates ChromaDB for persistent vector storage, HuggingFace CodeBERT for code quality, and SonarQube for static code analysis, quality metrics, and technical debt assessment. Langfuse provides LLM monitoring and tracing for all AI operations.
+An enhanced AI agent for enterprise-grade code analysis. It integrates ChromaDB for persistent vector storage and HuggingFace CodeBERT for code quality analysis. Langfuse provides LLM monitoring and tracing for all AI operations.
 
 ### Enterprise AI Technology Stack
-The platform integrates advanced AI and ML technologies: IBM Doclinq for PDF processing, LangChain for document handling, LangGraph for workflow orchestration, Langfuse for LLM observability, SonarQube for code quality, HuggingFace Models (CodeBERT, DialoGPT, transformers) for local AI, and multi-LLM support (OpenAI, Claude, Gemini, local). ChromaDB serves as the vector database, and Redis is used for performance optimization.
+The platform integrates advanced AI and ML technologies: IBM Doclinq for PDF processing, LangChain for document handling, LangGraph for workflow orchestration, Langfuse for LLM observability, HuggingFace Models (CodeBERT, DialoGPT, transformers) for local AI, and multi-LLM support (OpenAI, Claude, Gemini, local). ChromaDB serves as the vector database, and Redis is used for performance optimization.
 
 ## External Dependencies
 
@@ -60,7 +60,6 @@ The platform integrates advanced AI and ML technologies: IBM Doclinq for PDF pro
 - **LangChain**: AI application development framework.
 - **LangGraph**: Orchestration for complex AI workflows.
 - **Langfuse**: LLM observability platform.
-- **SonarQube**: Static code analysis.
 - **HuggingFace Models**: Local AI processing models.
 
 ### Development Tools
