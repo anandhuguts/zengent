@@ -273,10 +273,6 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
                 <FileCode className="w-4 h-4 mr-2" />
                 Class Diagram
               </TabsTrigger>
-              <TabsTrigger value="demographic" className="data-[state=active]:bg-background">
-                <Database className="w-4 h-4 mr-2" />
-                Demographic Scan
-              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -374,11 +370,18 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
 
             <MermaidClassDiagram analysisData={analysisData} />
           </TabsContent>
-
-          <TabsContent value="demographic">
-            <DemographicScanTab projectId={project.id} />
-          </TabsContent>
         </Tabs>
+      </Card>
+
+      {/* Demographic Scan Section */}
+      <Card className="mb-6">
+        <div className="border-b border-border p-4">
+          <div className="flex items-center space-x-2">
+            <Database className="w-5 h-5 text-orange-600" />
+            <h3 className="text-lg font-semibold">Demographic Scan</h3>
+          </div>
+        </div>
+        <DemographicScanTab projectId={project.id} />
       </Card>
 
       {/* Analysis Details */}
