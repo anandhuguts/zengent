@@ -22,12 +22,9 @@ const initialNodes: Node[] = [
     type: 'input',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <Upload className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">Upload Repository</div>
-            <div className="text-xs text-white opacity-90">ZIP file or GitHub URL</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">Upload Repository</div>
+          <div className="text-sm text-white mt-1">ZIP file or GitHub URL</div>
         </div>
       )
     },
@@ -47,12 +44,9 @@ const initialNodes: Node[] = [
     id: '2',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <FileSearch className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">AST Parsing</div>
-            <div className="text-xs text-white opacity-90">Tree-sitter extracts structure</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">AST Parsing</div>
+          <div className="text-sm text-white mt-1">Tree-sitter extracts structure</div>
         </div>
       )
     },
@@ -72,12 +66,9 @@ const initialNodes: Node[] = [
     id: '3',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <GitBranch className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">Diagram Generation</div>
-            <div className="text-xs text-white opacity-90">Flow, UML, Component diagrams</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">Diagram Generation</div>
+          <div className="text-sm text-white mt-1">Flow, UML, Component diagrams</div>
         </div>
       )
     },
@@ -97,12 +88,9 @@ const initialNodes: Node[] = [
     id: '4',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <Search className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">Demographic Scanning</div>
-            <div className="text-xs text-white opacity-90">PII/PHI pattern detection</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">Demographic Scanning</div>
+          <div className="text-sm text-white mt-1">PII/PHI pattern detection</div>
         </div>
       )
     },
@@ -122,12 +110,9 @@ const initialNodes: Node[] = [
     id: '5',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <Brain className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">LLM Analysis</div>
-            <div className="text-xs text-white opacity-90">GPT-4o insights & recommendations</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">LLM Analysis</div>
+          <div className="text-sm text-white mt-1">GPT-4o insights & recommendations</div>
         </div>
       )
     },
@@ -147,12 +132,9 @@ const initialNodes: Node[] = [
     id: '6',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <Shield className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">Quality Analysis</div>
-            <div className="text-xs text-white opacity-90">Code quality & change impact</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">Quality Analysis</div>
+          <div className="text-sm text-white mt-1">Code quality & change impact</div>
         </div>
       )
     },
@@ -173,12 +155,9 @@ const initialNodes: Node[] = [
     type: 'output',
     data: { 
       label: (
-        <div className="flex items-center gap-2 px-4 py-2">
-          <FileText className={iconStyle} />
-          <div>
-            <div className="font-bold text-white">Report Export</div>
-            <div className="text-xs text-white opacity-90">PDF/DOC with findings</div>
-          </div>
+        <div className="px-4 py-3">
+          <div className="font-bold text-white text-lg">Report Export</div>
+          <div className="text-sm text-white mt-1">PDF/DOC with findings</div>
         </div>
       )
     },
