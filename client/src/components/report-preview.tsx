@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, FileText, X } from "lucide-react";
+import { Download, FileText, X, Code } from "lucide-react";
 import type { Project, AnalysisData } from "@shared/schema";
 import { htmlExportService } from "@/services/htmlExportService";
 import { generateAllDiagramImages, type DiagramImages } from "@/services/diagramExportService";
@@ -28,6 +28,7 @@ export default function ReportPreview({
 }: ReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
+  const [isExportingHTML, setIsExportingHTML] = useState(false);
   const [diagramImages, setDiagramImages] = useState<DiagramImages>({
     flow: null,
     component: null,
@@ -106,6 +107,20 @@ export default function ReportPreview({
     }
   };
 
+  const handleHTMLExport = async () => {
+    setIsExportingHTML(true);
+    try {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      const filename = `${project.name.replace(/\s+/g, '-')}-Analysis-${timestamp}.html`;
+      await htmlExportService.exportToHTML('report-content', filename);
+    } catch (error) {
+      console.error('HTML export failed:', error);
+      alert('HTML export failed. Please try again.');
+    } finally {
+      setIsExportingHTML(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0">
@@ -132,6 +147,16 @@ export default function ReportPreview({
               >
                 <Download className="w-4 h-4 mr-2" />
                 {isExportingPDF ? 'Saving...' : 'Save as PDF'}
+              </Button>
+              <Button
+                onClick={handleHTMLExport}
+                disabled={isExportingHTML}
+                className="bg-green-600 hover:bg-green-700"
+                size="sm"
+                data-testid="button-save-html"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                {isExportingHTML ? 'Saving...' : 'Save as HTML'}
               </Button>
               <Button
                 onClick={onClose}

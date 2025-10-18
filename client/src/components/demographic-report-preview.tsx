@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, FileText, X } from "lucide-react";
+import { Download, FileText, X, Code } from "lucide-react";
 import type { Project } from "@shared/schema";
 import { htmlExportService } from "@/services/htmlExportService";
 
@@ -19,6 +19,7 @@ export default function DemographicReportPreview({
 }: DemographicReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
+  const [isExportingHTML, setIsExportingHTML] = useState(false);
   const [demographicData, setDemographicData] = useState<any>(null);
   const [fieldPatterns, setFieldPatterns] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +86,20 @@ export default function DemographicReportPreview({
     }
   };
 
+  const handleHTMLExport = async () => {
+    setIsExportingHTML(true);
+    try {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      const filename = `${project.name.replace(/\s+/g, '-')}-Demographic-Scan-${timestamp}.html`;
+      await htmlExportService.exportToHTML('demographic-report-content', filename);
+    } catch (error) {
+      console.error('HTML export failed:', error);
+      alert('HTML export failed. Please try again.');
+    } finally {
+      setIsExportingHTML(false);
+    }
+  };
+
   const getCategoryFields = (category: string) => {
     if (!fieldPatterns?.fields) return [];
     return fieldPatterns.fields.filter((f: any) => f.category === category);
@@ -118,6 +133,16 @@ export default function DemographicReportPreview({
               >
                 <Download className="w-4 h-4 mr-2" />
                 {isExportingPDF ? 'Saving...' : 'Save as PDF'}
+              </Button>
+              <Button
+                onClick={handleHTMLExport}
+                disabled={isExportingHTML || isLoading}
+                className="bg-green-600 hover:bg-green-700"
+                size="sm"
+                data-testid="button-save-demographic-html"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                {isExportingHTML ? 'Saving...' : 'Save as HTML'}
               </Button>
               <Button
                 onClick={onClose}

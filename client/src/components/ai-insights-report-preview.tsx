@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Download, FileText, X, Brain, Lightbulb, Target, Award, CheckCircle2 } from "lucide-react";
+import { Download, FileText, X, Brain, Lightbulb, Target, Award, CheckCircle2, Code } from "lucide-react";
 import type { Project, AnalysisData } from "@shared/schema";
 import { htmlExportService } from "@/services/htmlExportService";
 
@@ -43,6 +43,7 @@ export default function AIInsightsReportPreview({
 }: AIInsightsReportPreviewProps) {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingDOC, setIsExportingDOC] = useState(false);
+  const [isExportingHTML, setIsExportingHTML] = useState(false);
 
   const analysisData = project.analysisData as AnalysisData | null;
   const aiInsights = analysisData?.aiAnalysis;
@@ -72,6 +73,20 @@ export default function AIInsightsReportPreview({
       alert('DOC export failed. Please try again.');
     } finally {
       setIsExportingDOC(false);
+    }
+  };
+
+  const handleHTMLExport = async () => {
+    setIsExportingHTML(true);
+    try {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      const filename = `${project.name.replace(/\s+/g, '-')}-AI-Insights-${timestamp}.html`;
+      await htmlExportService.exportToHTML('ai-insights-report-content', filename);
+    } catch (error) {
+      console.error('HTML export failed:', error);
+      alert('HTML export failed. Please try again.');
+    } finally {
+      setIsExportingHTML(false);
     }
   };
 
@@ -121,6 +136,16 @@ export default function AIInsightsReportPreview({
               >
                 <Download className="w-4 h-4 mr-2" />
                 {isExportingPDF ? 'Saving...' : 'Save as PDF'}
+              </Button>
+              <Button
+                onClick={handleHTMLExport}
+                disabled={isExportingHTML}
+                className="bg-green-600 hover:bg-green-700"
+                size="sm"
+                data-testid="button-save-ai-insights-html"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                {isExportingHTML ? 'Saving...' : 'Save as HTML'}
               </Button>
               <Button
                 onClick={onClose}
