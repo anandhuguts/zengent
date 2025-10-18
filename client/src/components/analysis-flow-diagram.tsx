@@ -10,7 +10,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Upload, FileSearch, Brain, BarChart3, FileText, CheckCircle } from 'lucide-react';
+import { Upload, FileSearch, GitBranch, Brain, Shield, FileText, Code2 } from 'lucide-react';
 
 const iconStyle = "w-5 h-5";
 
@@ -48,8 +48,8 @@ const initialNodes: Node[] = [
         <div className="flex items-center gap-2 px-4 py-2">
           <FileSearch className={iconStyle} />
           <div>
-            <div className="font-bold">Code Extraction</div>
-            <div className="text-xs text-gray-600">Parse source files & structure</div>
+            <div className="font-bold">AST Parsing</div>
+            <div className="text-xs text-gray-600">Tree-sitter extracts structure</div>
           </div>
         </div>
       )
@@ -71,17 +71,17 @@ const initialNodes: Node[] = [
     data: { 
       label: (
         <div className="flex items-center gap-2 px-4 py-2">
-          <Brain className={iconStyle} />
+          <GitBranch className={iconStyle} />
           <div>
-            <div className="font-bold">AI Analysis</div>
-            <div className="text-xs text-gray-600">GPT-4o generates insights</div>
+            <div className="font-bold">Diagram Generation</div>
+            <div className="text-xs text-gray-600">Flow, UML, Component diagrams</div>
           </div>
         </div>
       )
     },
     position: { x: 400, y: 50 },
     style: { 
-      background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
       color: 'white',
       border: 'none',
       borderRadius: '12px',
@@ -96,17 +96,17 @@ const initialNodes: Node[] = [
     data: { 
       label: (
         <div className="flex items-center gap-2 px-4 py-2">
-          <BarChart3 className={iconStyle} />
+          <Brain className={iconStyle} />
           <div>
-            <div className="font-bold">Diagram Generation</div>
-            <div className="text-xs text-gray-600">Flow, UML, Sequence diagrams</div>
+            <div className="font-bold">LLM Analysis</div>
+            <div className="text-xs text-gray-600">GPT-4o insights & recommendations</div>
           </div>
         </div>
       )
     },
     position: { x: 400, y: 180 },
     style: { 
-      background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
       color: 'white',
       border: 'none',
       borderRadius: '12px',
@@ -121,10 +121,10 @@ const initialNodes: Node[] = [
     data: { 
       label: (
         <div className="flex items-center gap-2 px-4 py-2">
-          <FileText className={iconStyle} />
+          <Shield className={iconStyle} />
           <div>
-            <div className="font-bold">Report Generation</div>
-            <div className="text-xs text-gray-600">PDF/DOC export with findings</div>
+            <div className="font-bold">Quality Analysis</div>
+            <div className="text-xs text-gray-600">Code quality & change impact</div>
           </div>
         </div>
       )
@@ -147,10 +147,10 @@ const initialNodes: Node[] = [
     data: { 
       label: (
         <div className="flex items-center gap-2 px-4 py-2">
-          <CheckCircle className={iconStyle} />
+          <FileText className={iconStyle} />
           <div>
-            <div className="font-bold">Analysis Complete</div>
-            <div className="text-xs text-gray-600">View insights & download reports</div>
+            <div className="font-bold">Report Export</div>
+            <div className="text-xs text-gray-600">PDF/DOC with findings</div>
           </div>
         </div>
       )
@@ -183,13 +183,23 @@ const initialEdges: Edge[] = [
     source: '2', 
     target: '3',
     animated: true,
-    style: { stroke: '#4facfe', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#4facfe' },
+    style: { stroke: '#f093fb', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#f093fb' },
+    label: 'AST Data',
   },
   { 
-    id: 'e3-4', 
-    source: '3', 
+    id: 'e2-4', 
+    source: '2', 
     target: '4',
+    animated: true,
+    style: { stroke: '#f093fb', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#f093fb' },
+    label: 'Code Metadata',
+  },
+  { 
+    id: 'e3-5', 
+    source: '3', 
+    target: '5',
     animated: true,
     style: { stroke: '#fa709a', strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#fa709a' },
@@ -199,16 +209,16 @@ const initialEdges: Edge[] = [
     source: '4', 
     target: '5',
     animated: true,
-    style: { stroke: '#30cfd0', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#30cfd0' },
+    style: { stroke: '#4facfe', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#4facfe' },
   },
   { 
     id: 'e5-6', 
     source: '5', 
     target: '6',
     animated: true,
-    style: { stroke: '#a8edea', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#a8edea' },
+    style: { stroke: '#30cfd0', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#30cfd0' },
   },
 ];
 
