@@ -372,7 +372,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              AMEX Diamond Project Analysis
+              AMEX Diamond Project Discovery Steps
             </h2>
             <p className="text-gray-600 text-sm">
               End-to-end automated analysis process powered by AI
@@ -386,7 +386,7 @@ export default function Home() {
           <div className="max-w-5xl mx-auto mt-12">
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Demographic Data Scanning
+                Demographic Data Scanning Process
               </h3>
               <p className="text-gray-600 text-sm">
                 Automated PII/PHI detection with compliance reporting
