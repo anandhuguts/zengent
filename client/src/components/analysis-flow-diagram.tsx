@@ -254,27 +254,29 @@ const initialEdges: Edge[] = [
 ];
 
 export default function AnalysisFlowDiagram() {
-  const [nodes] = useNodesState(initialNodes);
-  const [edges] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg" style={{ height: '320px' }}>
+    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg" style={{ height: '500px' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         fitView
         attributionPosition="bottom-left"
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
+        nodesDraggable={true}
         nodesConnectable={false}
-        elementsSelectable={false}
-        zoomOnScroll={false}
-        panOnScroll={false}
-        panOnDrag={false}
-        zoomOnPinch={false}
+        elementsSelectable={true}
+        zoomOnScroll={true}
+        panOnScroll={true}
+        panOnDrag={true}
+        zoomOnPinch={true}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#e5e7eb" />
-        <Controls showInteractive={false} />
+        <Controls />
       </ReactFlow>
     </div>
   );
