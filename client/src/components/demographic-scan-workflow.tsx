@@ -156,7 +156,7 @@ const initialNodes: Node[] = [
       label: (
         <div className="px-4 py-3">
           <div className="font-bold text-white text-lg">Code Lens ML</div>
-          <div className="text-sm text-white mt-1">Tensor Flow</div>
+          <div className="text-base text-white mt-1">Tensor Flow</div>
         </div>
       )
     },
