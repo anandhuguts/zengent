@@ -271,7 +271,7 @@ function FlowContent() {
 
 export default function AnalysisFlowDiagram() {
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg" style={{ height: '320px' }}>
+    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg w-full" style={{ height: '320px' }}>
       <ReactFlowProvider>
         <FlowContent />
       </ReactFlowProvider>

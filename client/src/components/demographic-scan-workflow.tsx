@@ -336,7 +336,7 @@ function FlowContent() {
 
 export default function DemographicScanWorkflow() {
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg" style={{ height: '380px' }}>
+    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-lg w-full" style={{ height: '380px' }}>
       <ReactFlowProvider>
         <FlowContent />
       </ReactFlowProvider>
