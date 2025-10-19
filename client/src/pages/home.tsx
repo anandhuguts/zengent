@@ -221,44 +221,10 @@ export default function Home() {
         'Virtual environment configuration review',
         'Code quality and PEP compliance checking'
       ]
-    },
-    {
-      id: 'validator' as ProjectType,
-      name: 'Validator Agent',
-      description: 'Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment',
-      logoSrc: agentLogo,
-      borderColor: 'border-chart-5',
-      bgColor: 'bg-chart-5/5',
-      hoverBgColor: 'hover:bg-chart-5/10',
-      features: [
-        'Security vulnerability detection and assessment',
-        'Privacy compliance and data protection validation',
-        'Code quality metrics and best practices review',
-        'Performance bottleneck identification',
-        'Regulatory compliance verification (GDPR, CCPA)',
-        'Security risk scoring and remediation guidance'
-      ]
-    },
-    {
-      id: 'responsible-ai' as ProjectType,
-      name: 'Responsible AI Agent',
-      description: 'Ethics and bias detection in code analysis with comprehensive AI governance and fairness assessment',
-      logoSrc: agentLogo,
-      borderColor: 'border-purple-500',
-      bgColor: 'bg-purple-50',
-      hoverBgColor: 'hover:bg-purple-100',
-      features: [
-        'AI ethics and bias detection in algorithms',
-        'Fairness assessment across demographic groups',
-        'Algorithmic transparency and explainability',
-        'Compliance with AI governance frameworks',
-        'Ethical code review and recommendations',
-        'Responsible AI deployment validation'
-      ]
     }
   ];
 
-  // AI Agent types (ZenVector Agent removed, Validator moved to Language Project Analysis)
+  // AI Agent types for Diamond Project
   const aiAgents = [
     {
       id: 'code-lens' as ProjectType,
@@ -343,6 +309,40 @@ export default function Home() {
         'Code quality preservation',
         'Bulk project processing',
         'Language ecosystem mapping'
+      ]
+    },
+    {
+      id: 'validator' as ProjectType,
+      name: 'Validator Agent',
+      description: 'Comprehensive code validation covering security vulnerabilities, privacy compliance, and quality assessment',
+      logoSrc: agentLogo,
+      borderColor: 'border-chart-5',
+      bgColor: 'bg-chart-5/5',
+      hoverBgColor: 'hover:bg-chart-5/10',
+      features: [
+        'Security vulnerability detection and assessment',
+        'Privacy compliance and data protection validation',
+        'Code quality metrics and best practices review',
+        'Performance bottleneck identification',
+        'Regulatory compliance verification (GDPR, CCPA)',
+        'Security risk scoring and remediation guidance'
+      ]
+    },
+    {
+      id: 'responsible-ai' as ProjectType,
+      name: 'Responsible AI Agent',
+      description: 'Ethics and bias detection in code analysis with comprehensive AI governance and fairness assessment',
+      logoSrc: agentLogo,
+      borderColor: 'border-purple-500',
+      bgColor: 'bg-purple-50',
+      hoverBgColor: 'hover:bg-purple-100',
+      features: [
+        'AI ethics and bias detection in algorithms',
+        'Fairness assessment across demographic groups',
+        'Algorithmic transparency and explainability',
+        'Compliance with AI governance frameworks',
+        'Ethical code review and recommendations',
+        'Responsible AI deployment validation'
       ]
     }
   ];
