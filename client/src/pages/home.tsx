@@ -244,23 +244,6 @@ export default function Home() {
       ]
     },
     {
-      id: 'match-lens' as ProjectType,
-      name: 'Match Lens Agent',
-      description: 'Intelligent field matching between demographic data and C360 customer fields with automated relationship discovery',
-      logoSrc: agentLogo,
-      borderColor: 'border-chart-4',
-      bgColor: 'bg-chart-4/5',
-      hoverBgColor: 'hover:bg-chart-4/10',
-      features: [
-        'Demographic field to C360 field matching',
-        'Automated relationship discovery and mapping',
-        'Data quality and consistency analysis',
-        'Field transformation rule identification',
-        'Customer data model alignment verification',
-        'Integration gap analysis and recommendations'
-      ]
-    },
-    {
       id: 'knowledge' as ProjectType,
       name: 'Knowledge Agent',
       description: 'Document intelligence and Q&A system with Confluence integration, PDF processing, and intelligent knowledge extraction',
@@ -275,23 +258,6 @@ export default function Home() {
         'Redis caching for performance',
         'Intelligent Q&A chat interface',
         'Multi-source knowledge aggregation'
-      ]
-    },
-    {
-      id: 'datalens' as ProjectType,
-      name: 'Data Lens Agent',
-      description: 'Big Data intelligence agent for analyzing large-scale datasets, data lakes, and distributed computing environments',
-      logoSrc: agentLogo,
-      borderColor: 'border-cyan-500',
-      bgColor: 'bg-cyan-50',
-      hoverBgColor: 'hover:bg-cyan-100',
-      features: [
-        'Petabyte-scale data analysis',
-        'Apache Spark optimization',
-        'Real-time streaming analytics',
-        'Data quality monitoring',
-        'ETL pipeline optimization',
-        'ML pipeline integration'
       ]
     },
     {
