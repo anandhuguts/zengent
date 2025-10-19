@@ -165,9 +165,9 @@ class ExcelFieldScanner:
             # Method calls: getFirstName(), setFirstName()
             rf'\b(get|set){re.escape(field_name[0].upper() + field_name[1:])}\s*\(',
             # JPA @Column annotation: @Column(name="firstName")
-            rf'@Column\s*\(\s*name\s*=\s*["\']{ re.escape(field_name)}["\']',
+            rf'@Column\s*\(\s*name\s*=\s*["\']{re.escape(field_name)}["\']',
             # JSON/Object keys: "firstName": value or 'firstName': value
-            rf'["\']{ re.escape(field_name)}["\']\\s*:',
+            rf'["\']{re.escape(field_name)}["\']\\s*:',
             # Field as standalone identifier with word boundaries
             rf'\b{re.escape(field_name)}\b',
         ]
@@ -209,7 +209,7 @@ class ExcelFieldScanner:
             # SQL UPDATE clause
             rf'UPDATE\s+["\']?{re.escape(table_name)}["\']?\b',
             # JPA @Table annotation: @Table(name="User")
-            rf'@Table\s*\(\s*name\s*=\s*["\']{ re.escape(table_name)}["\']',
+            rf'@Table\s*\(\s*name\s*=\s*["\']{re.escape(table_name)}["\']',
             # Entity class name (often matches table name)
             rf'class\s+{re.escape(table_name)}\b',
             # SQL DROP TABLE
