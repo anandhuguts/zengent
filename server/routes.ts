@@ -1581,58 +1581,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Excel Field Mapping Report Generation
   app.get('/api/projects/:id/excel-mapping/:mappingId/report-html', requireAuth, async (req, res) => {
     try {
+      console.log('[Report HTML] Request received for project:', req.params.id, 'mapping:', req.params.mappingId);
       const { id, mappingId } = req.params;
       
       // Get mapping data
       const mappings = await storage.getExcelMappings(id);
+      console.log('[Report HTML] Found', mappings.length, 'mappings');
       const mapping = mappings.find(m => m.id === mappingId);
       
       if (!mapping) {
+        console.error('[Report HTML] Mapping not found:', mappingId);
         return res.status(404).json({ error: 'Mapping not found' });
       }
 
+      console.log('[Report HTML] Mapping found:', mapping.fileName, 'matched:', mapping.matchedFields);
+
       const project = await storage.getProject(id);
       if (!project) {
+        console.error('[Report HTML] Project not found:', id);
         return res.status(404).json({ error: 'Project not found' });
       }
 
+      console.log('[Report HTML] Project found:', project.name);
+
       // Generate HTML report
       const html = generateExcelMappingHTML(project, mapping);
+      console.log('[Report HTML] Generated HTML, length:', html.length);
       res.setHeader('Content-Type', 'text/html');
       res.send(html);
 
     } catch (error) {
-      console.error('Error generating Excel mapping HTML report:', error);
+      console.error('[Report HTML] Error generating Excel mapping HTML report:', error);
       res.status(500).json({ error: 'Failed to generate report' });
     }
   });
 
   app.get('/api/projects/:id/excel-mapping/:mappingId/report-download', requireAuth, async (req, res) => {
     try {
+      console.log('[Report Download] Request received for project:', req.params.id, 'mapping:', req.params.mappingId, 'format:', req.query.format);
       const { id, mappingId } = req.params;
       const { format } = req.query;
       
       if (!format || !['html', 'pdf', 'docx'].includes(format as string)) {
+        console.error('[Report Download] Invalid format:', format);
         return res.status(400).json({ error: 'Invalid format. Use html, pdf, or docx' });
       }
 
       // Get mapping data
       const mappings = await storage.getExcelMappings(id);
+      console.log('[Report Download] Found', mappings.length, 'mappings');
       const mapping = mappings.find(m => m.id === mappingId);
       
       if (!mapping) {
+        console.error('[Report Download] Mapping not found:', mappingId);
         return res.status(404).json({ error: 'Mapping not found' });
       }
 
       const project = await storage.getProject(id);
       if (!project) {
+        console.error('[Report Download] Project not found:', id);
         return res.status(404).json({ error: 'Project not found' });
       }
+
+      console.log('[Report Download] Generating', format, 'report for:', project.name);
 
       // Generate HTML first
       const html = generateExcelMappingHTML(project, mapping);
 
       if (format === 'html') {
+        console.log('[Report Download] Sending HTML file, length:', html.length);
         res.setHeader('Content-Type', 'text/html');
         res.setHeader('Content-Disposition', `attachment; filename="Excel_Field_Mapping_Report_${new Date().toISOString().split('T')[0]}.html"`);
         res.send(html);

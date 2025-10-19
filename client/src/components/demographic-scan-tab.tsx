@@ -422,23 +422,34 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
 
   const generateExcelMappingReport = async (mappingId: string) => {
     try {
+      console.log('[Report] Generating report for mapping:', mappingId);
+      const url = `/api/projects/${projectId}/excel-mapping/${mappingId}/report-html`;
+      console.log('[Report] Fetching from:', url);
+      
       // Fetch HTML preview
-      const response = await fetch(`/api/projects/${projectId}/excel-mapping/${mappingId}/report-html`, {
+      const response = await fetch(url, {
         method: 'GET',
+        credentials: 'include',
       });
 
+      console.log('[Report] Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to generate report preview');
+        const errorText = await response.text();
+        console.error('[Report] Error response:', errorText);
+        throw new Error(`Failed to generate report preview: ${response.status}`);
       }
 
       const html = await response.text();
+      console.log('[Report] Received HTML, length:', html.length);
       setReportHtml(html);
       setCurrentMappingId(mappingId);
       setShowReportPreview(true);
     } catch (error) {
+      console.error('[Report] Error generating report:', error);
       toast({
         title: 'Error',
-        description: 'Failed to generate report preview',
+        description: error instanceof Error ? error.message : 'Failed to generate report preview',
         variant: 'destructive',
       });
     }
@@ -446,33 +457,47 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
 
   const downloadReport = async (format: 'html' | 'pdf' | 'docx') => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/excel-mapping/${currentMappingId}/report-download?format=${format}`, {
+      console.log('[Download] Starting download, format:', format, 'mappingId:', currentMappingId);
+      const url = `/api/projects/${projectId}/excel-mapping/${currentMappingId}/report-download?format=${format}`;
+      console.log('[Download] Fetching from:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
+        credentials: 'include',
       });
 
+      console.log('[Download] Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`Failed to download ${format.toUpperCase()} report`);
+        const errorText = await response.text();
+        console.error('[Download] Error response:', errorText);
+        throw new Error(`Failed to download ${format.toUpperCase()} report: ${response.status}`);
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      console.log('[Download] Blob size:', blob.size, 'type:', blob.type);
+      
+      const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = blobUrl;
       const extension = format === 'docx' ? 'docx' : format === 'pdf' ? 'pdf' : 'html';
       link.download = `Excel_Field_Mapping_Report_${new Date().toISOString().split('T')[0]}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
+
+      console.log('[Download] Download triggered successfully');
 
       toast({
         title: 'Download Complete',
         description: `Report downloaded as ${format.toUpperCase()}`,
       });
     } catch (error) {
+      console.error('[Download] Error:', error);
       toast({
         title: 'Download Failed',
-        description: `Failed to download ${format.toUpperCase()} report`,
+        description: error instanceof Error ? error.message : `Failed to download ${format.toUpperCase()} report`,
         variant: 'destructive',
       });
     }
