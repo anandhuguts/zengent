@@ -76,7 +76,7 @@ class ExcelFieldScanner:
     
     def scan_source_files(self, source_files: List[Dict[str, str]]) -> Dict[str, Any]:
         """
-        Scan source files for 100% matches of table.field combinations
+        Scan source files for field names and table names separately
         
         Args:
             source_files: List of {relativePath, content} dictionaries
@@ -100,31 +100,44 @@ class ExcelFieldScanner:
             combined = mapping["combined"]
             
             field_matches = []
+            table_matches = []
             
             # Scan each source file
             for source_file in source_files:
                 file_path = source_file["relativePath"]
                 content = source_file["content"]
                 
-                # Find exact matches with various patterns
-                matches_found = self._find_field_matches(
+                # Find field name matches in all files
+                field_found = self._find_field_name_matches(
                     content, 
-                    table_name, 
                     field_name,
                     file_path
                 )
+                if field_found:
+                    field_matches.extend(field_found)
                 
-                if matches_found:
-                    field_matches.extend(matches_found)
+                # Find table name matches in SQL-related files
+                table_found = self._find_table_name_matches(
+                    content,
+                    table_name,
+                    file_path
+                )
+                if table_found:
+                    table_matches.extend(table_found)
             
-            if field_matches:
+            # Combine all matches
+            all_matches = field_matches + table_matches
+            
+            if all_matches:
                 matched_fields.add(combined)
                 results["matches"].append({
                     "tableName": table_name,
                     "fieldName": field_name,
                     "combined": combined,
-                    "matchCount": len(field_matches),
-                    "locations": field_matches
+                    "matchCount": len(all_matches),
+                    "locations": all_matches,
+                    "fieldMatchCount": len(field_matches),
+                    "tableMatchCount": len(table_matches)
                 })
             else:
                 results["unmatchedFields"].append({
@@ -136,33 +149,27 @@ class ExcelFieldScanner:
         results["matchedFields"] = len(matched_fields)
         return results
     
-    def _find_field_matches(self, content: str, table_name: str, field_name: str, file_path: str) -> List[Dict[str, Any]]:
-        """Find all matches of a field in content with context"""
+    def _find_field_name_matches(self, content: str, field_name: str, file_path: str) -> List[Dict[str, Any]]:
+        """Find all matches of a field name in content (independent of table)"""
         matches = []
         lines = content.split('\n')
         
-        # Create various pattern variations for matching
+        # Patterns to match field names in code
         patterns = [
-            # Java/Python: table.field
-            rf'\b{re.escape(table_name)}\.{re.escape(field_name)}\b',
-            # SQL: table.field or "table"."field"
-            rf'["\']?{re.escape(table_name)}["\']?\.[\"\']?{re.escape(field_name)}[\"\']?\b',
-            # SQL: SELECT field FROM table
-            rf'SELECT\s+.*?\b{re.escape(field_name)}\b.*?FROM\s+.*?\b{re.escape(table_name)}\b',
-            # JPA @Column(name="field") in table entity
-            rf'@Column\s*\(\s*name\s*=\s*["\']{ re.escape(field_name)}["\']',
-            # Field reference in queries
-            rf'"{re.escape(field_name)}".*?"{re.escape(table_name)}"',
-            rf'{re.escape(table_name)}.*?{re.escape(field_name)}',
-            # Standalone field name matches (like regex scan)
-            # Match field as variable name: private String firstName;
-            rf'\b(private|public|protected|var|let|const|@Column)\s+\w+\s+{re.escape(field_name)}\b',
-            # Match field in camelCase/snake_case: firstName, first_name
+            # Variable declarations: private String firstName;
+            rf'\b(private|public|protected|static|final|var|let|const)\s+\w+\s+{re.escape(field_name)}\b',
+            # Assignments: firstName = "John" or firstName: "John"
             rf'\b{re.escape(field_name)}\s*[:=]',
-            # Match field as property: this.firstName, self.firstName
-            rf'\b(this|self)\.{re.escape(field_name)}\b',
-            # Match field in getter/setter: getFirstName, setFirstName
-            rf'\b(get|set){re.escape(field_name[0].upper() + field_name[1:])}\b',
+            # Property access: this.firstName, self.firstName, user.firstName
+            rf'\.\s*{re.escape(field_name)}\b',
+            # Method calls: getFirstName(), setFirstName()
+            rf'\b(get|set){re.escape(field_name[0].upper() + field_name[1:])}\s*\(',
+            # JPA @Column annotation: @Column(name="firstName")
+            rf'@Column\s*\(\s*name\s*=\s*["\']{ re.escape(field_name)}["\']',
+            # JSON/Object keys: "firstName": value or 'firstName': value
+            rf'["\']{ re.escape(field_name)}["\']\\s*:',
+            # Field as standalone identifier with word boundaries
+            rf'\b{re.escape(field_name)}\b',
         ]
         
         for line_num, line in enumerate(lines, 1):
@@ -178,7 +185,53 @@ class ExcelFieldScanner:
                         "lineNumber": line_num,
                         "line": line.strip(),
                         "context": context,
-                        "matchType": "exact"
+                        "matchType": "field_name"
+                    })
+                    break  # Only count once per line
+        
+        return matches
+    
+    def _find_table_name_matches(self, content: str, table_name: str, file_path: str) -> List[Dict[str, Any]]:
+        """Find all matches of a table name in SQL contexts"""
+        matches = []
+        lines = content.split('\n')
+        
+        # Patterns to match table names in SQL and database contexts
+        patterns = [
+            # SQL CREATE TABLE
+            rf'CREATE\s+TABLE\s+(IF\s+NOT\s+EXISTS\s+)?["\']?{re.escape(table_name)}["\']?\b',
+            # SQL FROM clause
+            rf'FROM\s+["\']?{re.escape(table_name)}["\']?\b',
+            # SQL JOIN clause
+            rf'JOIN\s+["\']?{re.escape(table_name)}["\']?\b',
+            # SQL INTO clause
+            rf'INTO\s+["\']?{re.escape(table_name)}["\']?\b',
+            # SQL UPDATE clause
+            rf'UPDATE\s+["\']?{re.escape(table_name)}["\']?\b',
+            # JPA @Table annotation: @Table(name="User")
+            rf'@Table\s*\(\s*name\s*=\s*["\']{ re.escape(table_name)}["\']',
+            # Entity class name (often matches table name)
+            rf'class\s+{re.escape(table_name)}\b',
+            # SQL DROP TABLE
+            rf'DROP\s+TABLE\s+(IF\s+EXISTS\s+)?["\']?{re.escape(table_name)}["\']?\b',
+            # SQL ALTER TABLE
+            rf'ALTER\s+TABLE\s+["\']?{re.escape(table_name)}["\']?\b',
+        ]
+        
+        for line_num, line in enumerate(lines, 1):
+            for pattern in patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Get context (surrounding lines)
+                    start_line = max(0, line_num - 2)
+                    end_line = min(len(lines), line_num + 2)
+                    context = '\n'.join(lines[start_line:end_line])
+                    
+                    matches.append({
+                        "filePath": file_path,
+                        "lineNumber": line_num,
+                        "line": line.strip(),
+                        "context": context,
+                        "matchType": "table_name"
                     })
                     break  # Only count once per line
         

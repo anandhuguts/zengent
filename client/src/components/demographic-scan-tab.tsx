@@ -723,18 +723,39 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
                   {latestMapping.scanResults.matches.map((match, idx) => (
                     <div key={idx} className="p-3 border rounded-lg bg-green-50">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium text-sm">
-                          {match.tableName}.{match.fieldName}
+                        <div>
+                          <div className="font-medium text-sm">
+                            Table: <span className="text-blue-600">{match.tableName}</span> | Field: <span className="text-purple-600">{match.fieldName}</span>
+                          </div>
+                          {(match.fieldMatchCount > 0 || match.tableMatchCount > 0) && (
+                            <div className="flex gap-2 mt-1">
+                              {match.fieldMatchCount > 0 && (
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs">
+                                  Field: {match.fieldMatchCount}
+                                </Badge>
+                              )}
+                              {match.tableMatchCount > 0 && (
+                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                  Table: {match.tableMatchCount}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          {match.matchCount} {match.matchCount === 1 ? 'match' : 'matches'}
+                          {match.matchCount} total
                         </Badge>
                       </div>
                       <div className="space-y-2">
                         {match.locations.slice(0, 3).map((loc, locIdx) => (
                           <div key={locIdx} className="text-xs">
-                            <div className="text-muted-foreground">
-                              {loc.filePath}:{loc.lineNumber}
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {loc.matchType === 'field_name' ? '📄 Field' : '🗃️ Table'}
+                              </Badge>
+                              <span className="text-muted-foreground">
+                                {loc.filePath}:{loc.lineNumber}
+                              </span>
                             </div>
                             <code className="block bg-white px-2 py-1 rounded mt-1 text-xs">
                               {loc.line}
