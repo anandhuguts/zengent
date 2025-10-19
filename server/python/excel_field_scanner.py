@@ -174,16 +174,17 @@ def main():
     """Main entry point for CLI usage"""
     if len(sys.argv) < 3:
         print(json.dumps({
-            "error": "Usage: python excel_field_scanner.py <excel_file> <source_files_json>"
+            "error": "Usage: python excel_field_scanner.py <excel_file> <source_files_json_path>"
         }))
         sys.exit(1)
     
     excel_path = sys.argv[1]
-    source_files_json = sys.argv[2]
+    source_files_path = sys.argv[2]
     
     try:
-        # Parse source files JSON
-        source_files = json.loads(source_files_json)
+        # Read source files from JSON file
+        with open(source_files_path, 'r', encoding='utf-8') as f:
+            source_files = json.load(f)
         
         # Initialize scanner
         scanner = ExcelFieldScanner(excel_path)

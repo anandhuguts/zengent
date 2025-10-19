@@ -1079,6 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save Excel file temporarily
       const tempDir = os.tmpdir();
       const excelPath = path.join(tempDir, `excel_${Date.now()}_${req.file.originalname}`);
+      const sourceFilesPath = path.join(tempDir, `source_files_${Date.now()}.json`);
       fs.writeFileSync(excelPath, req.file.buffer);
 
       try {
@@ -1089,12 +1090,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           content: sf.content
         }));
 
+        // Save source files to temporary JSON file
+        fs.writeFileSync(sourceFilesPath, JSON.stringify(sourceFilesData));
+
         // Call Python scanner
         const pythonScript = path.join(process.cwd(), 'server/python/excel_field_scanner.py');
-        const sourceFilesJson = JSON.stringify(sourceFilesData).replace(/'/g, "\\'");
         
         const { stdout } = await execPromise(
-          `python3 "${pythonScript}" "${excelPath}" '${sourceFilesJson}'`,
+          `python3 "${pythonScript}" "${excelPath}" "${sourceFilesPath}"`,
           { maxBuffer: 10 * 1024 * 1024 } // 10MB buffer
         );
 
@@ -1115,8 +1118,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: 'completed'
         });
 
-        // Clean up temp file
+        // Clean up temp files
         fs.unlinkSync(excelPath);
+        if (fs.existsSync(sourceFilesPath)) {
+          fs.unlinkSync(sourceFilesPath);
+        }
 
         res.json({
           success: true,
@@ -1128,6 +1134,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Clean up on error
         if (fs.existsSync(excelPath)) {
           fs.unlinkSync(excelPath);
+        }
+        if (fs.existsSync(sourceFilesPath)) {
+          fs.unlinkSync(sourceFilesPath);
         }
         throw scanError;
       }
