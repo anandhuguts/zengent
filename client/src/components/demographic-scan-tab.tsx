@@ -16,6 +16,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface DemographicScanTabProps {
   projectId: string;
@@ -407,6 +413,8 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [mlSuggestions, setMlSuggestions] = useState<any>(null);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [processingSteps, setProcessingSteps] = useState<Array<{step: string; status: 'pending' | 'running' | 'complete'}>>([]);
   const { toast } = useToast();
 
   const { data: mappingsData, isLoading } = useQuery<{ mappings: ExcelMapping[]; success: boolean }>({
@@ -416,6 +424,30 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      // Show processing modal and initialize steps
+      setShowProcessingModal(true);
+      const steps = [
+        { step: 'Uploading Excel file', status: 'running' as const },
+        { step: 'Validating Excel format', status: 'pending' as const },
+        { step: 'Parsing table and field names', status: 'pending' as const },
+        { step: 'Scanning codebase for matches', status: 'pending' as const },
+        { step: 'Analyzing match results', status: 'pending' as const },
+        { step: 'Generating scan report', status: 'pending' as const },
+      ];
+      setProcessingSteps(steps);
+      
+      // Simulate step progression
+      const updateStep = (index: number) => {
+        setProcessingSteps(prev => prev.map((s, i) => ({
+          ...s,
+          status: i < index ? 'complete' : i === index ? 'running' : 'pending'
+        })));
+      };
+      
+      setTimeout(() => updateStep(1), 500);
+      setTimeout(() => updateStep(2), 1000);
+      setTimeout(() => updateStep(3), 1500);
+      
       const formData = new FormData();
       formData.append('excelFile', file);
       
@@ -429,18 +461,34 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
         throw new Error('Upload failed');
       }
       
-      return response.json();
+      setTimeout(() => updateStep(4), 500);
+      setTimeout(() => updateStep(5), 1000);
+      
+      const result = await response.json();
+      
+      // Mark all complete
+      setTimeout(() => {
+        setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'complete' as const })));
+      }, 1500);
+      
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'excel-mappings'] });
-      toast({
-        title: 'Upload Successful',
-        description: 'Excel file uploaded and scanned successfully',
-      });
-      setSelectedFile(null);
-      setUploadProgress(0);
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        setShowProcessingModal(false);
+        toast({
+          title: 'Upload Successful',
+          description: 'Excel file uploaded and scanned successfully',
+        });
+        setSelectedFile(null);
+        setUploadProgress(0);
+      }, 2000);
     },
     onError: (error: Error) => {
+      setShowProcessingModal(false);
       toast({
         title: 'Upload Failed',
         description: error.message,
@@ -497,6 +545,41 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Processing Modal */}
+      <Dialog open={showProcessingModal} onOpenChange={setShowProcessingModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              Code Lens - Processing Backend Operations
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            {processingSteps.map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
+                {item.status === 'complete' ? (
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                ) : item.status === 'running' ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                )}
+                <span className={`text-sm ${
+                  item.status === 'complete' ? 'text-green-600 font-medium' :
+                  item.status === 'running' ? 'text-primary font-medium' :
+                  'text-muted-foreground'
+                }`}>
+                  {item.step}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+            Backend processing in progress... Please wait.
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Upload Section */}
       <Card>
         <CardHeader>
