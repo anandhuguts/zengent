@@ -60,34 +60,110 @@ class FieldMatcherML:
             self.neural_model.load_model(model_path)
             self.model_loaded = True
         else:
-            print(f"Warning: Model not found at {model_path}. Using untrained model.", file=sys.stderr)
+            print(f"Warning: Model not found at {model_path}. Using traditional matching.", file=sys.stderr)
             self.model_loaded = False
+        
+        # Demographic field variations lookup table (knowledge-based matching)
+        self.demographic_variations = {
+            'ssn': ['social_security_number', 'socialSecurityNumber', 'taxId', 'tax_id'],
+            'dob': ['dateOfBirth', 'date_of_birth', 'birthDate', 'birth_date'],
+            'firstName': ['first_name', 'fname', 'givenName', 'given_name'],
+            'lastName': ['last_name', 'lname', 'surname', 'familyName', 'family_name'],
+            'email': ['emailAddress', 'email_address', 'eMail', 'e_mail'],
+            'phone': ['phoneNumber', 'phone_number', 'telephone', 'mobileNumber', 'mobile_number'],
+            'address': ['streetAddress', 'street_address', 'addressLine1', 'address_line_1'],
+            'zipCode': ['zip_code', 'postalCode', 'postal_code', 'postcode'],
+            'city': ['cityName', 'city_name', 'municipality'],
+            'state': ['stateCode', 'state_code', 'province', 'region'],
+           'accountNumber': ['account_number', 'accountNo', 'account_no', 'acctNum'],
+            'cardNumber': ['card_number', 'creditCardNumber', 'credit_card_number', 'panNumber', 'pan_number'],
+        }
         
     def preprocess_field_name(self, field_name: str) -> str:
         """Preprocess field name for better matching"""
         # Convert camelCase and snake_case to lowercase with spaces
         field_name = re.sub('([a-z])([A-Z])', r'\1 \2', field_name)
-        field_name = field_name.replace('_', ' ').lower()
+        field_name = field_name.replace('_', ' ').replace('-', ' ').lower()
         return field_name
+    
+    def extract_field_tokens(self, field_name: str) -> set:
+        """Extract meaningful tokens from field name including acronyms"""
+        # Split by common separators
+        tokens = re.split(r'[_\-\s]+', field_name.lower())
+        
+        # Also handle camelCase
+        camel_tokens = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', field_name)
+        tokens.extend([t.lower() for t in camel_tokens if t])
+        
+        # Remove empty tokens
+        tokens = [t for t in tokens if t and len(t) > 1]
+        
+        result_tokens = set(tokens)
+        
+        # Add acronyms (first letter of each word)
+        if len(tokens) > 1:
+            acronym = ''.join([t[0] for t in tokens if t])
+            if len(acronym) >= 2:
+                result_tokens.add(acronym)
+        
+        return result_tokens
+    
+    def is_acronym_match(self, short_field: str, long_field: str) -> bool:
+        """Check if short_field is likely an acronym of long_field"""
+        short = short_field.lower().strip()
+        
+        # Split long field into tokens (preserve order)
+        tokens = re.split(r'[_\-\s]+', long_field)
+        # Also handle camelCase
+        camel_tokens = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', long_field)
+        if camel_tokens:
+            tokens = camel_tokens
+        
+        # Filter out single-char and empty tokens
+        tokens = [t for t in tokens if t and len(t) > 1]
+        
+        if not tokens or len(short) < 2:
+            return False
+        
+        # Generate acronym from tokens (preserve order, case-insensitive)
+        acronym = ''.join([t[0].lower() for t in tokens if t])
+        
+        return short == acronym
     
     def calculate_similarity(self, source_field: str, target_field: str) -> float:
         """
-        Calculate similarity between two field names using neural network
+        Calculate similarity between two field names using multiple methods
         Returns score between 0 and 1
-        
-        Uses TensorFlow-style neural network with learned embeddings
         """
         # Method 1: Exact match (fast path)
         if source_field.lower() == target_field.lower():
             return 1.0
         
-        # Method 2: Neural network similarity (primary method)
-        if self.model_loaded:
-            neural_sim = self.neural_model.calculate_similarity(source_field, target_field)
-        else:
-            neural_sim = 0.0
+        # Strip table prefixes (e.g., "CUSTOMER.SSN" → "SSN")
+        source_clean = source_field.split('.')[-1] if '.' in source_field else source_field
+        target_clean = target_field.split('.')[-1] if '.' in target_field else target_field
         
-        # Method 3: Levenshtein distance (fallback/boost)
+        # Method 2: Lookup table match (knowledge-based, high confidence)
+        source_lower = source_clean.lower().replace('_', '').replace('-', '')
+        target_lower = target_clean.lower().replace('_', '').replace('-', '')
+        
+        for base_field, variations in self.demographic_variations.items():
+            base_normalized = base_field.lower().replace('_', '').replace('-', '')
+            variations_normalized = [v.lower().replace('_', '').replace('-', '') for v in variations]
+            
+            # Check if both fields match the same demographic category
+            if ((source_lower == base_normalized or source_lower in variations_normalized) and
+                (target_lower == base_normalized or target_lower in variations_normalized)):
+                return 0.95  # High confidence match from lookup table
+        
+        # Method 3: Check for acronym match (e.g., ssn == social_security_number)
+        shorter = source_field if len(source_field) < len(target_field) else target_field
+        longer = target_field if len(source_field) < len(target_field) else source_field
+        
+        if self.is_acronym_match(shorter, longer):
+            return 0.90  # High confidence acronym match
+        
+        # Method 3: Levenshtein distance
         source = self.preprocess_field_name(source_field)
         target = self.preprocess_field_name(target_field)
         
@@ -97,27 +173,30 @@ class FieldMatcherML:
         else:
             lev_similarity = 0.0
         
-        # Method 4: Token overlap (fallback/boost)
-        source_tokens = set(source.split())
-        target_tokens = set(target.split())
-        if source_tokens or target_tokens:
-            token_overlap = len(source_tokens & target_tokens) / len(source_tokens | target_tokens)
+        # Method 4: Token overlap (without acronyms to avoid duplicates)
+        source_tokens = set(re.split(r'[_\-\s]+', source_field.lower()))
+        target_tokens = set(re.split(r'[_\-\s]+', target_field.lower()))
+        
+        # Also add camelCase tokens
+        source_tokens.update(re.findall(r'[a-z]+', source_field.lower()))
+        target_tokens.update(re.findall(r'[a-z]+', target_field.lower()))
+        
+        # Remove single-char and empty tokens
+        source_tokens = {t for t in source_tokens if t and len(t) > 1}
+        target_tokens = {t for t in target_tokens if t and len(t) > 1}
+        
+        if source_tokens and target_tokens:
+            intersection = len(source_tokens & target_tokens)
+            union = len(source_tokens | target_tokens)
+            token_overlap = intersection / union if union > 0 else 0.0
         else:
             token_overlap = 0.0
         
-        # Weighted combination: prioritize neural network
-        if self.model_loaded:
-            final_score = (
-                0.7 * neural_sim +      # 70% neural network
-                0.2 * lev_similarity +   # 20% Levenshtein
-                0.1 * token_overlap      # 10% token overlap
-            )
-        else:
-            # Fallback if model not loaded
-            final_score = (
-                0.6 * lev_similarity +
-                0.4 * token_overlap
-            )
+        # Weighted combination: Balanced approach
+        final_score = (
+            0.6 * lev_similarity +   # 60% Levenshtein distance
+            0.4 * token_overlap      # 40% token overlap
+        )
         
         return min(1.0, max(0.0, final_score))
     
