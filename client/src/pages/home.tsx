@@ -377,7 +377,7 @@ export default function Home() {
               <div className="bg-gradient-to-r from-blue-900 to-blue-800 rounded-xl p-6 mb-8 border border-blue-600">
                 <div>
                   <h2 className="text-xl font-bold text-white mb-2">
-                    Enterprise Application Agents
+                    Enterprise Application Code Scan AI ML Utilities
                   </h2>
                   <p className="text-blue-100 text-sm mb-3">
                     Transform your codebase understanding with 11 specialized AI agents covering multi-language analysis, 
