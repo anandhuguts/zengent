@@ -47,7 +47,7 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  const { data: scanData, isLoading: isScanLoading } = useQuery<{ report: ScanReport; success: boolean }>({
+  const { data: scanData, isLoading: isScanLoading } = useQuery<{ report: ScanReport; success: boolean; excelMapping?: any }>({
     queryKey: ['/api/projects', projectId, 'demographics'],
     enabled: !!projectId,
   });
@@ -84,6 +84,7 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
   }
 
   const report = scanData?.report;
+  const excelMapping = scanData?.excelMapping;
   const allResults: ScanResult[] = report ? Object.values(report.fieldResults).flat() : [];
   const filteredResults = allResults.filter(result => 
     result.fieldType.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -206,6 +207,46 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
               </CardContent>
             </Card>
           </div>
+
+          {/* Excel Field Mapping Summary */}
+          {excelMapping && (
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Excel Field Mapping Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                  <div className="text-center p-3 bg-white rounded-lg border">
+                    <div className="text-lg font-bold text-blue-600">{excelMapping.totalFields}</div>
+                    <div className="text-xs text-muted-foreground">Total Fields</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg border">
+                    <div className="text-lg font-bold text-green-600">{excelMapping.matchedFields}</div>
+                    <div className="text-xs text-muted-foreground">Matched</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg border">
+                    <div className="text-lg font-bold text-orange-600">{excelMapping.unmatchedFields}</div>
+                    <div className="text-xs text-muted-foreground">Unmatched</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg border">
+                    <div className="text-lg font-bold text-blue-600">{excelMapping.matchPercentage}%</div>
+                    <div className="text-xs text-muted-foreground">Match Rate</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg border">
+                    <div className="text-xs font-medium text-muted-foreground truncate">{excelMapping.fileName}</div>
+                    <div className="text-xs text-muted-foreground">{new Date(excelMapping.uploadedAt).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground bg-white p-2 rounded border">
+                  <span>💡 Excel-based field mapping uses 100% exact matching algorithm</span>
+                  <Badge variant="outline" className="text-xs">Code Lens ML Available</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Coverage by Category */}
           <Card>

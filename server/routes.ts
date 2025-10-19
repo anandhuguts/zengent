@@ -893,11 +893,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[GET demographics] Scanning ${files.length} source files for project ${id}`);
       const scanReport = await demographicScanner.scanRepository(files);
       
+      // Include Excel Field Mapping information if available
+      const excelMappings = await storage.getExcelMappings(id);
+      const latestMapping = excelMappings && excelMappings.length > 0 ? excelMappings[0] : null;
+      
       res.json({
         success: true,
         projectId: id,
         projectName: project.name,
-        report: scanReport
+        report: scanReport,
+        excelMapping: latestMapping ? {
+          fileName: latestMapping.fileName,
+          uploadedAt: latestMapping.uploadedAt,
+          totalFields: latestMapping.totalFields,
+          matchedFields: latestMapping.matchedFields,
+          unmatchedFields: latestMapping.totalFields - latestMapping.matchedFields,
+          matchPercentage: Math.round((latestMapping.matchedFields / latestMapping.totalFields) * 100),
+          scanResults: latestMapping.scanResults
+        } : null
       });
     } catch (error) {
       console.error('Error scanning demographics:', error);
