@@ -448,7 +448,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       
       const readmePath = path.join(process.cwd(), 'server', 'python', 'README_TENSORFLOW_MODEL.md');
-      const markdownContent = await fs.readFile(readmePath, 'utf-8');
+      let markdownContent = await fs.readFile(readmePath, 'utf-8');
+      
+      // Remove the first H1 header (since we already have page title)
+      markdownContent = markdownContent.replace(/^#\s+.*$/m, '');
       
       // Convert markdown to HTML (simple conversion)
       let htmlContent = markdownContent
