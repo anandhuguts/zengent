@@ -57,8 +57,13 @@ class ExcelFieldScanner:
             mappings = []
             for row in sheet.iter_rows(min_row=2, values_only=True):
                 if len(row) > max(table_col_idx, field_col_idx):
+                    # Aggressively strip all types of whitespace (spaces, tabs, newlines, non-breaking spaces)
                     table_name = str(row[table_col_idx]).strip() if row[table_col_idx] else ""
                     field_name = str(row[field_col_idx]).strip() if row[field_col_idx] else ""
+                    
+                    # Remove all leading/trailing whitespace including non-breaking spaces
+                    table_name = ' '.join(table_name.split())
+                    field_name = ' '.join(field_name.split())
                     
                     if table_name and field_name and table_name != "None" and field_name != "None":
                         mappings.append({
