@@ -17,28 +17,27 @@ import { FileSearch, Database, Search, AlertTriangle, FileText, BarChart3, Brain
 const iconStyle = "w-5 h-5";
 
 const initialNodes: Node[] = [
-  // Input nodes
+  // PATH 1: REGEX SCAN (Top Row)
   {
     id: '1',
     type: 'input',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Source Code Input</div>
-          <div className="text-sm text-white mt-1">Parsed code files</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Source Code</div>
         </div>
       )
     },
-    position: { x: 50, y: 50 },
+    position: { x: 30, y: 20 },
     style: { 
       background: '#b8860b',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 220,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
   {
@@ -46,22 +45,112 @@ const initialNodes: Node[] = [
     type: 'input',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Regex Patterns</div>
-          <div className="text-sm text-white mt-1">39 patterns + custom</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">39 Regex Patterns</div>
         </div>
       )
     },
-    position: { x: 50, y: 150 },
+    position: { x: 30, y: 80 },
     style: { 
       background: '#8b8d90',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 220,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
+    },
+  },
+  {
+    id: '3',
+    data: { 
+      label: (
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Regex Scan</div>
+          <div className="text-xs text-white mt-0.5">Pattern matching</div>
+        </div>
+      )
+    },
+    position: { x: 220, y: 45 },
+    style: { 
+      background: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      borderRadius: '10px',
+      padding: '8px',
+      width: 160,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
+    },
+  },
+  {
+    id: 'llm-1',
+    data: { 
+      label: (
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">LLM</div>
+          <div className="text-xs text-white mt-0.5">Optional</div>
+        </div>
+      )
+    },
+    position: { x: 430, y: 20 },
+    style: { 
+      background: '#06b6d4',
+      color: 'white',
+      border: '2px dashed white',
+      borderRadius: '10px',
+      padding: '8px',
+      width: 120,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
+    },
+  },
+  {
+    id: 'report-1',
+    type: 'output',
+    data: { 
+      label: (
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Report</div>
+          <div className="text-xs text-white mt-0.5">PDF/DOC/HTML</div>
+        </div>
+      )
+    },
+    position: { x: 600, y: 45 },
+    style: { 
+      background: '#10b981',
+      color: 'white',
+      border: 'none',
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
+    },
+  },
+
+  // PATH 2: EXCEL SCAN (Bottom Row)
+  {
+    id: 'source-2',
+    type: 'input',
+    data: { 
+      label: (
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Source Code</div>
+        </div>
+      )
+    },
+    position: { x: 30, y: 180 },
+    style: { 
+      background: '#b8860b',
+      color: 'white',
+      border: 'none',
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
   {
@@ -69,123 +158,96 @@ const initialNodes: Node[] = [
     type: 'input',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Excel Upload</div>
-          <div className="text-sm text-white mt-1">table_name, field_name</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Excel Upload</div>
+          <div className="text-xs text-white mt-0.5">table.field</div>
         </div>
       )
     },
-    position: { x: 50, y: 250 },
+    position: { x: 30, y: 240 },
     style: { 
       background: '#b8860b',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 220,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-    },
-  },
-  
-  // Scanning methods
-  {
-    id: '3',
-    data: { 
-      label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Regex Scan</div>
-          <div className="text-sm text-white mt-1">Pattern matching</div>
-        </div>
-      )
-    },
-    position: { x: 340, y: 100 },
-    style: { 
-      background: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 200,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
   {
     id: 'excel-2',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Excel Field Scan</div>
-          <div className="text-sm text-white mt-1">100% exact match</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Excel Scan</div>
+          <div className="text-xs text-white mt-0.5">100% exact match</div>
         </div>
       )
     },
-    position: { x: 340, y: 250 },
+    position: { x: 220, y: 205 },
     style: { 
       background: '#3b82f6',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 200,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      borderRadius: '10px',
+      padding: '8px',
+      width: 160,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
-  
-  // Optional LLM processing
   {
-    id: '5',
+    id: 'llm-2',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">SLM / LLM</div>
-          <div className="text-sm text-white mt-1">Optional enhancement</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">LLM</div>
+          <div className="text-xs text-white mt-0.5">Optional</div>
         </div>
       )
     },
-    position: { x: 630, y: 50 },
+    position: { x: 430, y: 240 },
     style: { 
       background: '#06b6d4',
       color: 'white',
-      border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 200,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      border: '2px dashed white',
+      borderRadius: '10px',
+      padding: '8px',
+      width: 120,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
-  
-  // Report output
   {
-    id: '6',
+    id: 'report-2',
     type: 'output',
     data: { 
       label: (
-        <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Compliance Report</div>
-          <div className="text-sm text-white mt-1">PDF/DOCX/HTML export</div>
+        <div className="px-3 py-2">
+          <div className="font-bold text-white text-sm">Report</div>
+          <div className="text-xs text-white mt-0.5">PDF/DOC/HTML</div>
         </div>
       )
     },
-    position: { x: 630, y: 200 },
+    position: { x: 600, y: 205 },
     style: { 
       background: '#10b981',
       color: 'white',
       border: 'none',
-      borderRadius: '12px',
-      padding: '10px',
-      width: 200,
-      fontSize: '14px',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      borderRadius: '10px',
+      padding: '8px',
+      width: 140,
+      fontSize: '12px',
+      boxShadow: '0 3px 5px rgba(0,0,0,0.1)'
     },
   },
 ];
 
 const initialEdges: Edge[] = [
-  // PATH 1: Regex Scan
+  // ===== PATH 1: REGEX SCAN (Top Row) =====
+  // Inputs → Regex Scan
   { 
     id: 'e1-3', 
     source: '1', 
@@ -202,76 +264,75 @@ const initialEdges: Edge[] = [
     style: { stroke: '#3b82f6', strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
   },
-  // Regex Scan → Report
+  // Regex Scan → Direct to Report
   { 
-    id: 'e3-6', 
+    id: 'e3-r1', 
     source: '3', 
-    target: '6',
+    target: 'report-1',
     animated: true,
     style: { stroke: '#10b981', strokeWidth: 3 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
   },
-  // Regex Scan → Optional LLM → Report
+  // Regex Scan → Optional LLM
   { 
-    id: 'e3-5', 
+    id: 'e3-llm1', 
     source: '3', 
-    target: '5',
+    target: 'llm-1',
     animated: true,
-    style: { stroke: '#06b6d4', strokeWidth: 2, strokeDasharray: '5,5' },
+    style: { stroke: '#06b6d4', strokeWidth: 1.5, strokeDasharray: '4,4' },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
-    label: 'optional',
-    labelBgPadding: [8, 4],
-    labelBgBorderRadius: 4,
-    labelBgStyle: { fill: '#cffafe', fillOpacity: 0.9 },
-    labelStyle: { fontSize: '10px', fill: '#0e7490', fontWeight: 600 },
+  },
+  // Optional LLM → Report
+  { 
+    id: 'ellm1-r1', 
+    source: 'llm-1', 
+    target: 'report-1',
+    animated: true,
+    style: { stroke: '#06b6d4', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
   },
   
-  // PATH 2: Excel Field Scan
+  // ===== PATH 2: EXCEL SCAN (Bottom Row) =====
+  // Inputs → Excel Scan
   { 
-    id: 'excel-e1', 
+    id: 'es2-e2', 
+    source: 'source-2', 
+    target: 'excel-2',
+    animated: true,
+    style: { stroke: '#3b82f6', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
+  },
+  { 
+    id: 'ex1-e2', 
     source: 'excel-1', 
     target: 'excel-2',
     animated: true,
     style: { stroke: '#3b82f6', strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
   },
+  // Excel Scan → Direct to Report
   { 
-    id: 'excel-e2', 
-    source: '1', 
-    target: 'excel-2',
-    animated: true,
-    style: { stroke: '#3b82f6', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
-  },
-  // Excel Scan → Report
-  { 
-    id: 'excel-e3', 
+    id: 'e2-r2', 
     source: 'excel-2', 
-    target: '6',
+    target: 'report-2',
     animated: true,
     style: { stroke: '#10b981', strokeWidth: 3 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
   },
-  // Excel Scan → Optional LLM → Report
+  // Excel Scan → Optional LLM
   { 
-    id: 'excel-e4', 
+    id: 'e2-llm2', 
     source: 'excel-2', 
-    target: '5',
+    target: 'llm-2',
     animated: true,
-    style: { stroke: '#06b6d4', strokeWidth: 2, strokeDasharray: '5,5' },
+    style: { stroke: '#06b6d4', strokeWidth: 1.5, strokeDasharray: '4,4' },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
-    label: 'optional',
-    labelBgPadding: [8, 4],
-    labelBgBorderRadius: 4,
-    labelBgStyle: { fill: '#cffafe', fillOpacity: 0.9 },
-    labelStyle: { fontSize: '10px', fill: '#0e7490', fontWeight: 600 },
   },
-  
   // Optional LLM → Report
   { 
-    id: 'e5-6', 
-    source: '5', 
-    target: '6',
+    id: 'ellm2-r2', 
+    source: 'llm-2', 
+    target: 'report-2',
     animated: true,
     style: { stroke: '#06b6d4', strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
