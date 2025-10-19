@@ -89,7 +89,7 @@ const initialNodes: Node[] = [
     data: { 
       label: (
         <div className="px-4 py-3">
-          <div className="font-bold text-white text-lg">Demographic Scanning</div>
+          <div className="font-bold text-white text-lg">Code Lens - Demographic Scanning</div>
           <div className="text-sm text-white mt-1">PII/PHI pattern detection</div>
         </div>
       )
