@@ -491,7 +491,7 @@ export default function Home() {
               <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 rounded-xl p-6 mb-8 border border-emerald-600">
                 <div>
                   <h2 className="text-xl font-bold text-white mb-2">
-                    Diamond Project Intelligence
+                    Gen AI - Agents for Diamond Project
                   </h2>
                   <p className="text-emerald-100 text-sm mb-3">
                     Advanced AI-powered agents designed for specialized analysis tasks including code matching, knowledge extraction, 
