@@ -1,4 +1,4 @@
-# Demographic Data Scanning Process - Flow Diagram
+# Code Lens - Demographic Data Scanning Process - Flow Diagram
 
 ## Process Overview
 
