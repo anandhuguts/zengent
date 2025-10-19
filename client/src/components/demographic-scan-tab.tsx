@@ -473,15 +473,16 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
       
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'excel-mappings'] });
       
       // Close modal after a short delay
       setTimeout(() => {
         setShowProcessingModal(false);
+        const totalRows = data?.results?.totalFields || data?.mapping?.totalFields || 0;
         toast({
           title: 'Upload Successful',
-          description: 'Excel file uploaded and scanned successfully',
+          description: `Excel file uploaded and scanned successfully. Loaded ${totalRows} rows from Excel file.`,
         });
         setSelectedFile(null);
         setUploadProgress(0);
@@ -686,7 +687,7 @@ function ExcelFieldMappingTab({ projectId }: ExcelFieldMappingTabProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <div className="text-2xl font-bold text-primary">{latestMapping.totalFields}</div>
-                  <div className="text-sm text-muted-foreground">Total Fields</div>
+                  <div className="text-sm text-muted-foreground">Total Rows Loaded</div>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{latestMapping.matchedFields}</div>
