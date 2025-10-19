@@ -19,8 +19,7 @@ import {
   Info,
   FileText,
   HelpCircle,
-  Cpu,
-  BookOpen
+  Cpu
 } from "lucide-react";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 
@@ -148,19 +147,6 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
                   </Button>
                 )
               )}
-              
-              {/* Code Lens ML Documentation */}
-              <Link href="/ml-documentation">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-900 bg-white border-white hover:bg-gray-100 hover:text-primary font-medium"
-                  data-testid="button-ml-docs"
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  ML Docs
-                </Button>
-              </Link>
               
               {/* User Profile Dropdown */}
               {user && (
