@@ -10,6 +10,7 @@ import MermaidClassDiagram from "@/components/mermaid-class-diagram";
 import MermaidFlowDiagram from "@/components/mermaid-flow-diagram";
 import MermaidSequenceDiagram from "@/components/mermaid-sequence-diagram";
 import DemographicScanTab from "@/components/demographic-scan-tab";
+import DemographicScanWorkflow from "@/components/demographic-scan-workflow";
 import ComprehensiveAnalysis from "@/components/comprehensive-analysis";
 import ReportPreview from "@/components/report-preview";
 import DemographicReportPreview from "@/components/demographic-report-preview";
@@ -372,6 +373,19 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
           </TabsContent>
         </Tabs>
       </Card>
+
+      {/* Code Lens - Demographic Scanning Workflow */}
+      <div className="mb-6">
+        <div className="text-center mb-4">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Code Lens - Demographic Data Scanning Process
+          </h3>
+          <p className="text-gray-600 text-sm">
+            Automated PII/PHI detection with compliance reporting
+          </p>
+        </div>
+        <DemographicScanWorkflow />
+      </div>
 
       {/* Demographic Scan Section */}
       <Card className="mb-6">

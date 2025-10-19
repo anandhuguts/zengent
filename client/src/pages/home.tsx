@@ -7,7 +7,6 @@ import AnalysisResults from "@/components/analysis-results";
 import Dashboard from "@/components/dashboard";
 import AIModelSelector, { type AIModelConfig } from "@/components/ai-model-selector";
 import AnalysisFlowDiagram from "@/components/analysis-flow-diagram";
-import DemographicScanWorkflow from "@/components/demographic-scan-workflow";
 import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { AIAnalysisResult } from "@shared/schema";
@@ -380,19 +379,6 @@ export default function Home() {
           </div>
           <div className="max-w-6xl mx-auto mb-8">
             <AnalysisFlowDiagram />
-          </div>
-
-          {/* Code Lens - Demographic Scanning Workflow */}
-          <div className="max-w-5xl mx-auto mt-12">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Code Lens - Demographic Data Scanning Process
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Automated PII/PHI detection with compliance reporting
-              </p>
-            </div>
-            <DemographicScanWorkflow />
           </div>
         </div>
       </div>
