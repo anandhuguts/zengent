@@ -464,16 +464,15 @@ export default function Home() {
                     Gen AI - Agents for Diamond Project
                   </h2>
                   <p className="text-emerald-100 text-sm mb-3">
-                    Advanced AI-powered agents designed for specialized analysis tasks including code matching, knowledge extraction, 
-                    data analysis, and intelligent code transformation. Each agent leverages cutting-edge AI models for precise 
-                    and efficient processing of complex enterprise data and code patterns.
+                    Three specialized AI agents for enterprise development: Knowledge Agent for document intelligence and Q&A with 
+                    Confluence integration, Code Conversion Agent for multi-language code transformation, and Validator & Responsible AI 
+                    Agent for security compliance, privacy validation, ethics assessment, and bias detection across your applications.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="text-xs text-blue-300 border-blue-300 bg-blue-900/20">Code Analysis</Badge>
-                    <Badge variant="outline" className="text-xs text-purple-300 border-purple-300 bg-purple-900/20">Pattern Matching</Badge>
-                    <Badge variant="outline" className="text-xs text-yellow-300 border-yellow-300 bg-yellow-900/20">Knowledge Mining</Badge>
-                    <Badge variant="outline" className="text-xs text-red-300 border-red-300 bg-red-900/20">Data Intelligence</Badge>
-                    <Badge variant="outline" className="text-xs text-indigo-300 border-indigo-300 bg-indigo-900/20">Code Transformation</Badge>
+                    <Badge variant="outline" className="text-xs text-teal-300 border-teal-300 bg-teal-900/20">Knowledge Intelligence</Badge>
+                    <Badge variant="outline" className="text-xs text-indigo-300 border-indigo-300 bg-indigo-900/20">Code Conversion</Badge>
+                    <Badge variant="outline" className="text-xs text-purple-300 border-purple-300 bg-purple-900/20">Security & Compliance</Badge>
+                    <Badge variant="outline" className="text-xs text-pink-300 border-pink-300 bg-pink-900/20">Responsible AI</Badge>
                   </div>
                 </div>
               </div>
