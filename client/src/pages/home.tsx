@@ -266,23 +266,6 @@ export default function Home() {
   // AI Agent types for Diamond Project
   const aiAgents = [
     {
-      id: 'code-lens' as ProjectType,
-      name: 'Code Lens Agent',
-      description: 'Advanced demographic field analysis and integration pattern detection for comprehensive application understanding',
-      logoSrc: agentLogo,
-      borderColor: 'border-chart-3',
-      bgColor: 'bg-chart-3/5',
-      hoverBgColor: 'hover:bg-chart-3/10',
-      features: [
-        'Demographic field identification and analysis',
-        'Integration pattern detection and mapping',
-        'Data flow and transformation analysis',
-        'Cross-system dependency identification',
-        'API endpoint and service interaction mapping',
-        'Business logic and workflow documentation'
-      ]
-    },
-    {
       id: 'knowledge' as ProjectType,
       name: 'Knowledge Agent',
       description: 'Document intelligence and Q&A system with Confluence integration, PDF processing, and intelligent knowledge extraction',
