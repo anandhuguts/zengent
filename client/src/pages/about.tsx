@@ -141,7 +141,7 @@ export default function TeamBehind() {
             </h1>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Zengent AI - Enterprise Application Agents
+            Code Lens v2 - Enterprise Application Agents
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Transform your codebase understanding with AI-powered analysis, interactive visualizations, 

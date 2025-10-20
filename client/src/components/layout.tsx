@@ -127,9 +127,9 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
               />
             </div>
             
-            {/* Center - Zengent AI Text */}
+            {/* Center - Code Lens v2 Text */}
             <div className="flex-1 text-center">
-              <h2 className="text-lg font-medium">Zengent AI - Enterprise Application Agents</h2>
+              <h2 className="text-lg font-medium">Code Lens v2 - Enterprise Application Agents</h2>
             </div>
             
             {/* Right side - AI Settings, User Profile and other buttons */}
