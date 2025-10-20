@@ -60,7 +60,7 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Panel - Blue Background with Zengent AI Agents Layout */}
+      {/* Left Panel - Blue Background with Code Lens AI Agents Layout */}
       <div className="hidden lg:flex lg:w-[60%] bg-[#2E4BC7] items-center justify-center p-12">
         <div className="text-center max-w-2xl w-full">
           {/* Main Heading */}
@@ -72,7 +72,7 @@ export default function LoginForm() {
           <div className="mb-16">
             <img 
               src={zenagentImage} 
-              alt="Zengent AI Agents" 
+              alt="Code Lens AI Agents" 
               className="mx-auto w-full h-auto"
               style={{ maxHeight: '350px' }}
             />
@@ -105,10 +105,10 @@ export default function LoginForm() {
           <div className="lg:hidden text-center mb-8">
             <img 
               src={zenagentImage} 
-              alt="Zengent AI Agents" 
+              alt="Code Lens AI Agents" 
               className="mx-auto mb-4 w-64 h-auto"
             />
-            <h1 className="text-2xl font-bold text-gray-900">Zengent AI</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Code Lens AI</h1>
           </div>
 
           {/* Login Form */}
@@ -116,7 +116,7 @@ export default function LoginForm() {
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                ZENGENT AI
+                CODE LENS AI
               </h1>
               <p className="text-sm text-gray-600">
                 Secure platform access
