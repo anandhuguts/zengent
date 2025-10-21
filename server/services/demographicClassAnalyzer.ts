@@ -70,6 +70,10 @@ export class DemographicClassAnalyzer {
     scanResults: { [fieldName: string]: Array<{ file: string; line: number; fieldType: string; context: string }> },
     sourceFiles: Array<{ path: string; content: string }>
   ): Promise<DemographicClassReport> {
+    console.log('[DemographicClassAnalyzer] Starting analysis...');
+    console.log('[DemographicClassAnalyzer] Scan result field types:', Object.keys(scanResults).length);
+    console.log('[DemographicClassAnalyzer] Source files:', sourceFiles.length);
+    
     const classesMap = new Map<string, ClassInfo>();
 
     // Group scan results by file
@@ -93,15 +97,23 @@ export class DemographicClassAnalyzer {
       });
     });
 
+    console.log('[DemographicClassAnalyzer] Files with demographic fields (after filtering tests):', fileResults.size);
+
     // Analyze each file with demographic fields
     const fileResultsArray = Array.from(fileResults.entries());
     for (const [filePath, demographicMatches] of fileResultsArray) {
       const sourceFile = sourceFiles.find(sf => sf.path === filePath);
-      if (!sourceFile) continue;
+      if (!sourceFile) {
+        console.log('[DemographicClassAnalyzer] Source file not found:', filePath);
+        continue;
+      }
 
       const classInfo = this.analyzeFile(filePath, sourceFile.content, demographicMatches);
       if (classInfo && classInfo.functions.length > 0) {
         classesMap.set(filePath, classInfo);
+        console.log(`[DemographicClassAnalyzer] ✓ Class: ${classInfo.className} (${classInfo.functions.length} functions)`);
+      } else {
+        console.log(`[DemographicClassAnalyzer] ✗ No functions found in: ${filePath}`);
       }
     }
 

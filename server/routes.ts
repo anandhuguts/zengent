@@ -1270,12 +1270,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[GET demographic-classes] Analyzing ${files.length} source files for project ${id}`);
       const scanReport = await demographicScanner.scanRepository(files);
+      console.log(`[GET demographic-classes] Scan complete. Field results:`, Object.keys(scanReport.fieldResults).length);
       
       // Then analyze classes that contain demographic fields
       const classReport = await demographicClassAnalyzer.analyzeClasses(
         scanReport.fieldResults,
         files
       );
+      console.log(`[GET demographic-classes] Class analysis complete. Classes found:`, classReport.summary.totalClasses);
 
       res.json({
         success: true,

@@ -89,6 +89,11 @@ export default function DemographicScanTab({ projectId }: DemographicScanTabProp
     enabled: !!projectId,
   });
 
+  // Debug logging
+  console.log('[DemographicClass Tab] classData:', classData);
+  console.log('[DemographicClass Tab] isLoading:', isClassLoading);
+  console.log('[DemographicClass Tab] classes:', classData?.report?.classes?.length);
+
   const { data: patternsData } = useQuery({
     queryKey: ['/api/demographic/patterns'],
     enabled: !!projectId,
