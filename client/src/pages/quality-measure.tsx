@@ -291,6 +291,142 @@ export default function QualityMeasure() {
     return 'destructive';
   };
 
+  const exportToHTML = () => {
+    if (!analysisReport) return;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ISO 5055 Quality Analysis Report - ${analysisReport.projectName}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 30px; border-radius: 10px; }
+    .summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0; }
+    .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .stat-value { font-size: 36px; font-weight: bold; }
+    .reliability { color: #3b82f6; }
+    .security { color: #8b5cf6; }
+    .performance { color: #10b981; }
+    .maintainability { color: #f59e0b; }
+    .overall { color: #1d4ed8; }
+    .section { background: white; margin: 20px 0; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .issue { background: #f9fafb; margin: 10px 0; padding: 15px; border-radius: 6px; border-left: 4px solid #ccc; }
+    .issue.critical { border-left-color: #dc2626; }
+    .issue.high { border-left-color: #ea580c; }
+    .issue.medium { border-left-color: #f59e0b; }
+    .issue.low { border-left-color: #3b82f6; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+    .progress-bar { background: #e5e7eb; height: 20px; border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+    h2 { color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 ISO/IEC 5055:2021 Quality Analysis Report</h1>
+    <p><strong>Project:</strong> ${analysisReport.projectName}</p>
+    <p><strong>Language:</strong> ${analysisReport.language.toUpperCase()}</p>
+    <p><strong>Scan Date:</strong> ${new Date(analysisReport.scanDate).toLocaleString()}</p>
+  </div>
+
+  <div class="summary">
+    <div class="stat-card">
+      <div style="color: #6b7280; font-size: 14px;">Overall Score</div>
+      <div class="stat-value overall">${analysisReport.metrics.overallScore}</div>
+      <div class="progress-bar" style="margin-top: 10px;">
+        <div class="progress-fill" style="width: ${analysisReport.metrics.overallScore}%;"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div style="color: #6b7280; font-size: 14px;">Reliability</div>
+      <div class="stat-value reliability">${analysisReport.metrics.reliability}</div>
+      <div class="progress-bar" style="margin-top: 10px;">
+        <div class="progress-fill" style="width: ${analysisReport.metrics.reliability}%; background: #3b82f6;"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div style="color: #6b7280; font-size: 14px;">Security</div>
+      <div class="stat-value security">${analysisReport.metrics.security}</div>
+      <div class="progress-bar" style="margin-top: 10px;">
+        <div class="progress-fill" style="width: ${analysisReport.metrics.security}%; background: #8b5cf6;"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div style="color: #6b7280; font-size: 14px;">Performance</div>
+      <div class="stat-value performance">${analysisReport.metrics.performance}</div>
+      <div class="progress-bar" style="margin-top: 10px;">
+        <div class="progress-fill" style="width: ${analysisReport.metrics.performance}%; background: #10b981;"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div style="color: #6b7280; font-size: 14px;">Maintainability</div>
+      <div class="stat-value maintainability">${analysisReport.metrics.maintainability}</div>
+      <div class="progress-bar" style="margin-top: 10px;">
+        <div class="progress-fill" style="width: ${analysisReport.metrics.maintainability}%; background: #f59e0b;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📈 Issue Summary</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px;">
+      <div style="text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #dc2626;">${analysisReport.issues.critical}</div>
+        <div style="color: #6b7280;">Critical</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #ea580c;">${analysisReport.issues.high}</div>
+        <div style="color: #6b7280;">High</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #f59e0b;">${analysisReport.issues.medium}</div>
+        <div style="color: #6b7280;">Medium</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #3b82f6;">${analysisReport.issues.low}</div>
+        <div style="color: #6b7280;">Low</div>
+      </div>
+    </div>
+  </div>
+
+  ${Object.entries(analysisReport.details).map(([category, data]) => `
+    <div class="section">
+      <h2>🔍 ${category.charAt(0).toUpperCase() + category.slice(1)} Issues (Score: ${data.score}/100)</h2>
+      ${data.issues.length === 0 ? '<p style="color: #10b981; font-weight: bold;">✓ No issues found</p>' : ''}
+      ${data.issues.map(issue => `
+        <div class="issue ${issue.severity}">
+          <div>
+            <span class="badge" style="background: ${issue.severity === 'critical' ? '#dc2626' : issue.severity === 'high' ? '#ea580c' : issue.severity === 'medium' ? '#f59e0b' : '#3b82f6'}; color: white;">
+              ${issue.severity.toUpperCase()}
+            </span>
+          </div>
+          <p style="margin: 10px 0;"><strong>${issue.description}</strong></p>
+          <p style="color: #6b7280; font-size: 14px;">📁 ${issue.file}${issue.line ? ` (Line ${issue.line})` : ''}</p>
+        </div>
+      `).join('')}
+    </div>
+  `).join('')}
+
+  <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 8px; text-align: center;">
+    <p style="color: #6b7280;">Generated by ISO 5055 Quality Analyzer on ${new Date().toLocaleString()}</p>
+    <p style="color: #6b7280; font-size: 12px; margin-top: 10px;">ISO/IEC 5055:2021 - Automated Source Code Quality Measurement</p>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `iso5055-quality-report-${analysisReport.projectName}-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -774,17 +910,17 @@ export default function QualityMeasure() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <Button variant="outline">
+                <Button variant="outline" disabled>
                   <Download className="w-4 h-4 mr-2" />
-                  Export as PDF
+                  Export as PDF (Coming Soon)
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={exportToHTML} data-testid="button-export-html">
                   <Download className="w-4 h-4 mr-2" />
                   Export as HTML
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" disabled>
                   <Download className="w-4 h-4 mr-2" />
-                  Export as DOC
+                  Export as DOC (Coming Soon)
                 </Button>
               </div>
             </CardContent>
