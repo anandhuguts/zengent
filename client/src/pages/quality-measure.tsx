@@ -272,6 +272,25 @@ export default function QualityMeasure() {
       return;
     }
 
+    // Show detailed analysis information
+    toast({
+      title: '🔍 Starting Comprehensive Quality Analysis',
+      description: (
+        <div className="mt-2 space-y-2 text-sm">
+          <p className="font-semibold">Analyzing your code with:</p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li><strong>ISO/IEC 5055:2021</strong> - Automated quality measurement</li>
+            <li><strong>ISO/IEC 25010</strong> - 74 quality characteristic checks</li>
+            <li><strong>CWE Scanner</strong> - 16 security vulnerability rules</li>
+          </ul>
+          <p className="mt-2 text-xs text-gray-600">
+            Total: 90 comprehensive code quality and security checks
+          </p>
+        </div>
+      ),
+      duration: 8000,
+    });
+
     uploadMutation.mutate({
       file: selectedFile || undefined,
       githubUrl: githubUrl || undefined,
