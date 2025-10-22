@@ -434,10 +434,18 @@ export default function QualityMeasure() {
           <Award className="w-8 h-8 text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-900">Quality Measure</h1>
         </div>
-        <p className="text-gray-600">ISO 5055 - Automated Source Code Quality Measurement</p>
-        <Badge variant="outline" className="mt-2">
-          ISO/IEC 5055:2021 Compliant
-        </Badge>
+        <p className="text-gray-600">Automated Source Code Quality Measurement</p>
+        <div className="flex gap-2 mt-2">
+          <Badge variant="outline" className="bg-blue-50">
+            ISO/IEC 5055:2021
+          </Badge>
+          <Badge variant="outline" className="bg-purple-50">
+            ISO/IEC 25010
+          </Badge>
+          <Badge variant="outline" className="bg-green-50">
+            CWE-Based Analysis
+          </Badge>
+        </div>
       </div>
 
       {/* Upload Section */}
@@ -527,12 +535,12 @@ export default function QualityMeasure() {
             {uploadMutation.isPending ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Analyzing...
+                Analyzing Code Quality...
               </>
             ) : (
               <>
                 <BarChart3 className="w-4 h-4 mr-2" />
-                Run ISO 5055 Analysis
+                Run Quality Analysis
               </>
             )}
           </Button>
