@@ -880,35 +880,39 @@ Example: 'Focus on security vulnerabilities and performance bottlenecks' or 'Ana
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={[
-                    { 
-                      type: 'Controllers', 
-                      avgMethods: stats.controllers > 0 
-                        ? Math.round((stats.totalMethods * 0.3) / stats.controllers) 
-                        : 0 
-                    },
-                    { 
-                      type: 'Services', 
-                      avgMethods: stats.services > 0 
-                        ? Math.round((stats.totalMethods * 0.4) / stats.services) 
-                        : 0 
-                    },
-                    { 
-                      type: 'Repositories', 
-                      avgMethods: stats.repositories > 0 
-                        ? Math.round((stats.totalMethods * 0.2) / stats.repositories) 
-                        : 0 
-                    },
-                    { 
-                      type: 'Entities', 
-                      avgMethods: stats.entities > 0 
-                        ? Math.round((stats.totalMethods * 0.1) / stats.entities) 
-                        : 0 
-                    },
-                  ]} layout="horizontal">
+                  <BarChart 
+                    data={[
+                      { 
+                        type: 'Controllers', 
+                        avgMethods: stats.controllers > 0 
+                          ? Math.round((stats.totalMethods * 0.3) / stats.controllers) 
+                          : 0 
+                      },
+                      { 
+                        type: 'Services', 
+                        avgMethods: stats.services > 0 
+                          ? Math.round((stats.totalMethods * 0.4) / stats.services) 
+                          : 0 
+                      },
+                      { 
+                        type: 'Repositories', 
+                        avgMethods: stats.repositories > 0 
+                          ? Math.round((stats.totalMethods * 0.2) / stats.repositories) 
+                          : 0 
+                      },
+                      { 
+                        type: 'Entities', 
+                        avgMethods: stats.entities > 0 
+                          ? Math.round((stats.totalMethods * 0.1) / stats.entities) 
+                          : 0 
+                      },
+                    ]} 
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
-                    <YAxis dataKey="type" type="category" width={100} />
+                    <YAxis dataKey="type" type="category" width={90} />
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="avgMethods" fill="#10b981" name="Avg Methods" />

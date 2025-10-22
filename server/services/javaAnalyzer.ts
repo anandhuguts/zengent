@@ -195,7 +195,19 @@ function parseJavaFile(content: string, filePath: string): AnalysisData['classes
     
     // Extract inheritance
     const extendsMatch = content.match(/class\s+\w+\s+extends\s+(\w+)/);
+    const interfaceExtendsMatch = content.match(/interface\s+\w+\s+extends\s+([^{]+)/);
     const implementsMatch = content.match(/class\s+\w+.*?implements\s+([^{]+)/);
+    
+    // Check if this is a JpaRepository (common repository pattern without @Repository annotation)
+    if (classType === 'other' && interfaceExtendsMatch) {
+      const extendsTypes = interfaceExtendsMatch[1];
+      if (extendsTypes.includes('JpaRepository') || 
+          extendsTypes.includes('CrudRepository') || 
+          extendsTypes.includes('Repository') ||
+          content.includes('interface') && className.endsWith('Repository')) {
+        classType = 'repository';
+      }
+    }
     
     return {
       name: className,
