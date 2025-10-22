@@ -9,9 +9,11 @@ export interface CWERule {
   owasp?: string;
   description: string;
   recommendation: string;
+  impact?: string;
   patterns: {
     regex: RegExp;
     context?: string;
+    impactDetails?: string;
   }[];
   languages: string[];
   confidence: 'high' | 'medium' | 'low';
@@ -27,15 +29,63 @@ export const CWE_RULES: CWERule[] = [
     owasp: "A03:2021 - Injection",
     description: "Improper neutralization of special elements used in an SQL Command",
     recommendation: "Use parameterized queries or prepared statements instead of string concatenation",
+    impact: "SQL injection can lead to: (1) Unauthorized data access and exfiltration, (2) Data manipulation or deletion, (3) Authentication bypass, (4) Privilege escalation, (5) Complete database compromise, (6) Remote code execution in some cases. This vulnerability allows attackers to execute arbitrary SQL commands, potentially exposing sensitive data, modifying records, or gaining administrative access to the entire database system.",
     patterns: [
-      { regex: /executeQuery\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, context: "Java/JDBC" },
-      { regex: /createQuery\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, context: "JPA" },
-      { regex: /Statement\s*=.*?createStatement\(\)/gi, context: "JDBC Statement" },
-      { regex: /execute\s*\(\s*["\`].*?%s.*?["\`].*?%/gi, context: "Python string formatting" },
-      { regex: /execute\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, context: "Python concatenation" },
-      { regex: /\$conn->query\s*\(\s*["\`].*?\$.*?["\`]\s*\)/gi, context: "PHP" },
-      { regex: /db\.query\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, context: "Node.js" },
-      { regex: /db\.exec\s*\(\s*f["\`].*?\{.*?\}.*?["\`]\s*\)/gi, context: "Python f-string" },
+      { 
+        regex: /executeQuery\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "Java/JDBC String Concatenation",
+        impactDetails: "Direct SQL execution with concatenated user input - Critical risk of data breach"
+      },
+      { 
+        regex: /createQuery\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "JPA Dynamic Query",
+        impactDetails: "JPA query built with string concatenation - Vulnerable to data extraction attacks"
+      },
+      { 
+        regex: /Statement\s*=.*?createStatement\(\)/gi, 
+        context: "JDBC Statement (Unsafe)",
+        impactDetails: "Using Statement instead of PreparedStatement - High risk of SQL injection"
+      },
+      { 
+        regex: /execute\s*\(\s*["\`].*?%s.*?["\`].*?%/gi, 
+        context: "Python String Formatting in SQL",
+        impactDetails: "SQL query with % string formatting - Critical vulnerability for database manipulation"
+      },
+      { 
+        regex: /execute\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "Python SQL Concatenation",
+        impactDetails: "Concatenated SQL query - Allows arbitrary SQL command execution"
+      },
+      { 
+        regex: /\$conn->query\s*\(\s*["\`].*?\$.*?["\`]\s*\)/gi, 
+        context: "PHP mysqli/PDO Query",
+        impactDetails: "PHP query with variable interpolation - Critical risk of data compromise"
+      },
+      { 
+        regex: /db\.query\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "Node.js Database Query",
+        impactDetails: "Dynamic query construction - Vulnerable to SQL injection attacks"
+      },
+      { 
+        regex: /db\.exec\s*\(\s*f["\`].*?\{.*?\}.*?["\`]\s*\)/gi, 
+        context: "Python f-string SQL",
+        impactDetails: "SQL with f-string interpolation - Critical vulnerability for unauthorized access"
+      },
+      { 
+        regex: /query\s*\(\s*["\`]SELECT.*?\$\{.*?\}.*?["\`]\s*\)/gi, 
+        context: "Template Literal SQL",
+        impactDetails: "SQL in template literals with variables - High risk injection point"
+      },
+      { 
+        regex: /executeSql\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "Mobile/SQLite Query",
+        impactDetails: "SQLite query with concatenation - Vulnerable to local database attacks"
+      },
+      { 
+        regex: /rawQuery\s*\(\s*["\`].*?\+.*?["\`]\s*\)/gi, 
+        context: "Android Raw Query",
+        impactDetails: "Android raw SQL query - Critical mobile app vulnerability"
+      },
     ],
     languages: ["java", "python", "javascript", "typescript", "php", "csharp"],
     confidence: "high",
@@ -338,6 +388,11 @@ export class CWERuleEngine {
           const matches = line.match(pattern.regex);
 
           if (matches) {
+            const impactInfo = pattern.impactDetails || rule.impact;
+            const description = pattern.impactDetails 
+              ? `${rule.description}${pattern.context ? ` (${pattern.context})` : ''}\n\nImpact: ${pattern.impactDetails}`
+              : `${rule.description}${pattern.context ? ` (${pattern.context})` : ''}${rule.impact ? `\n\nImpact: ${rule.impact}` : ''}`;
+            
             const vulnerability: CWEVulnerabilityDetail = {
               id: `${rule.cweId}-${filePath}-${i + 1}`,
               cweId: rule.cweId,
@@ -347,7 +402,7 @@ export class CWERuleEngine {
               filePath,
               lineNumber: i + 1,
               codeSnippet: this.getCodeSnippet(lines, i, 2),
-              description: `${rule.description}${pattern.context ? ` (${pattern.context})` : ''}`,
+              description: description,
               recommendation: rule.recommendation,
               owasp: rule.owasp,
               confidence: rule.confidence,
