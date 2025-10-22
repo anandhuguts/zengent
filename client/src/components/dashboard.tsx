@@ -447,7 +447,7 @@ export default function Dashboard({ analysisData, onAIAnalysisComplete }: Dashbo
 Example: 'Focus on security vulnerabilities and performance bottlenecks' or 'Analyze the authentication flow in detail'"
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                className="min-h-[100px] resize-vertical"
+                className="min-h-[100px] resize-vertical border-2 border-gray-300 focus:border-blue-500"
                 disabled={isLoadingAI}
               />
               <p className="text-xs text-gray-500">
