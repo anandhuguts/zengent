@@ -1663,19 +1663,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: 'Invalid GitHub URL format' });
         }
 
-        const githubAnalysis = await analyzeGithubRepository(githubUrl);
+        // Create validated data object for GitHub analysis
+        const validatedData = githubProjectSchema.parse({
+          name: `Quality Analysis - ${new Date().toISOString()}`,
+          githubUrl,
+          projectType: language as 'java' | 'python' | 'pyspark' | 'mainframe',
+          description: 'ISO 5055 Quality Measure Analysis'
+        });
+
+        const projectId = await analyzeGithubRepository(validatedData);
+        const project = await storage.getProject(projectId);
         
-        if (!githubAnalysis.success || !githubAnalysis.project) {
-          return res.status(500).json({ error: 'Failed to analyze GitHub repository' });
+        if (!project) {
+          return res.status(500).json({ error: 'Failed to create project from GitHub repository' });
         }
 
         // Get source files
-        const files = await storage.getSourceFilesByProject(githubAnalysis.project.id);
+        const files = await storage.getSourceFilesByProject(projectId);
         sourceFiles = files.map(f => ({
           path: f.relativePath,
           content: f.content
         }));
-        projectName = githubAnalysis.project.name;
+        projectName = project.name;
       } else if (file) {
         // Analyze ZIP file
         console.log(`[ISO5055] Analyzing ZIP file: ${file.originalname}`);
