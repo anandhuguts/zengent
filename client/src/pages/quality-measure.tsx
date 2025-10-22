@@ -272,25 +272,6 @@ export default function QualityMeasure() {
       return;
     }
 
-    // Show detailed analysis information
-    toast({
-      title: '🔍 Starting Comprehensive Quality Analysis',
-      description: (
-        <div className="mt-2 space-y-2 text-sm">
-          <p className="font-semibold">Analyzing your code with:</p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
-            <li><strong>ISO/IEC 5055:2021</strong> - Automated quality measurement</li>
-            <li><strong>ISO/IEC 25010</strong> - 74 quality characteristic checks</li>
-            <li><strong>CWE Scanner</strong> - 16 security vulnerability rules</li>
-          </ul>
-          <p className="mt-2 text-xs text-gray-600">
-            Total: 90 comprehensive code quality and security checks
-          </p>
-        </div>
-      ),
-      duration: 8000,
-    });
-
     uploadMutation.mutate({
       file: selectedFile || undefined,
       githubUrl: githubUrl || undefined,
@@ -565,6 +546,108 @@ export default function QualityMeasure() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Analysis Progress Display */}
+      {uploadMutation.isPending && (
+        <Card className="mb-8 bg-gradient-to-r from-blue-50 via-purple-50 to-green-50 border-2 border-blue-300 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-blue-900">
+              <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
+              Running Comprehensive Quality Analysis
+            </CardTitle>
+            <CardDescription className="text-gray-700 font-medium">
+              Analyzing your code with multiple standards and security checks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Step 1 */}
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-200">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                    <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    ISO/IEC 5055:2021 - Automated Quality Measurement
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Analyzing code structure, complexity, and adherence to quality standards
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-purple-200">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                    <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    ISO/IEC 25010 - Quality Characteristics (74 Checks)
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Evaluating maintainability, performance efficiency, reliability, and security characteristics
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Badge variant="outline" className="text-xs bg-blue-50">Maintainability</Badge>
+                    <Badge variant="outline" className="text-xs bg-green-50">Performance</Badge>
+                    <Badge variant="outline" className="text-xs bg-purple-50">Reliability</Badge>
+                    <Badge variant="outline" className="text-xs bg-orange-50">Security</Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-green-200">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                    <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    CWE Security Vulnerability Scanner (16 Rules)
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Scanning for common security vulnerabilities including SQL injection, XSS, authentication issues, and more
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Badge variant="outline" className="text-xs bg-red-50">SQL Injection</Badge>
+                    <Badge variant="outline" className="text-xs bg-orange-50">XSS</Badge>
+                    <Badge variant="outline" className="text-xs bg-yellow-50">Auth Issues</Badge>
+                    <Badge variant="outline" className="text-xs bg-purple-50">Crypto Weaknesses</Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="mt-4 p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg border-2 border-blue-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                    <span className="font-bold text-gray-900">Total Analysis Coverage</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-600">90+</p>
+                    <p className="text-xs text-gray-600">Comprehensive Checks</p>
+                  </div>
+                </div>
+              </div>
+
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-gray-700">
+                  This may take a few moments depending on your codebase size. Please wait while we perform comprehensive quality and security analysis.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ISO 5055 Information */}
       <Card className="mb-8 bg-blue-50 border-blue-200">
