@@ -223,16 +223,16 @@ export default function AIInsightsReportPreview({
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-xl border-l-4 border-green-500 shadow-sm">
                   <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="text-center">
-                      <div className="text-6xl font-bold text-green-600">{aiInsights.qualityScore}<span className="text-3xl text-gray-500">/10</span></div>
+                      <div className="text-6xl font-bold text-green-600">{aiInsights.qualityScore}<span className="text-3xl text-gray-500">/100</span></div>
                       <div className="text-sm font-semibold text-gray-600 mt-3">Overall Quality Score</div>
                     </div>
                     <div className="flex-1 w-full">
                       <div className="w-full bg-gray-200 rounded-full h-6 shadow-inner">
                         <div 
                           className="bg-gradient-to-r from-green-500 to-emerald-500 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3 shadow-md" 
-                          style={{ width: `${Math.min((aiInsights.qualityScore / 10) * 100, 100)}%` }}
+                          style={{ width: `${Math.min(aiInsights.qualityScore, 100)}%` }}
                         >
-                          <span className="text-white text-xs font-bold">{Math.round((aiInsights.qualityScore / 10) * 100)}%</span>
+                          <span className="text-white text-xs font-bold">{Math.round(aiInsights.qualityScore)}%</span>
                         </div>
                       </div>
                       <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
