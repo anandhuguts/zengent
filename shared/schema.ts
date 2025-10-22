@@ -231,3 +231,156 @@ export interface AnalysisData {
   };
   aiAnalysis?: AIAnalysisResult;
 }
+
+// CWE Vulnerability Scans table
+export const cweScans = pgTable("cwe_scans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull(),
+  scanType: text("scan_type").notNull().default("full"), // 'full' | 'quick' | 'custom'
+  status: text("status").notNull().default("pending"), // 'pending' | 'running' | 'completed' | 'failed'
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  totalFiles: integer("total_files").default(0),
+  scannedFiles: integer("scanned_files").default(0),
+  totalVulnerabilities: integer("total_vulnerabilities").default(0),
+  criticalCount: integer("critical_count").default(0),
+  highCount: integer("high_count").default(0),
+  mediumCount: integer("medium_count").default(0),
+  lowCount: integer("low_count").default(0),
+  infoCount: integer("info_count").default(0),
+  scanResults: jsonb("scan_results"), // Detailed scan results
+  qualityMetrics: jsonb("quality_metrics"), // ISO 25010 quality metrics
+  errorMessage: text("error_message"),
+}, (table) => [
+  index("idx_cwe_scans_project_id").on(table.projectId),
+]);
+
+// CWE Vulnerabilities table (detailed findings)
+export const cweVulnerabilities = pgTable("cwe_vulnerabilities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scanId: varchar("scan_id").notNull(),
+  projectId: varchar("project_id").notNull(),
+  cweId: text("cwe_id").notNull(), // e.g., "CWE-89", "CWE-79"
+  cweName: text("cwe_name").notNull(),
+  severity: text("severity").notNull(), // 'critical' | 'high' | 'medium' | 'low' | 'info'
+  category: text("category").notNull(), // 'injection' | 'xss' | 'crypto' | 'auth' | etc.
+  filePath: text("file_path").notNull(),
+  lineNumber: integer("line_number"),
+  lineEndNumber: integer("line_end_number"),
+  codeSnippet: text("code_snippet"),
+  description: text("description").notNull(),
+  recommendation: text("recommendation"),
+  owasp: text("owasp"), // OWASP Top 10 mapping
+  confidence: text("confidence").default("high"), // 'high' | 'medium' | 'low'
+  detectedAt: timestamp("detected_at").defaultNow(),
+}, (table) => [
+  index("idx_cwe_vulnerabilities_scan_id").on(table.scanId),
+  index("idx_cwe_vulnerabilities_project_id").on(table.projectId),
+  index("idx_cwe_vulnerabilities_severity").on(table.severity),
+]);
+
+// Quality Metrics table for ISO 25010 tracking
+export const qualityMetrics = pgTable("quality_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().unique(),
+  scanId: varchar("scan_id"),
+  // ISO 25010 Characteristics
+  functionalSuitability: integer("functional_suitability").default(0), // 0-100
+  performanceEfficiency: integer("performance_efficiency").default(0),
+  compatibility: integer("compatibility").default(0),
+  usability: integer("usability").default(0),
+  reliability: integer("reliability").default(0),
+  security: integer("security").default(0), // Based on CWE findings
+  maintainability: integer("maintainability").default(0),
+  portability: integer("portability").default(0),
+  // Overall scores
+  overallScore: integer("overall_score").default(0), // 0-100
+  securityGrade: text("security_grade").default("F"), // A-F
+  // Detailed metrics
+  codeComplexity: integer("code_complexity").default(0),
+  technicalDebt: integer("technical_debt").default(0), // minutes
+  duplicateCode: integer("duplicate_code").default(0), // percentage
+  testCoverage: integer("test_coverage").default(0), // percentage
+  documentationScore: integer("documentation_score").default(0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_quality_metrics_project_id").on(table.projectId),
+]);
+
+// CWE Types
+export type CWEScan = typeof cweScans.$inferSelect;
+export type InsertCWEScan = typeof cweScans.$inferInsert;
+
+export type CWEVulnerability = typeof cweVulnerabilities.$inferSelect;
+export type InsertCWEVulnerability = typeof cweVulnerabilities.$inferInsert;
+
+export type QualityMetric = typeof qualityMetrics.$inferSelect;
+export type InsertQualityMetric = typeof qualityMetrics.$inferInsert;
+
+// Zod schemas
+export const insertCWEScanSchema = createInsertSchema(cweScans).omit({
+  id: true,
+  startedAt: true,
+});
+
+export const insertCWEVulnerabilitySchema = createInsertSchema(cweVulnerabilities).omit({
+  id: true,
+  detectedAt: true,
+});
+
+export const insertQualityMetricSchema = createInsertSchema(qualityMetrics).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// CWE Vulnerability Detail Interface
+export interface CWEVulnerabilityDetail {
+  id: string;
+  cweId: string;
+  cweName: string;
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  category: string;
+  filePath: string;
+  lineNumber?: number;
+  lineEndNumber?: number;
+  codeSnippet?: string;
+  description: string;
+  recommendation?: string;
+  owasp?: string;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+// CWE Scan Result Interface
+export interface CWEScanResult {
+  id: string;
+  projectId: string;
+  scanType: string;
+  status: string;
+  startedAt: Date;
+  completedAt?: Date;
+  totalFiles: number;
+  scannedFiles: number;
+  totalVulnerabilities: number;
+  criticalCount: number;
+  highCount: number;
+  mediumCount: number;
+  lowCount: number;
+  infoCount: number;
+  vulnerabilities: CWEVulnerabilityDetail[];
+  qualityMetrics?: QualityMetric;
+}
+
+// ISO 25010 Quality Result Interface
+export interface ISO25010Result {
+  functionalSuitability: number;
+  performanceEfficiency: number;
+  compatibility: number;
+  usability: number;
+  reliability: number;
+  security: number;
+  maintainability: number;
+  portability: number;
+  overallScore: number;
+  securityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  recommendations: string[];
+}
