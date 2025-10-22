@@ -24,6 +24,24 @@ import {
   Info,
   Download
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+} from "recharts";
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -69,8 +87,8 @@ interface QualityAnalysisReport {
 
 export default function QualityMeasure() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [githubUrl, setGithubUrl] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [githubUrl, setGithubUrl] = useState('https://github.com/kartik1502/Spring-Boot-Microservices-Banking-Application');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('java');
   const [analysisReport, setAnalysisReport] = useState<QualityAnalysisReport | null>(null);
   const { toast } = useToast();
 
@@ -393,6 +411,96 @@ export default function QualityMeasure() {
                   <div className="text-sm text-blue-800 mt-1">Low</div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Visualization Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quality Metrics Radar Chart</CardTitle>
+                <CardDescription>Comprehensive view of all quality characteristics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={350}>
+                  <RadarChart data={[
+                    { subject: 'Reliability', score: analysisReport.metrics.reliability },
+                    { subject: 'Security', score: analysisReport.metrics.security },
+                    { subject: 'Performance', score: analysisReport.metrics.performance },
+                    { subject: 'Maintainability', score: analysisReport.metrics.maintainability },
+                  ]}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="subject" />
+                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                    <Radar name="Quality Score" dataKey="score" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+                    <Tooltip />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Issues Distribution by Severity</CardTitle>
+                <CardDescription>Visual representation of issue severity levels</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={350}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Critical', value: analysisReport.issues.critical, color: '#dc2626' },
+                        { name: 'High', value: analysisReport.issues.high, color: '#ea580c' },
+                        { name: 'Medium', value: analysisReport.issues.medium, color: '#f59e0b' },
+                        { name: 'Low', value: analysisReport.issues.low, color: '#3b82f6' },
+                      ].filter(d => d.value > 0)}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => `${entry.name}: ${entry.value}`}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {[
+                        { name: 'Critical', value: analysisReport.issues.critical, color: '#dc2626' },
+                        { name: 'High', value: analysisReport.issues.high, color: '#ea580c' },
+                        { name: 'Medium', value: analysisReport.issues.medium, color: '#f59e0b' },
+                        { name: 'Low', value: analysisReport.issues.low, color: '#3b82f6' },
+                      ].filter(d => d.value > 0).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quality Metrics Bar Chart */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Quality Metrics Comparison</CardTitle>
+              <CardDescription>Compare all quality characteristics side by side</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={[
+                  { name: 'Reliability', score: analysisReport.metrics.reliability },
+                  { name: 'Security', score: analysisReport.metrics.security },
+                  { name: 'Performance', score: analysisReport.metrics.performance },
+                  { name: 'Maintainability', score: analysisReport.metrics.maintainability },
+                  { name: 'Overall', score: analysisReport.metrics.overallScore },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 100]} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="score" fill="#3b82f6" name="Score" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
 
