@@ -92,6 +92,22 @@ export class CWEScanner {
   }
 
   calculateISO25010Quality(vulnerabilities: CWEVulnerabilityDetail[], fileCount: number): ISO25010Result {
+    if (fileCount <= 0) {
+      return {
+        functionalSuitability: 100,
+        performanceEfficiency: 100,
+        compatibility: 100,
+        usability: 100,
+        reliability: 100,
+        security: 100,
+        maintainability: 100,
+        portability: 100,
+        overallScore: 100,
+        securityGrade: 'A',
+        recommendations: ['No files scanned. Upload a project to get quality metrics.'],
+      };
+    }
+
     const criticalCount = vulnerabilities.filter((v) => v.severity === 'critical').length;
     const highCount = vulnerabilities.filter((v) => v.severity === 'high').length;
     const mediumCount = vulnerabilities.filter((v) => v.severity === 'medium').length;
