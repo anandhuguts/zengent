@@ -1,24 +1,18 @@
-// Define our own types (don't import from reactflow - it's browser-only)
-interface ReactFlowNode {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
-  data: { label: string };
-  style?: Record<string, any>;
+// Cytoscape format types
+interface CytoscapeNode {
+  data: {
+    id: string;
+    label: string;
+    type: string;
+  };
 }
 
-interface ReactFlowEdge {
-  id: string;
-  source: string;
-  target: string;
-  type?: string;
-  animated?: boolean;
-  markerEnd?: {
-    type: string;
-    width?: number;
-    height?: number;
+interface CytoscapeEdge {
+  data: {
+    id: string;
+    source: string;
+    target: string;
   };
-  style?: Record<string, any>;
 }
 
 interface FunctionNode {
@@ -33,8 +27,8 @@ interface FunctionNode {
 }
 
 interface DataFlowResult {
-  nodes: ReactFlowNode[];
-  edges: ReactFlowEdge[];
+  nodes: CytoscapeNode[];
+  edges: CytoscapeEdge[];
   stats: {
     totalFunctions: number;
     totalCalls: number;
@@ -59,7 +53,7 @@ export class DataFlowAnalyzer {
     // Build call graph
     this.buildCallGraph();
 
-    // Convert to ReactFlow format
+    // Convert to Cytoscape format
     return this.generateFlowData();
   }
 
@@ -338,58 +332,32 @@ export class DataFlowAnalyzer {
   }
 
   private generateFlowData(): DataFlowResult {
-    const nodes: ReactFlowNode[] = [];
-    const edges: ReactFlowEdge[] = [];
-    const nodePositions = this.calculateNodePositions();
+    const nodes: CytoscapeNode[] = [];
+    const edges: CytoscapeEdge[] = [];
 
-    // Generate nodes
-    let nodeIndex = 0;
+    // Generate nodes in Cytoscape format
     this.functions.forEach((func, key) => {
-      const position = nodePositions.get(key) || { x: 0, y: 0 };
-      
-      const node: ReactFlowNode = {
-        id: key,
-        type: 'default',
-        position,
+      const node: CytoscapeNode = {
         data: {
+          id: key,
           label: `${func.name}\n${this.getFileName(func.file)}`,
-        },
-        style: {
-          background: this.getNodeColor(func.type),
-          color: '#fff',
-          border: '2px solid #555',
-          borderRadius: '8px',
-          padding: '10px',
-          fontSize: '12px',
-          fontWeight: 'bold',
+          type: func.type,
         },
       };
-
       nodes.push(node);
-      nodeIndex++;
     });
 
-    // Generate edges
+    // Generate edges in Cytoscape format
     let edgeIndex = 0;
     this.callGraph.forEach((targets, source) => {
       targets.forEach(target => {
-        const edge: ReactFlowEdge = {
-          id: `edge-${edgeIndex++}`,
-          source,
-          target,
-          type: 'smoothstep',
-          animated: true,
-          markerEnd: {
-            type: 'arrowclosed',
-            width: 20,
-            height: 20,
-          },
-          style: {
-            stroke: '#888',
-            strokeWidth: 2,
+        const edge: CytoscapeEdge = {
+          data: {
+            id: `edge-${edgeIndex++}`,
+            source,
+            target,
           },
         };
-
         edges.push(edge);
       });
     });

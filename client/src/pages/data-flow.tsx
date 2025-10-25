@@ -1,18 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import ReactFlow, {
-  Node,
-  Edge,
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Connection,
-  MarkerType,
-  Panel,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+import cytoscape from 'cytoscape';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,22 +10,38 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   Network, 
-  RefreshCw, 
   Download, 
-  ZoomIn, 
-  ZoomOut,
   Info,
   Loader2,
   Upload,
-  Github
+  Github,
+  ZoomIn,
+  ZoomOut,
+  Maximize
 } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Project } from '@shared/schema';
 
+interface CytoscapeNode {
+  data: {
+    id: string;
+    label: string;
+    type: string;
+  };
+}
+
+interface CytoscapeEdge {
+  data: {
+    id: string;
+    source: string;
+    target: string;
+  };
+}
+
 interface FunctionCallData {
-  nodes: Node[];
-  edges: Edge[];
+  nodes: CytoscapeNode[];
+  edges: CytoscapeEdge[];
   stats: {
     totalFunctions: number;
     totalCalls: number;
@@ -49,13 +53,13 @@ interface FunctionCallData {
 export default function DataFlow() {
   const { toast } = useToast();
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [flowStats, setFlowStats] = useState<FunctionCallData['stats'] | null>(null);
   const [githubUrl, setGithubUrl] = useState('');
   const [githubBranch, setGithubBranch] = useState('main');
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cyRef = useRef<cytoscape.Core | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -106,9 +110,8 @@ export default function DataFlow() {
         } catch (error) {
           console.error('Error polling project status:', error);
         }
-      }, 3000); // Poll every 3 seconds
+      }, 3000);
       
-      // Stop polling after 5 minutes
       setTimeout(() => clearInterval(pollInterval), 300000);
     },
     onError: (error: Error) => {
@@ -149,7 +152,7 @@ export default function DataFlow() {
       setGithubUrl('');
       setGithubBranch('main');
       
-      // Poll for project completion, then trigger data flow analysis
+      // Poll for project completion
       const pollInterval = setInterval(async () => {
         try {
           const response = await fetch(`/api/projects/${project.id}`);
@@ -173,9 +176,8 @@ export default function DataFlow() {
         } catch (error) {
           console.error('Error polling project status:', error);
         }
-      }, 3000); // Poll every 3 seconds
+      }, 3000);
       
-      // Stop polling after 5 minutes
       setTimeout(() => clearInterval(pollInterval), 300000);
     },
     onError: (error: Error) => {
@@ -204,54 +206,130 @@ export default function DataFlow() {
     enabled: !!selectedProjectId,
   });
 
-  // Update nodes and edges when data changes
+  // Initialize and update Cytoscape graph
   useEffect(() => {
-    if (dataFlowData) {
-      setNodes(dataFlowData.nodes);
-      setEdges(dataFlowData.edges);
-      setFlowStats(dataFlowData.stats);
-    }
-  }, [dataFlowData, setNodes, setEdges]);
+    if (!containerRef.current || !dataFlowData) return;
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
-
-  const handleAnalyze = async () => {
-    if (!selectedProjectId) {
-      toast({
-        title: "No Project Selected",
-        description: "Please select a project to analyze",
-        variant: "destructive",
-      });
-      return;
+    // Destroy existing instance
+    if (cyRef.current) {
+      cyRef.current.destroy();
     }
 
-    try {
-      await refetch();
-      toast({
-        title: "Success",
-        description: "Data flow analysis completed",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to analyze data flow",
-        variant: "destructive",
-      });
+    // Create Cytoscape instance
+    cyRef.current = cytoscape({
+      container: containerRef.current,
+      elements: {
+        nodes: dataFlowData.nodes,
+        edges: dataFlowData.edges,
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'background-color': '#60a5fa',
+            'color': '#fff',
+            'text-outline-color': '#1e40af',
+            'text-outline-width': 2,
+            'font-size': '12px',
+            'width': 60,
+            'height': 60,
+          },
+        },
+        {
+          selector: 'node[type="controller"]',
+          style: {
+            'background-color': '#3b82f6',
+          },
+        },
+        {
+          selector: 'node[type="service"]',
+          style: {
+            'background-color': '#10b981',
+          },
+        },
+        {
+          selector: 'node[type="repository"]',
+          style: {
+            'background-color': '#8b5cf6',
+          },
+        },
+        {
+          selector: 'node[type="entity"]',
+          style: {
+            'background-color': '#f59e0b',
+          },
+        },
+        {
+          selector: 'node[type="util"]',
+          style: {
+            'background-color': '#6b7280',
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#94a3b8',
+            'target-arrow-color': '#94a3b8',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'arrow-scale': 1.5,
+          },
+        },
+      ],
+      layout: {
+        name: 'breadthfirst',
+        directed: true,
+        padding: 50,
+        spacingFactor: 1.5,
+      },
+      minZoom: 0.1,
+      maxZoom: 3,
+      wheelSensitivity: 0.2,
+    });
+
+    // Update stats
+    setFlowStats(dataFlowData.stats);
+
+    // Cleanup
+    return () => {
+      if (cyRef.current) {
+        cyRef.current.destroy();
+      }
+    };
+  }, [dataFlowData]);
+
+  const handleExport = () => {
+    if (!cyRef.current) return;
+    
+    const png = cyRef.current.png({ scale: 2 });
+    const link = document.createElement('a');
+    link.href = png;
+    link.download = `data-flow-${selectedProjectId}.png`;
+    link.click();
+  };
+
+  const handleZoomIn = () => {
+    if (cyRef.current) {
+      cyRef.current.zoom(cyRef.current.zoom() * 1.2);
+      cyRef.current.center();
     }
   };
 
-  const handleExport = () => {
-    const dataStr = JSON.stringify({ nodes, edges, stats: flowStats }, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `data-flow-${selectedProjectId}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleZoomOut = () => {
+    if (cyRef.current) {
+      cyRef.current.zoom(cyRef.current.zoom() * 0.8);
+      cyRef.current.center();
+    }
+  };
+
+  const handleFit = () => {
+    if (cyRef.current) {
+      cyRef.current.fit();
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -485,6 +563,16 @@ export default function DataFlow() {
           </Alert>
         )}
 
+        {/* Loading Indicator */}
+        {isLoadingFlow && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertDescription>
+              Analyzing data flow patterns...
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Flow Diagram */}
         <Card data-testid="card-flow-diagram">
           <CardHeader>
@@ -495,77 +583,78 @@ export default function DataFlow() {
                   Interactive visualization of function calls and data flow
                 </CardDescription>
               </div>
-              {nodes.length > 0 && (
-                <Button
-                  onClick={handleExport}
-                  variant="outline"
-                  data-testid="button-export"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
-                </Button>
+              {cyRef.current && (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleZoomIn}
+                    variant="outline"
+                    size="icon"
+                    data-testid="button-zoom-in"
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleZoomOut}
+                    variant="outline"
+                    size="icon"
+                    data-testid="button-zoom-out"
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleFit}
+                    variant="outline"
+                    size="icon"
+                    data-testid="button-fit"
+                  >
+                    <Maximize className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleExport}
+                    variant="outline"
+                    data-testid="button-export"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export PNG
+                  </Button>
+                </div>
               )}
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div style={{ height: '700px' }} className="bg-gray-50">
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                fitView
-                attributionPosition="bottom-left"
-              >
-                <Background />
-                <Controls />
-                <Panel position="top-right" className="bg-white p-2 rounded shadow-md">
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="bg-blue-100">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                      Controllers
-                    </Badge>
-                    <Badge variant="outline" className="bg-green-100">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                      Services
-                    </Badge>
-                    <Badge variant="outline" className="bg-purple-100">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-                      Repositories
-                    </Badge>
+            <div className="relative bg-gray-50">
+              <div 
+                ref={containerRef} 
+                style={{ height: '700px', width: '100%' }}
+                data-testid="cytoscape-container"
+              />
+              
+              {/* Legend */}
+              {cyRef.current && (
+                <div className="absolute top-4 right-4 bg-white p-3 rounded shadow-md space-y-2">
+                  <div className="text-sm font-semibold mb-2">Node Types</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm">Controllers</span>
                   </div>
-                </Panel>
-              </ReactFlow>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Legend & Instructions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>How to Use</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-2">Controls</h4>
-                <ul className="space-y-1 text-sm text-gray-600">
-                  <li>• <strong>Drag</strong> - Move nodes around</li>
-                  <li>• <strong>Scroll</strong> - Zoom in/out</li>
-                  <li>• <strong>Click + Drag</strong> background - Pan the canvas</li>
-                  <li>• <strong>Click</strong> node - View function details</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Node Types</h4>
-                <ul className="space-y-1 text-sm text-gray-600">
-                  <li>• <strong>Blue nodes</strong> - Controller functions (entry points)</li>
-                  <li>• <strong>Green nodes</strong> - Service functions (business logic)</li>
-                  <li>• <strong>Purple nodes</strong> - Repository functions (data access)</li>
-                  <li>• <strong>Arrows</strong> - Function call direction</li>
-                </ul>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Services</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                    <span className="text-sm">Repositories</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm">Entities</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
+                    <span className="text-sm">Utilities</span>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
