@@ -5,6 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -258,10 +264,8 @@ export default function DataFlow() {
     }));
     setAllFunctions(functions);
     
-    // Initialize with all functions selected
-    if (selectedFunctions.size === 0) {
-      setSelectedFunctions(new Set(functions.map(f => f.id)));
-    }
+    // Always reset with all functions selected when new data arrives
+    setSelectedFunctions(new Set(functions.map(f => f.id)));
 
     // Destroy existing instance
     if (cyRef.current) {
@@ -393,10 +397,8 @@ export default function DataFlow() {
     }));
     setAllFields(fields);
     
-    // Initialize with all fields selected
-    if (selectedFields.size === 0) {
-      setSelectedFields(new Set(fields.map(f => f.id)));
-    }
+    // Always reset with all fields selected when new data arrives
+    setSelectedFields(new Set(fields.map(f => f.id)));
 
     // Destroy existing instance
     if (cyFieldRef.current) {
@@ -817,7 +819,25 @@ export default function DataFlow() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600">{flowStats.maxDepth}</div>
-                  <div className="text-sm text-gray-600 mt-1">Max Call Depth</div>
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mt-1">
+                    <span>Max Call Depth</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button 
+                            type="button"
+                            className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                            aria-label="Information about Max Call Depth"
+                          >
+                            <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>The maximum number of function calls in a chain. For example, if function A calls B, and B calls C, the call depth is 3. Higher depth may indicate complex call chains.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -825,7 +845,25 @@ export default function DataFlow() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-orange-600">{flowStats.cyclicDependencies}</div>
-                  <div className="text-sm text-gray-600 mt-1">Cyclic Dependencies</div>
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mt-1">
+                    <span>Cyclic Dependencies</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button 
+                            type="button"
+                            className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                            aria-label="Information about Cyclic Dependencies"
+                          >
+                            <Info className="w-4 h-4 text-gray-400 cursor-help" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>Functions that call each other in a circular pattern (A calls B, B calls C, C calls A). Cyclic dependencies can make code harder to maintain and test.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
               </CardContent>
             </Card>
