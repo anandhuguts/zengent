@@ -107,10 +107,12 @@ export class DataFieldAnalyzer {
 
           if (field) {
             // Check if it's an assignment or access
-            const position = accessMatch.index;
-            const beforeMatch = methodBody.substring(Math.max(0, position - 10), position);
+            const matchEnd = accessMatch.index + accessMatch[0].length;
+            const afterMatch = methodBody.substring(matchEnd, matchEnd + 10);
             
-            if (beforeMatch.includes('=')) {
+            // Check if there's a single '=' immediately after (assignment)
+            // Exclude ==, ===, !=, etc. (comparisons)
+            if (afterMatch.match(/^\s*=(?!=)/)) {
               field.assignedBy.push(method.name);
             } else {
               field.accessedBy.push(method.name);
@@ -186,10 +188,12 @@ export class DataFieldAnalyzer {
         const field = this.fields.get(fieldId);
 
         if (field) {
-          const position = accessMatch.index;
-          const afterMatch = methodBody.substring(position, position + 50);
+          const matchEnd = accessMatch.index + accessMatch[0].length;
+          const afterMatch = methodBody.substring(matchEnd, matchEnd + 10);
           
-          if (afterMatch.match(/this\.\w+\s*=/)) {
+          // Check if there's a single '=' immediately after (assignment)
+          // Exclude ==, ===, !=, etc. (comparisons)
+          if (afterMatch.match(/^\s*=(?!=)/)) {
             field.assignedBy.push(method.name);
           } else {
             field.accessedBy.push(method.name);
@@ -244,10 +248,12 @@ export class DataFieldAnalyzer {
         const field = this.fields.get(fieldId);
 
         if (field) {
-          const position = accessMatch.index;
-          const afterMatch = methodBody.substring(position, position + 50);
+          const matchEnd = accessMatch.index + accessMatch[0].length;
+          const afterMatch = methodBody.substring(matchEnd, matchEnd + 10);
           
-          if (afterMatch.match(/self\.\w+\s*=/)) {
+          // Check if there's a single '=' immediately after (assignment)
+          // Exclude ==, !=, etc. (comparisons)
+          if (afterMatch.match(/^\s*=(?!=)/)) {
             field.assignedBy.push(method.name);
           } else {
             field.accessedBy.push(method.name);

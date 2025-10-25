@@ -116,6 +116,7 @@ export default function DataFlow() {
           if (updatedProject.status === 'completed') {
             clearInterval(pollInterval);
             refetch();
+            refetchFieldFlow();
             toast({
               title: "Analysis Complete",
               description: "Data flow visualization is ready!",
@@ -182,6 +183,7 @@ export default function DataFlow() {
           if (updatedProject.status === 'completed') {
             clearInterval(pollInterval);
             refetch();
+            refetchFieldFlow();
             toast({
               title: "Analysis Complete",
               description: "Data flow visualization is ready!",
@@ -379,6 +381,136 @@ export default function DataFlow() {
     });
   }, [selectedFunctions]);
 
+  // Initialize data field flow Cytoscape graph
+  useEffect(() => {
+    if (!containerFieldRef.current || !dataFieldFlowData) return;
+
+    // Extract all fields for checkbox list
+    const fields = dataFieldFlowData.nodes.map(node => ({
+      id: node.data.id,
+      label: node.data.label,
+      type: node.data.type,
+    }));
+    setAllFields(fields);
+    
+    // Initialize with all fields selected
+    if (selectedFields.size === 0) {
+      setSelectedFields(new Set(fields.map(f => f.id)));
+    }
+
+    // Destroy existing instance
+    if (cyFieldRef.current) {
+      cyFieldRef.current.destroy();
+    }
+
+    // Create Cytoscape instance for field flow
+    cyFieldRef.current = cytoscape({
+      container: containerFieldRef.current,
+      elements: {
+        nodes: dataFieldFlowData.nodes,
+        edges: dataFieldFlowData.edges,
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'background-color': '#60a5fa',
+            'color': '#fff',
+            'text-outline-color': '#1e40af',
+            'text-outline-width': 2,
+            'font-size': '12px',
+            'width': 60,
+            'height': 60,
+          },
+        },
+        {
+          selector: 'node[type = "field"]',
+          style: {
+            'background-color': '#ec4899',
+            'shape': 'rectangle',
+          },
+        },
+        {
+          selector: 'node[type = "method"]',
+          style: {
+            'background-color': '#06b6d4',
+            'shape': 'ellipse',
+          },
+        },
+        {
+          selector: 'node[type = "parameter"]',
+          style: {
+            'background-color': '#f59e0b',
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#94a3b8',
+            'target-arrow-color': '#94a3b8',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'arrow-scale': 1.5,
+            'label': 'data(label)',
+            'font-size': '10px',
+            'text-background-color': '#fff',
+            'text-background-opacity': 0.8,
+            'text-background-padding': '2px',
+          },
+        },
+      ],
+      layout: {
+        name: 'cose',
+        padding: 50,
+        nodeRepulsion: 8000,
+        idealEdgeLength: 100,
+      },
+      minZoom: 0.1,
+      maxZoom: 3,
+      wheelSensitivity: 0.2,
+    });
+
+    // Update stats
+    setFieldStats(dataFieldFlowData.stats);
+
+    // Cleanup
+    return () => {
+      if (cyFieldRef.current) {
+        cyFieldRef.current.destroy();
+      }
+    };
+  }, [dataFieldFlowData]);
+
+  // Update field graph visibility when selected fields change
+  useEffect(() => {
+    if (!cyFieldRef.current) return;
+
+    // Show/hide nodes based on selection
+    cyFieldRef.current.nodes().forEach((node) => {
+      const nodeId = node.data('id');
+      if (selectedFields.has(nodeId)) {
+        node.style('display', 'element');
+      } else {
+        node.style('display', 'none');
+      }
+    });
+
+    // Hide edges if source or target is hidden
+    cyFieldRef.current.edges().forEach((edge) => {
+      const source = edge.data('source');
+      const target = edge.data('target');
+      if (selectedFields.has(source) && selectedFields.has(target)) {
+        edge.style('display', 'element');
+      } else {
+        edge.style('display', 'none');
+      }
+    });
+  }, [selectedFields]);
+
   const handleExport = () => {
     if (!cyRef.current) return;
     
@@ -463,6 +595,56 @@ export default function DataFlow() {
 
   const deselectAllFunctions = () => {
     setSelectedFunctions(new Set());
+  };
+
+  const toggleField = (fieldId: string) => {
+    setSelectedFields(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fieldId)) {
+        newSet.delete(fieldId);
+      } else {
+        newSet.add(fieldId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllFields = () => {
+    setSelectedFields(new Set(allFields.map(f => f.id)));
+  };
+
+  const deselectAllFields = () => {
+    setSelectedFields(new Set());
+  };
+
+  const handleFieldExport = () => {
+    if (!cyFieldRef.current) return;
+    
+    const png = cyFieldRef.current.png({ scale: 2 });
+    const link = document.createElement('a');
+    link.href = png;
+    link.download = `data-field-flow-${selectedProjectId}.png`;
+    link.click();
+  };
+
+  const handleFieldZoomIn = () => {
+    if (cyFieldRef.current) {
+      cyFieldRef.current.zoom(cyFieldRef.current.zoom() * 1.2);
+      cyFieldRef.current.center();
+    }
+  };
+
+  const handleFieldZoomOut = () => {
+    if (cyFieldRef.current) {
+      cyFieldRef.current.zoom(cyFieldRef.current.zoom() * 0.8);
+      cyFieldRef.current.center();
+    }
+  };
+
+  const handleFieldFit = () => {
+    if (cyFieldRef.current) {
+      cyFieldRef.current.fit();
+    }
   };
 
   const handleGithubSubmit = (e: React.FormEvent) => {
@@ -756,7 +938,7 @@ export default function DataFlow() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Function Call Graph</CardTitle>
+                <CardTitle>Function Call / Levels</CardTitle>
                 <CardDescription>
                   Interactive visualization of function calls and data flow
                 </CardDescription>
@@ -836,6 +1018,205 @@ export default function DataFlow() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Data Field Flow Statistics */}
+        {fieldStats && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-pink-600">{fieldStats.totalFields}</div>
+                  <div className="text-sm text-gray-600 mt-1">Total Fields</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-cyan-600">{fieldStats.totalAccesses}</div>
+                  <div className="text-sm text-gray-600 mt-1">Total Accesses</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">{fieldStats.sharedFields}</div>
+                  <div className="text-sm text-gray-600 mt-1">Shared Fields</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Loading Indicator for Field Flow */}
+        {isLoadingFieldFlow && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertDescription>
+              Analyzing data field flow patterns...
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Field Filter */}
+        {allFields.length > 0 && (
+          <Card data-testid="card-field-filter">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="w-5 h-5" />
+                    Filter Fields
+                  </CardTitle>
+                  <CardDescription>
+                    Select fields to display in the graph ({selectedFields.size} of {allFields.length} selected)
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={selectAllFields}
+                    variant="outline"
+                    size="sm"
+                    data-testid="button-select-all-fields"
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    onClick={deselectAllFields}
+                    variant="outline"
+                    size="sm"
+                    data-testid="button-deselect-all-fields"
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-64">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFields.map((field) => {
+                    const typeColors = {
+                      field: 'bg-pink-100 text-pink-800 border-pink-300',
+                      method: 'bg-cyan-100 text-cyan-800 border-cyan-300',
+                      parameter: 'bg-orange-100 text-orange-800 border-orange-300',
+                    };
+                    
+                    return (
+                      <div
+                        key={field.id}
+                        className={`flex items-center space-x-3 p-3 rounded border ${
+                          selectedFields.has(field.id) 
+                            ? typeColors[field.type as keyof typeof typeColors] 
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                        data-testid={`field-item-${field.id}`}
+                      >
+                        <Checkbox
+                          id={`field-${field.id}`}
+                          checked={selectedFields.has(field.id)}
+                          onCheckedChange={() => toggleField(field.id)}
+                          data-testid={`checkbox-field-${field.id}`}
+                        />
+                        <label
+                          htmlFor={`field-${field.id}`}
+                          className="flex-1 text-sm font-medium cursor-pointer truncate"
+                          title={field.label}
+                        >
+                          {field.label}
+                        </label>
+                        <Badge variant="outline" className="text-xs">
+                          {field.type}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Data Field Flow Diagram */}
+        {allFields.length > 0 && (
+          <Card data-testid="card-field-flow-diagram">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Data Field Flow Graph</CardTitle>
+                  <CardDescription>
+                    Interactive visualization showing how data fields are accessed by methods
+                  </CardDescription>
+                </div>
+                {cyFieldRef.current && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleFieldZoomIn}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-field-zoom-in"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleFieldZoomOut}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-field-zoom-out"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleFieldFit}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-field-fit"
+                    >
+                      <Maximize className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleFieldExport}
+                      variant="outline"
+                      data-testid="button-field-export"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export PNG
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="relative bg-gray-50">
+                <div 
+                  ref={containerFieldRef} 
+                  style={{ height: '700px', width: '100%' }}
+                  data-testid="cytoscape-field-container"
+                />
+                
+                {/* Legend */}
+                {cyFieldRef.current && (
+                  <div className="absolute top-4 right-4 bg-white p-3 rounded shadow-md space-y-2">
+                    <div className="text-sm font-semibold mb-2">Node Types</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-pink-500 rounded"></div>
+                      <span className="text-sm">Fields</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-cyan-500 rounded-full"></div>
+                      <span className="text-sm">Methods</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                      <span className="text-sm">Parameters</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
