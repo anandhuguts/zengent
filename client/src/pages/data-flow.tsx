@@ -17,8 +17,11 @@ import {
   Github,
   ZoomIn,
   ZoomOut,
-  Maximize
+  Maximize,
+  Filter
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { Project } from '@shared/schema';
@@ -57,6 +60,8 @@ export default function DataFlow() {
   const [githubUrl, setGithubUrl] = useState('');
   const [githubBranch, setGithubBranch] = useState('main');
   const [dragActive, setDragActive] = useState(false);
+  const [selectedFunctions, setSelectedFunctions] = useState<Set<string>>(new Set());
+  const [allFunctions, setAllFunctions] = useState<Array<{ id: string; label: string; type: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -210,6 +215,19 @@ export default function DataFlow() {
   useEffect(() => {
     if (!containerRef.current || !dataFlowData) return;
 
+    // Extract all functions for checkbox list
+    const functions = dataFlowData.nodes.map(node => ({
+      id: node.data.id,
+      label: node.data.label,
+      type: node.data.type,
+    }));
+    setAllFunctions(functions);
+    
+    // Initialize with all functions selected
+    if (selectedFunctions.size === 0) {
+      setSelectedFunctions(new Set(functions.map(f => f.id)));
+    }
+
     // Destroy existing instance
     if (cyRef.current) {
       cyRef.current.destroy();
@@ -302,6 +320,32 @@ export default function DataFlow() {
     };
   }, [dataFlowData]);
 
+  // Update graph visibility when selected functions change
+  useEffect(() => {
+    if (!cyRef.current) return;
+
+    // Show/hide nodes based on selection
+    cyRef.current.nodes().forEach((node) => {
+      const nodeId = node.data('id');
+      if (selectedFunctions.has(nodeId)) {
+        node.style('display', 'element');
+      } else {
+        node.style('display', 'none');
+      }
+    });
+
+    // Hide edges if source or target is hidden
+    cyRef.current.edges().forEach((edge) => {
+      const source = edge.data('source');
+      const target = edge.data('target');
+      if (selectedFunctions.has(source) && selectedFunctions.has(target)) {
+        edge.style('display', 'element');
+      } else {
+        edge.style('display', 'none');
+      }
+    });
+  }, [selectedFunctions]);
+
   const handleExport = () => {
     if (!cyRef.current) return;
     
@@ -366,6 +410,26 @@ export default function DataFlow() {
       const file = e.target.files[0];
       uploadMutation.mutate(file);
     }
+  };
+
+  const toggleFunction = (functionId: string) => {
+    setSelectedFunctions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(functionId)) {
+        newSet.delete(functionId);
+      } else {
+        newSet.add(functionId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllFunctions = () => {
+    setSelectedFunctions(new Set(allFunctions.map(f => f.id)));
+  };
+
+  const deselectAllFunctions = () => {
+    setSelectedFunctions(new Set());
   };
 
   const handleGithubSubmit = (e: React.FormEvent) => {
@@ -571,6 +635,87 @@ export default function DataFlow() {
               Analyzing data flow patterns...
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Function Filter */}
+        {allFunctions.length > 0 && (
+          <Card data-testid="card-function-filter">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="w-5 h-5" />
+                    Filter Functions
+                  </CardTitle>
+                  <CardDescription>
+                    Select functions to display in the graph ({selectedFunctions.size} of {allFunctions.length} selected)
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={selectAllFunctions}
+                    variant="outline"
+                    size="sm"
+                    data-testid="button-select-all"
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    onClick={deselectAllFunctions}
+                    variant="outline"
+                    size="sm"
+                    data-testid="button-deselect-all"
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-64">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFunctions.map((func) => {
+                    const typeColors = {
+                      controller: 'bg-blue-100 text-blue-800 border-blue-300',
+                      service: 'bg-green-100 text-green-800 border-green-300',
+                      repository: 'bg-purple-100 text-purple-800 border-purple-300',
+                      entity: 'bg-orange-100 text-orange-800 border-orange-300',
+                      util: 'bg-gray-100 text-gray-800 border-gray-300',
+                    };
+                    
+                    return (
+                      <div
+                        key={func.id}
+                        className={`flex items-center space-x-3 p-3 rounded border ${
+                          selectedFunctions.has(func.id) 
+                            ? typeColors[func.type as keyof typeof typeColors] 
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                        data-testid={`function-item-${func.id}`}
+                      >
+                        <Checkbox
+                          id={`func-${func.id}`}
+                          checked={selectedFunctions.has(func.id)}
+                          onCheckedChange={() => toggleFunction(func.id)}
+                          data-testid={`checkbox-function-${func.id}`}
+                        />
+                        <label
+                          htmlFor={`func-${func.id}`}
+                          className="flex-1 text-sm font-medium cursor-pointer truncate"
+                          title={func.label}
+                        >
+                          {func.label}
+                        </label>
+                        <Badge variant="outline" className="text-xs">
+                          {func.type}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
         )}
 
         {/* Flow Diagram */}
