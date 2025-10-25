@@ -18,6 +18,8 @@ import { demographicScanner } from "./services/demographicScanner";
 import { demographicClassAnalyzer } from "./services/demographicClassAnalyzer";
 import { ISO5055Analyzer } from "./services/iso5055Analyzer";
 import { DataFlowAnalyzer } from "./services/dataFlowAnalyzer";
+import { ImpactAnalyzer } from "./services/impactAnalyzer";
+import { DependencyGraphAnalyzer } from "./services/dependencyGraphAnalyzer";
 
 interface AIModelConfig {
   type: 'openai' | 'local';
@@ -579,6 +581,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error analyzing data field flow:", error);
       res.status(500).json({ message: "Failed to analyze data field flow" });
+    }
+  });
+
+  // Get impact analysis for a project
+  app.get("/api/impact-analysis/:projectId", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      
+      // Get project
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Get source files for the project
+      const sourceFiles = await storage.getProjectSourceFiles(projectId);
+      
+      if (!sourceFiles || sourceFiles.length === 0) {
+        return res.status(404).json({ message: "No source files found for this project" });
+      }
+
+      // Prepare files for analysis
+      const files = sourceFiles.map(file => ({
+        path: file.relativePath,
+        content: file.content,
+        language: file.language || 'java',
+      }));
+
+      // Analyze impact
+      const analyzer = new ImpactAnalyzer();
+      const impactResult = analyzer.analyze(files);
+
+      res.json(impactResult);
+    } catch (error) {
+      console.error("Error analyzing impact:", error);
+      res.status(500).json({ message: "Failed to analyze impact" });
+    }
+  });
+
+  // Get dependency graph for a project
+  app.get("/api/dependency-graph/:projectId", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      
+      // Get project
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Get source files for the project
+      const sourceFiles = await storage.getProjectSourceFiles(projectId);
+      
+      if (!sourceFiles || sourceFiles.length === 0) {
+        return res.status(404).json({ message: "No source files found for this project" });
+      }
+
+      // Prepare files for analysis
+      const files = sourceFiles.map(file => ({
+        path: file.relativePath,
+        content: file.content,
+        language: file.language || 'java',
+      }));
+
+      // Analyze dependencies
+      const analyzer = new DependencyGraphAnalyzer();
+      const dependencyResult = analyzer.analyze(files);
+
+      res.json(dependencyResult);
+    } catch (error) {
+      console.error("Error analyzing dependencies:", error);
+      res.status(500).json({ message: "Failed to analyze dependencies" });
     }
   });
 

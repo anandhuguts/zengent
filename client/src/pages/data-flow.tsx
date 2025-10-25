@@ -69,6 +69,53 @@ interface DataFieldFlowData {
   };
 }
 
+interface ImpactAnalysisData {
+  nodes: Array<{
+    id: string;
+    label: string;
+    type: string;
+    impactLevel: string;
+    distance: number;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+    type: string;
+  }>;
+  stats: {
+    totalImpacted: number;
+    directUpstream: number;
+    directDownstream: number;
+    maxDepth: number;
+    criticalFunctions: string[];
+  };
+}
+
+interface DependencyGraphData {
+  nodes: Array<{
+    id: string;
+    label: string;
+    type: string;
+    complexity: number;
+    inDegree: number;
+    outDegree: number;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+    type: string;
+    weight: number;
+  }>;
+  stats: {
+    totalFiles: number;
+    totalFunctions: number;
+    totalDependencies: number;
+    avgComplexity: number;
+    cyclicDependencies: number;
+    isolatedComponents: number;
+  };
+}
+
 export default function DataFlow() {
   const { toast } = useToast();
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -82,11 +129,21 @@ export default function DataFlow() {
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set());
   const [allFields, setAllFields] = useState<Array<{ id: string; label: string; type: string }>>([]);
   const [activeTab, setActiveTab] = useState<'function-call' | 'data-field'>('function-call');
+  const [impactStats, setImpactStats] = useState<ImpactAnalysisData['stats'] | null>(null);
+  const [depStats, setDepStats] = useState<DependencyGraphData['stats'] | null>(null);
+  const [selectedImpactFunctions, setSelectedImpactFunctions] = useState<Set<string>>(new Set());
+  const [allImpactFunctions, setAllImpactFunctions] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedDepNodes, setSelectedDepNodes] = useState<Set<string>>(new Set());
+  const [allDepNodes, setAllDepNodes] = useState<Array<{ id: string; label: string; type: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const cyFieldRef = useRef<cytoscape.Core | null>(null);
   const containerFieldRef = useRef<HTMLDivElement>(null);
+  const cyImpactRef = useRef<cytoscape.Core | null>(null);
+  const containerImpactRef = useRef<HTMLDivElement>(null);
+  const cyDepRef = useRef<cytoscape.Core | null>(null);
+  const containerDepRef = useRef<HTMLDivElement>(null);
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -246,6 +303,40 @@ export default function DataFlow() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch data field flow');
+      }
+      return response.json();
+    },
+    enabled: !!selectedProjectId,
+  });
+
+  // Fetch impact analysis for selected project
+  const { data: impactData, isLoading: isLoadingImpact, refetch: refetchImpact } = useQuery<ImpactAnalysisData>({
+    queryKey: ['/api/impact-analysis', selectedProjectId],
+    queryFn: async () => {
+      if (!selectedProjectId) {
+        throw new Error('No project selected');
+      }
+      const response = await fetch(`/api/impact-analysis/${selectedProjectId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch impact analysis');
+      }
+      return response.json();
+    },
+    enabled: !!selectedProjectId,
+  });
+
+  // Fetch dependency graph for selected project
+  const { data: depGraphData, isLoading: isLoadingDepGraph, refetch: refetchDepGraph } = useQuery<DependencyGraphData>({
+    queryKey: ['/api/dependency-graph', selectedProjectId],
+    queryFn: async () => {
+      if (!selectedProjectId) {
+        throw new Error('No project selected');
+      }
+      const response = await fetch(`/api/dependency-graph/${selectedProjectId}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch dependency graph');
       }
       return response.json();
     },
@@ -514,6 +605,242 @@ export default function DataFlow() {
     });
   }, [selectedFields]);
 
+  // Initialize Impact Analysis Cytoscape graph
+  useEffect(() => {
+    if (!containerImpactRef.current || !impactData) return;
+
+    const functions = impactData.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+    }));
+    setAllImpactFunctions(functions);
+    setSelectedImpactFunctions(new Set(functions.map(f => f.id)));
+
+    if (cyImpactRef.current) {
+      cyImpactRef.current.destroy();
+    }
+
+    cyImpactRef.current = cytoscape({
+      container: containerImpactRef.current,
+      elements: {
+        nodes: impactData.nodes.map(n => ({ data: n })),
+        edges: impactData.edges.map(e => ({ data: { id: `${e.source}-${e.target}`, source: e.source, target: e.target, type: e.type } })),
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'background-color': '#3b82f6',
+            'color': '#fff',
+            'text-outline-color': '#1e40af',
+            'text-outline-width': 2,
+            'font-size': '11px',
+            'width': 55,
+            'height': 55,
+          },
+        },
+        {
+          selector: 'node[type = "function"]',
+          style: {
+            'background-color': '#8b5cf6',
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#94a3b8',
+            'target-arrow-color': '#94a3b8',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+          },
+        },
+        {
+          selector: 'edge[type = "calls"]',
+          style: {
+            'line-color': '#10b981',
+          },
+        },
+        {
+          selector: 'edge[type = "called-by"]',
+          style: {
+            'line-color': '#f59e0b',
+          },
+        },
+      ],
+      layout: {
+        name: 'cose',
+        padding: 50,
+        nodeRepulsion: 10000,
+        idealEdgeLength: 120,
+      },
+      minZoom: 0.1,
+      maxZoom: 3,
+      wheelSensitivity: 0.2,
+    });
+
+    setImpactStats(impactData.stats);
+
+    return () => {
+      if (cyImpactRef.current) {
+        cyImpactRef.current.destroy();
+      }
+    };
+  }, [impactData]);
+
+  // Update Impact Analysis graph visibility
+  useEffect(() => {
+    if (!cyImpactRef.current) return;
+
+    cyImpactRef.current.nodes().forEach((node) => {
+      const nodeId = node.data('id');
+      if (selectedImpactFunctions.has(nodeId)) {
+        node.style('display', 'element');
+      } else {
+        node.style('display', 'none');
+      }
+    });
+
+    cyImpactRef.current.edges().forEach((edge) => {
+      const source = edge.data('source');
+      const target = edge.data('target');
+      if (selectedImpactFunctions.has(source) && selectedImpactFunctions.has(target)) {
+        edge.style('display', 'element');
+      } else {
+        edge.style('display', 'none');
+      }
+    });
+  }, [selectedImpactFunctions]);
+
+  // Initialize Dependency Graph Cytoscape graph
+  useEffect(() => {
+    if (!containerDepRef.current || !depGraphData) return;
+
+    const nodes = depGraphData.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      type: node.type,
+    }));
+    setAllDepNodes(nodes);
+    setSelectedDepNodes(new Set(nodes.map(n => n.id)));
+
+    if (cyDepRef.current) {
+      cyDepRef.current.destroy();
+    }
+
+    cyDepRef.current = cytoscape({
+      container: containerDepRef.current,
+      elements: {
+        nodes: depGraphData.nodes.map(n => ({ data: n })),
+        edges: depGraphData.edges.map(e => ({ data: { id: `${e.source}-${e.target}`, source: e.source, target: e.target, type: e.type } })),
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'background-color': '#06b6d4',
+            'color': '#fff',
+            'text-outline-color': '#0e7490',
+            'text-outline-width': 2,
+            'font-size': '10px',
+            'width': 50,
+            'height': 50,
+          },
+        },
+        {
+          selector: 'node[type = "file"]',
+          style: {
+            'background-color': '#fbbf24',
+            'shape': 'rectangle',
+          },
+        },
+        {
+          selector: 'node[type = "function"]',
+          style: {
+            'background-color': '#06b6d4',
+            'shape': 'ellipse',
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 1.5,
+            'line-color': '#94a3b8',
+            'target-arrow-color': '#94a3b8',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+          },
+        },
+        {
+          selector: 'edge[type = "calls"]',
+          style: {
+            'line-color': '#3b82f6',
+          },
+        },
+        {
+          selector: 'edge[type = "contains"]',
+          style: {
+            'line-color': '#a855f7',
+            'line-style': 'dashed',
+          },
+        },
+        {
+          selector: 'edge[type = "imports"]',
+          style: {
+            'line-color': '#f97316',
+          },
+        },
+      ],
+      layout: {
+        name: 'cose',
+        padding: 50,
+        nodeRepulsion: 12000,
+        idealEdgeLength: 100,
+      },
+      minZoom: 0.1,
+      maxZoom: 3,
+      wheelSensitivity: 0.2,
+    });
+
+    setDepStats(depGraphData.stats);
+
+    return () => {
+      if (cyDepRef.current) {
+        cyDepRef.current.destroy();
+      }
+    };
+  }, [depGraphData]);
+
+  // Update Dependency Graph visibility
+  useEffect(() => {
+    if (!cyDepRef.current) return;
+
+    cyDepRef.current.nodes().forEach((node) => {
+      const nodeId = node.data('id');
+      if (selectedDepNodes.has(nodeId)) {
+        node.style('display', 'element');
+      } else {
+        node.style('display', 'none');
+      }
+    });
+
+    cyDepRef.current.edges().forEach((edge) => {
+      const source = edge.data('source');
+      const target = edge.data('target');
+      if (selectedDepNodes.has(source) && selectedDepNodes.has(target)) {
+        edge.style('display', 'element');
+      } else {
+        edge.style('display', 'none');
+      }
+    });
+  }, [selectedDepNodes]);
+
   const handleExport = () => {
     if (!cyRef.current) return;
     
@@ -647,6 +974,106 @@ export default function DataFlow() {
   const handleFieldFit = () => {
     if (cyFieldRef.current) {
       cyFieldRef.current.fit();
+    }
+  };
+
+  // Impact Analysis handlers
+  const toggleImpactFunction = (funcId: string) => {
+    setSelectedImpactFunctions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(funcId)) {
+        newSet.delete(funcId);
+      } else {
+        newSet.add(funcId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllImpactFunctions = () => {
+    setSelectedImpactFunctions(new Set(allImpactFunctions.map(f => f.id)));
+  };
+
+  const deselectAllImpactFunctions = () => {
+    setSelectedImpactFunctions(new Set());
+  };
+
+  const handleImpactExport = () => {
+    if (!cyImpactRef.current) return;
+    const png = cyImpactRef.current.png({ scale: 2 });
+    const link = document.createElement('a');
+    link.href = png;
+    link.download = `impact-analysis-${selectedProjectId}.png`;
+    link.click();
+  };
+
+  const handleImpactZoomIn = () => {
+    if (cyImpactRef.current) {
+      cyImpactRef.current.zoom(cyImpactRef.current.zoom() * 1.2);
+      cyImpactRef.current.center();
+    }
+  };
+
+  const handleImpactZoomOut = () => {
+    if (cyImpactRef.current) {
+      cyImpactRef.current.zoom(cyImpactRef.current.zoom() * 0.8);
+      cyImpactRef.current.center();
+    }
+  };
+
+  const handleImpactFit = () => {
+    if (cyImpactRef.current) {
+      cyImpactRef.current.fit();
+    }
+  };
+
+  // Dependency Graph handlers
+  const toggleDepNode = (nodeId: string) => {
+    setSelectedDepNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllDepNodes = () => {
+    setSelectedDepNodes(new Set(allDepNodes.map(n => n.id)));
+  };
+
+  const deselectAllDepNodes = () => {
+    setSelectedDepNodes(new Set());
+  };
+
+  const handleDepExport = () => {
+    if (!cyDepRef.current) return;
+    const png = cyDepRef.current.png({ scale: 2 });
+    const link = document.createElement('a');
+    link.href = png;
+    link.download = `dependency-graph-${selectedProjectId}.png`;
+    link.click();
+  };
+
+  const handleDepZoomIn = () => {
+    if (cyDepRef.current) {
+      cyDepRef.current.zoom(cyDepRef.current.zoom() * 1.2);
+      cyDepRef.current.center();
+    }
+  };
+
+  const handleDepZoomOut = () => {
+    if (cyDepRef.current) {
+      cyDepRef.current.zoom(cyDepRef.current.zoom() * 0.8);
+      cyDepRef.current.center();
+    }
+  };
+
+  const handleDepFit = () => {
+    if (cyDepRef.current) {
+      cyDepRef.current.fit();
     }
   };
 
@@ -1249,6 +1676,259 @@ export default function DataFlow() {
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
                       <span className="text-sm">Parameters</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Impact Analysis Statistics */}
+        {impactStats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">{impactStats.totalImpacted}</div>
+                  <div className="text-sm text-gray-600 mt-1">Total Functions</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600">{impactStats.directUpstream}</div>
+                  <div className="text-sm text-gray-600 mt-1">Upstream Calls</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">{impactStats.directDownstream}</div>
+                  <div className="text-sm text-gray-600 mt-1">Downstream Calls</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-600">{impactStats.maxDepth}</div>
+                  <div className="text-sm text-gray-600 mt-1">Max Call Depth</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Loading Indicator for Impact Analysis */}
+        {isLoadingImpact && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertDescription>
+              Analyzing impact relationships...
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Impact Analysis Graph */}
+        {impactData && impactData.nodes.length > 0 && (
+          <Card data-testid="card-impact-analysis" className="mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Impact Analysis Graph</CardTitle>
+                  <CardDescription>
+                    Visualize the impact of changing a function - shows upstream and downstream dependencies
+                  </CardDescription>
+                </div>
+                {cyImpactRef.current && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleImpactZoomIn}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-impact-zoom-in"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleImpactZoomOut}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-impact-zoom-out"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleImpactFit}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-impact-fit"
+                    >
+                      <Maximize className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleImpactExport}
+                      variant="outline"
+                      data-testid="button-impact-export"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export PNG
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="relative bg-gray-50">
+                <div 
+                  ref={containerImpactRef} 
+                  style={{ height: '700px', width: '100%' }}
+                  data-testid="cytoscape-impact-container"
+                />
+                
+                {/* Legend */}
+                {cyImpactRef.current && (
+                  <div className="absolute top-4 right-4 bg-white p-3 rounded shadow-md space-y-2">
+                    <div className="text-sm font-semibold mb-2">Edge Types</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-green-500"></div>
+                      <span className="text-sm">Calls</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-orange-500"></div>
+                      <span className="text-sm">Called By</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Dependency Graph Statistics */}
+        {depStats && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-cyan-600">{depStats.totalFunctions}</div>
+                  <div className="text-sm text-gray-600 mt-1">Total Functions</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">{depStats.totalDependencies}</div>
+                  <div className="text-sm text-gray-600 mt-1">Dependencies</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-600">{depStats.avgComplexity.toFixed(1)}</div>
+                  <div className="text-sm text-gray-600 mt-1">Avg Complexity</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Loading Indicator for Dependency Graph */}
+        {isLoadingDepGraph && (
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertDescription>
+              Analyzing code dependencies...
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Dependency Graph */}
+        {depGraphData && depGraphData.nodes.length > 0 && (
+          <Card data-testid="card-dependency-graph">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Dependency Graph</CardTitle>
+                  <CardDescription>
+                    Overall code structure showing files, functions, and their relationships
+                  </CardDescription>
+                </div>
+                {cyDepRef.current && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleDepZoomIn}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-dep-zoom-in"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleDepZoomOut}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-dep-zoom-out"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleDepFit}
+                      variant="outline"
+                      size="icon"
+                      data-testid="button-dep-fit"
+                    >
+                      <Maximize className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleDepExport}
+                      variant="outline"
+                      data-testid="button-dep-export"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export PNG
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="relative bg-gray-50">
+                <div 
+                  ref={containerDepRef} 
+                  style={{ height: '700px', width: '100%' }}
+                  data-testid="cytoscape-dep-container"
+                />
+                
+                {/* Legend */}
+                {cyDepRef.current && (
+                  <div className="absolute top-4 right-4 bg-white p-3 rounded shadow-md space-y-2">
+                    <div className="text-sm font-semibold mb-2">Node Types</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+                      <span className="text-sm">Files</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-cyan-500 rounded-full"></div>
+                      <span className="text-sm">Functions</span>
+                    </div>
+                    <div className="text-sm font-semibold mt-3 mb-2">Edge Types</div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-blue-500"></div>
+                      <span className="text-sm">Calls</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-purple-500" style={{borderStyle: 'dashed'}}></div>
+                      <span className="text-sm">Contains</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-orange-500"></div>
+                      <span className="text-sm">Imports</span>
                     </div>
                   </div>
                 )}
