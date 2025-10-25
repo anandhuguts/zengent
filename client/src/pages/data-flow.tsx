@@ -395,6 +395,7 @@ export default function DataFlow() {
       label: node.data.label,
       type: node.data.type,
     }));
+    console.log('Data Field Flow - Nodes loaded:', fields.length, 'Edges:', dataFieldFlowData.edges.length);
     setAllFields(fields);
     
     // Always reset with all fields selected when new data arrives
