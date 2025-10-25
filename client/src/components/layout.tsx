@@ -20,7 +20,8 @@ import {
   FileText,
   HelpCircle,
   Cpu,
-  Award
+  Award,
+  Network
 } from "lucide-react";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 
@@ -84,6 +85,12 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
       href: '/quality-measure',
       icon: Award,
       current: location === '/quality-measure'
+    },
+    {
+      name: 'Data Flow',
+      href: '/data-flow',
+      icon: Network,
+      current: location === '/data-flow'
     },
     {
       name: 'Technology & Flow',
