@@ -399,63 +399,6 @@ export default function TeamBehind() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Architect Section */}
-        <Card className="mb-8 border-2 border-purple-500">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50">
-            <CardTitle className="flex items-center">
-              <Sparkles className="h-6 w-6 text-purple-600 mr-2" />
-              Lead Architect
-            </CardTitle>
-            <CardDescription>
-              System design and technical leadership
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="flex items-start space-x-6">
-              <img 
-                src={ullasPhoto} 
-                alt="Ullas Krishnan" 
-                className="w-32 h-40 rounded-lg object-cover border-4 border-purple-500 flex-shrink-0 shadow-lg"
-              />
-              <div className="flex-1">
-                <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Ullas Krishnan</h3>
-                  <p className="text-lg text-purple-600 font-semibold mb-1">Sr. Solution Architect</p>
-                  <p className="text-gray-600 mb-4">AES Cloud Strategy & Operations</p>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700">Complete platform architecture design and implementation strategy</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700">Multi-language code analysis engine architecture</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700">AI integration framework with multiple LLM providers</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700">Data visualization and interactive diagram systems</p>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700">Enterprise-grade security and authentication framework</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">System Design</Badge>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">Technical Leadership</Badge>
-                  <Badge variant="secondary" className="bg-green-100 text-green-700">Innovation</Badge>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-700">Implementation</Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
     </div>
   );
 }
