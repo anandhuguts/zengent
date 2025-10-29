@@ -385,8 +385,7 @@ export default function TeamBehind() {
                 <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                   <p className="text-gray-800 leading-relaxed">
                     <strong className="text-blue-700">End-to-end design and development</strong> of the CodeLens platform, 
-                    including architecture, AI logic, data processing, UI integration, and report generation. 
-                    <strong className="text-blue-700"> Led the entire implementation independently.</strong>
+                    including architecture, AI logic, data processing, UI integration, and report generation.
                   </p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
