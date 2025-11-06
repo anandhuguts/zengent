@@ -121,7 +121,7 @@ export default function DataFlow() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [flowStats, setFlowStats] = useState<FunctionCallData['stats'] | null>(null);
   const [fieldStats, setFieldStats] = useState<DataFieldFlowData['stats'] | null>(null);
-  const [githubUrl, setGithubUrl] = useState('');
+  const [githubUrl, setGithubUrl] = useState('https://github.com/kartik1502/Spring-Boot-Microservices-Banking-Application');
   const [githubBranch, setGithubBranch] = useState('main');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFunctions, setSelectedFunctions] = useState<Set<string>>(new Set());
