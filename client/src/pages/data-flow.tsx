@@ -1184,7 +1184,7 @@ export default function DataFlow() {
                     <Input
                       id="github-url"
                       type="url"
-                      placeholder="https://github.com/username/repository"
+                      placeholder="https://github.com/kartik1502/Spring-Boot-Microservices-Banking-Application"
                       value={githubUrl}
                       onChange={(e) => setGithubUrl(e.target.value)}
                       disabled={githubMutation.isPending}
