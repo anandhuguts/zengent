@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSession, requireAuth, optionalAuth } from "./auth";
+import { setupSession, requireAuth, optionalAuth, validateHardcodedUser } from "./auth";
 import { loginSchema, insertProjectSchema, githubProjectSchema } from "@shared/schema";
 import { analyzeJavaProject } from "./services/javaAnalyzer";
 import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const loginData = loginSchema.parse(req.body);
-      const user = await storage.validateUser(loginData.username, loginData.password);
+      const user = await validateHardcodedUser(loginData.username, loginData.password);
       
       if (user) {
         if (req.session) {
@@ -422,14 +422,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user profile
+  // Update user profile (hardcoded user - updates session only)
   app.patch('/api/auth/user', requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const user = req.session.user;
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       const updateData = req.body;
       
       // Validate the update data
-      const allowedFields = ['firstName', 'lastName', 'email', 'position', 'department'];
+      const allowedFields = ['firstName', 'lastName', 'email', 'position'];
       const validData: any = {};
       
       for (const field of allowedFields) {
@@ -438,48 +442,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const updatedUser = await storage.updateUser(userId, validData);
-      if (updatedUser) {
-        const { password, ...userWithoutPassword } = updatedUser;
-        res.json(userWithoutPassword);
-      } else {
-        res.status(404).json({ message: "User not found" });
-      }
+      // Update session user data
+      const updatedUser = { ...user, ...validData, updatedAt: new Date() };
+      req.session.user = updatedUser;
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
     }
   });
 
-  // Upload profile image
+  // Upload profile image (hardcoded user - updates session only)
   app.post('/api/auth/upload-avatar', requireAuth, uploadImage.single('profileImage'), async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const user = req.session.user;
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       const file = req.file;
       
-      console.log(`Avatar upload attempt for user ID: ${userId}`);
+      console.log(`Avatar upload attempt for user: ${user.username}`);
       
       if (!file) {
         return res.status(400).json({ message: "No image file provided" });
       }
       
-      // Check if user exists first
-      const existingUser = await storage.getUser(userId);
-      if (!existingUser) {
-        console.error(`User not found with ID: ${userId}`);
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Convert image to base64 for storage
+      // Convert image to base64 for storage in session
       const imageData = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
       
-      const updatedUser = await storage.updateUser(userId, { profileImageUrl: imageData });
-      if (updatedUser) {
-        const { password, ...userWithoutPassword } = updatedUser;
-        res.json(userWithoutPassword);
-      } else {
-        res.status(404).json({ message: "Failed to update user profile" });
-      }
+      // Update session user data
+      const updatedUser = { ...user, profileImageUrl: imageData, updatedAt: new Date() };
+      req.session.user = updatedUser;
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error uploading profile image:", error);
       res.status(500).json({ message: "Failed to upload image" });
