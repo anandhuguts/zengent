@@ -61,6 +61,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "connect-pg-simple": "^10.0.0",
+    "cross-env": "^10.1.0",
     "cytoscape": "^3.33.1",
     "dagre": "^0.8.5",
     "date-fns": "^3.6.0",

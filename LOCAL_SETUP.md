@@ -49,8 +49,32 @@ SESSION_SECRET=code-lens-session-secret-2024
 
 ### 4. Start the Application
 
-Run the development server:
+**Option A - Windows (Command Prompt):**
+```bash
+start-windows.bat
+```
 
+**Option B - Windows (PowerShell):**
+```powershell
+.\start-windows.ps1
+```
+
+**Option C - Mac/Linux:**
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+**Option D - Using npm (all platforms - requires cross-env):**
+First install cross-env if not already installed:
+```bash
+npm install cross-env
+```
+Then manually update package.json `dev` script to:
+```json
+"dev": "cross-env NODE_ENV=development tsx server/index.ts"
+```
+Then run:
 ```bash
 npm run dev
 ```
