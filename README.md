@@ -303,8 +303,8 @@ http://localhost:5000
 ```
 
 ### **Default Credentials**
-- Username: `admin`
-- Password: `admin123`
+- Username: `amex`
+- Password: `zensar`
 
 ---
 
