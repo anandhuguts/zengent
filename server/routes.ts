@@ -804,6 +804,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Error scanning demographics for migration plan:', error);
       }
       
+      // Initialize tracking structures (always, even if no demographic data)
+      const detailedFindings: any[] = [];
+      const impactedFilesMap = new Map<string, any>();
+      const impactedComponentsMap = new Map<string, any>();
+      let impactedFiles: any[] = [];
+      let impactedComponents: any[] = [];
+      
+      if (demographicReport && demographicReport.fieldResults) {
+        // Build detailed findings for each demographic field type
+        for (const [fieldType, results] of Object.entries(demographicReport.fieldResults)) {
+          const scanResults = results as any[];
+          const filesSet = new Set(scanResults.map((r: any) => r.file));
+          const functionsSet = new Set<string>();
+          const classesSet = new Set<string>();
+          
+          // Extract function and class names from context
+          scanResults.forEach((result: any) => {
+            const context = result.context || '';
+            // Extract function names (simple heuristic)
+            const funcMatch = context.match(/(?:public|private|protected)?\s*(?:static)?\s*\w+\s+(\w+)\s*\(/);
+            if (funcMatch) functionsSet.add(funcMatch[1]);
+            
+            // Extract class names (simple heuristic)
+            const classMatch = context.match(/class\s+(\w+)/);
+            if (classMatch) classesSet.add(classMatch[1]);
+            
+            // Track impacted files
+            const filePath = result.file;
+            if (!impactedFilesMap.has(filePath)) {
+              impactedFilesMap.set(filePath, {
+                path: filePath,
+                demographicFields: [],
+                functions: [],
+                classes: [],
+                linesOfCode: 0,
+                migrationPriority: 'MEDIUM' as const
+              });
+            }
+            const fileEntry = impactedFilesMap.get(filePath);
+            if (!fileEntry.demographicFields.includes(fieldType)) {
+              fileEntry.demographicFields.push(fieldType);
+            }
+          });
+          
+          detailedFindings.push({
+            fieldType,
+            category: fieldType.split(' ')[0] || 'Unknown',
+            filesContaining: Array.from(filesSet),
+            functionsAccessing: Array.from(functionsSet),
+            classesUsing: Array.from(classesSet),
+            totalOccurrences: scanResults.length,
+            complianceRequirements: ['GDPR', 'PCI-DSS', 'HIPAA'] // Based on field type
+          });
+        }
+        
+        // Update impacted files with functions and classes
+        for (const fileEntry of impactedFilesMap.values()) {
+          const allFunctions = new Set<string>();
+          const allClasses = new Set<string>();
+          
+          detailedFindings.forEach(finding => {
+            if (finding.filesContaining.includes(fileEntry.path)) {
+              finding.functionsAccessing.forEach((f: string) => allFunctions.add(f));
+              finding.classesUsing.forEach((c: string) => allClasses.add(c));
+            }
+          });
+          
+          fileEntry.functions = Array.from(allFunctions);
+          fileEntry.classes = Array.from(allClasses);
+          fileEntry.migrationPriority = fileEntry.demographicFields.length > 5 ? 'CRITICAL' :
+                                       fileEntry.demographicFields.length > 3 ? 'HIGH' :
+                                       fileEntry.demographicFields.length > 1 ? 'MEDIUM' : 'LOW';
+        }
+        
+        // Use ImpactAnalyzer to build detailed component tracking
+        const sourceFiles = await storage.getProjectSourceFiles(id);
+        if (sourceFiles.length > 0) {
+          const analyzer = new ImpactAnalyzer();
+          
+          // Analyze each demographic field to find impacted components
+          for (const finding of detailedFindings) {
+            const files = sourceFiles.map(sf => ({
+              path: sf.relativePath,
+              content: sf.content,
+              language: 'java' as const
+            }));
+            
+            const impactResult = analyzer.analyze(files, finding.fieldType);
+            
+            // Extract impacted components from impact analysis
+            impactResult.impactedFunctions.forEach(funcNode => {
+              const componentKey = `${funcNode.file}::${funcNode.name}`;
+              if (!impactedComponentsMap.has(componentKey)) {
+                impactedComponentsMap.set(componentKey, {
+                  type: 'function' as const,
+                  name: funcNode.name,
+                  file: funcNode.file,
+                  demographicFieldsAccessed: [finding.fieldType],
+                  dependsOn: Array.from(impactResult.edges
+                    .filter(e => e.from === funcNode.id)
+                    .map(e => {
+                      const targetNode = impactResult.impactedFunctions.find(n => n.id === e.to);
+                      return targetNode ? targetNode.name : '';
+                    })
+                    .filter(Boolean)),
+                  usedBy: Array.from(impactResult.edges
+                    .filter(e => e.to === funcNode.id)
+                    .map(e => {
+                      const sourceNode = impactResult.impactedFunctions.find(n => n.id === e.from);
+                      return sourceNode ? sourceNode.name : '';
+                    })
+                    .filter(Boolean)),
+                  transformationRequired: true
+                });
+              } else {
+                // Add field to existing component
+                const component = impactedComponentsMap.get(componentKey);
+                if (!component.demographicFieldsAccessed.includes(finding.fieldType)) {
+                  component.demographicFieldsAccessed.push(finding.fieldType);
+                }
+              }
+            });
+          }
+        }
+        
+        // Convert maps to arrays (will be populated if demographic data exists)
+        impactedFiles = Array.from(impactedFilesMap.values());
+        impactedComponents = Array.from(impactedComponentsMap.values());
+      }
+      
       // Get quality metrics
       const qualityMetric = await storage.getQualityMetricByProject(id);
       
@@ -817,18 +947,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Build POD analysis from project data
+      const analysisClasses = (analysisData as any)?.classes || [];
+      const totalDemoFields = demographicReport?.summary?.totalMatches || 0;
+      const complianceRisk: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 
+        totalDemoFields > 30 ? 'CRITICAL' : 
+        totalDemoFields > 15 ? 'HIGH' :
+        totalDemoFields > 5 ? 'MEDIUM' : 'LOW';
+      
       const podAnalysis = {
         language: 'Java', // TODO: detect from project
-        framework: analysisData.classes?.some((c: any) => c.annotations?.includes('@RestController')) ? 'Spring Boot' : 'Java',
+        framework: analysisClasses.some((c: any) => c.annotations?.includes('@RestController')) ? 'Spring Boot' : 'Java',
         architecture: 'Monolithic', // TODO: detect from structure
         database: 'Unknown', // TODO: detect from dependencies
-        dependencies: analysisData.classes?.slice(0, 20).map((c: any) => c.package) || [],
+        dependencies: analysisClasses.slice(0, 20).map((c: any) => c.package) || [],
         demographicFields: {
-          total: demographicReport?.summary?.totalMatches || 0,
+          total: totalDemoFields,
           categories: demographicReport?.coverage?.foundFields || [],
-          complianceRisk: (demographicReport?.summary?.totalMatches || 0) > 30 ? 'CRITICAL' : 
-                         (demographicReport?.summary?.totalMatches || 0) > 15 ? 'HIGH' :
-                         (demographicReport?.summary?.totalMatches || 0) > 5 ? 'MEDIUM' : 'LOW'
+          complianceRisk,
+          detailedFindings
         },
         qualityMetrics: {
           securityScore: qualityMetric?.security || 0,
@@ -838,8 +974,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         cyclicDependencies: 0, // TODO: get from dependency analysis
         isolatedComponents: 0, // TODO: get from dependency analysis
-        vulnerabilities: vulnCounts
+        vulnerabilities: vulnCounts,
+        impactedFiles,
+        impactedComponents
       };
+      
+      // Generate pseudo code transformation examples for demographic fields
+      const transformationExamples = [
+        {
+          fieldType: 'SSN (Social Security Number)',
+          scenario: 'Encrypting SSN field during migration',
+          beforeCode: `// POD (Legacy Code)
+public class Customer {
+  private String ssn; // Plain text storage - SECURITY RISK!
+  
+  public String getSSN() {
+    return this.ssn; // Direct exposure
+  }
+  
+  public void setSSN(String ssn) {
+    this.ssn = ssn; // No validation or encryption
+  }
+}`,
+          afterCode: `// POA (Modern Secure Code)
+@Entity
+public class Customer {
+  @Encrypted // Using encryption at rest
+  @Column(name = "ssn_encrypted")
+  private String ssnEncrypted;
+  
+  @Transient
+  private String ssn; // Decrypted in memory only
+  
+  public String getSSN() {
+    if (ssn == null && ssnEncrypted != null) {
+      ssn = encryptionService.decrypt(ssnEncrypted);
+    }
+    return ssn;
+  }
+  
+  public void setSSN(String ssn) {
+    // Validate SSN format
+    if (!ssnValidator.isValid(ssn)) {
+      throw new ValidationException("Invalid SSN format");
+    }
+    this.ssn = ssn;
+    this.ssnEncrypted = encryptionService.encrypt(ssn);
+  }
+  
+  @PrePersist
+  @PreUpdate
+  private void encryptSSN() {
+    if (ssn != null) {
+      ssnEncrypted = encryptionService.encrypt(ssn);
+      ssn = null; // Clear from memory
+    }
+  }
+}`,
+          explanation: 'Transforms plain text SSN storage to encrypted field with AES-256-GCM encryption, field validation, and secure lifecycle management.',
+          securityEnhancements: [
+            'AES-256-GCM encryption at rest using AWS KMS',
+            'SSN format validation before storage',
+            'Transient in-memory decryption only when needed',
+            'Automatic encryption on persist/update',
+            'Audit logging for SSN access (GDPR/HIPAA compliance)'
+          ]
+        },
+        {
+          fieldType: 'Credit Card Number',
+          scenario: 'PCI-DSS compliant tokenization',
+          beforeCode: `// POD (Legacy Code)
+public void processPayment(String cardNumber, String cvv) {
+  // CRITICAL SECURITY FLAW: Storing full card number
+  payment.setCardNumber(cardNumber);
+  payment.setCVV(cvv);
+  database.save(payment);
+  
+  chargeCard(cardNumber, cvv);
+}`,
+          afterCode: `// POA (PCI-DSS Compliant Code)
+public void processPayment(String cardNumber, String cvv) {
+  // Tokenize card using PCI-DSS Level 1 compliant vault
+  TokenizationResponse token = paymentVault.tokenize(
+    cardNumber, 
+    cvv,
+    TokenizationOptions.builder()
+      .format(TokenFormat.PRESERVING_LAST_4)
+      .expiresIn(Duration.ofMinutes(15))
+      .build()
+  );
+  
+  // Store only token, never actual card data
+  payment.setCardToken(token.getToken());
+  payment.setLast4Digits(token.getLast4Digits());
+  payment.setCardBrand(token.getCardBrand());
+  database.save(payment);
+  
+  // Process payment using token
+  chargeCardWithToken(token.getToken());
+}`,
+          explanation: 'Replaces direct card storage with PCI-DSS Level 1 tokenization, ensuring no card data touches your infrastructure.',
+          securityEnhancements: [
+            'PCI-DSS Level 1 compliant tokenization service',
+            'No card data stored in application database',
+            'Token expiration for security',
+            'Preserves last 4 digits for UX',
+            'Automatic PCI compliance audit trail'
+          ]
+        },
+        {
+          fieldType: 'Email Address',
+          scenario: 'GDPR-compliant data isolation microservice',
+          beforeCode: `// POD (Monolithic Legacy Code)
+public class OrderService {
+  public void createOrder(Order order) {
+    // Email scattered across monolith
+    order.setCustomerEmail(request.getEmail());
+    order.setNotificationEmail(request.getEmail());
+    database.save(order);
+    
+    emailService.send(order.getCustomerEmail(), "Order placed");
+  }
+}`,
+          afterCode: `// POA (Microservices with PII Isolation)
+@Service
+public class OrderService {
+  @Autowired
+  private PIIVaultClient piiVault; // Dedicated PII microservice
+  
+  public void createOrder(Order order) {
+    // Store email in isolated PII vault
+    String emailId = piiVault.storeEmail(
+      request.getEmail(),
+      PIIRetentionPolicy.builder()
+        .purpose("order_processing")
+        .gdprConsent(request.getGdprConsent())
+        .retentionDays(90)
+        .build()
+    );
+    
+    // Store only reference ID in order
+    order.setCustomerEmailId(emailId);
+    database.save(order);
+    
+    // Retrieve email only when needed
+    String email = piiVault.retrieveEmail(emailId);
+    emailService.send(email, "Order placed");
+  }
+  
+  // GDPR Right to be Forgotten
+  public void deleteCustomerData(String customerId) {
+    piiVault.deleteAllEmailsForCustomer(customerId);
+    // Email references auto-nullified
+  }
+}`,
+          explanation: 'Isolates PII data into dedicated microservice with GDPR compliance features (consent tracking, retention policies, right to be forgotten).',
+          securityEnhancements: [
+            'PII data isolated in dedicated vault microservice',
+            'GDPR consent tracking and retention policies',
+            'Right to be Forgotten implementation',
+            'Reduced PII exposure across microservices',
+            'Audit trail for all PII access'
+          ]
+        }
+      ];
       
       // Generate migration plan using AI
       const migrationPlan = await aiMigrationService.generateMigrationPath(
@@ -853,6 +1151,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiModel,
         customPrompt
       );
+      
+      // Add component impact analysis and transformation examples
+      migrationPlan.componentImpactAnalysis = {
+        impactedFiles,
+        impactedComponents,
+        transformationExamples
+      };
       
       res.json(migrationPlan);
     } catch (error: any) {

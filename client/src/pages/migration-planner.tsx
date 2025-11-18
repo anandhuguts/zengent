@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Sparkles,
   Brain,
-  Cpu
+  Cpu,
+  FileCode,
+  Code
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import type { Project } from '@shared/schema';
@@ -113,6 +115,33 @@ interface MigrationPlan {
   aiReasoning: string;
   aiModel: string;
   generatedAt: string;
+  componentImpactAnalysis?: {
+    impactedFiles: Array<{
+      path: string;
+      demographicFields: string[];
+      functions: string[];
+      classes: string[];
+      linesOfCode: number;
+      migrationPriority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+    }>;
+    impactedComponents: Array<{
+      type: 'class' | 'function' | 'library';
+      name: string;
+      file: string;
+      demographicFieldsAccessed: string[];
+      dependsOn: string[];
+      usedBy: string[];
+      transformationRequired: boolean;
+    }>;
+    transformationExamples: Array<{
+      fieldType: string;
+      scenario: string;
+      beforeCode: string;
+      afterCode: string;
+      explanation: string;
+      securityEnhancements: string[];
+    }>;
+  };
 }
 
 export default function MigrationPlanner() {
@@ -372,7 +401,7 @@ export default function MigrationPlanner() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => generatePlanMutation.mutate(selectedAIModel)}
+                  onClick={() => generatePlanMutation.mutate({ aiModel: selectedAIModel, customPrompt })}
                 >
                   Regenerate Plan
                 </Button>
@@ -382,11 +411,13 @@ export default function MigrationPlanner() {
 
           {/* Tabbed Content */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 gap-1">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
               <TabsTrigger value="architecture" data-testid="tab-architecture">POA Architecture</TabsTrigger>
               <TabsTrigger value="phases" data-testid="tab-phases">Migration Phases</TabsTrigger>
               <TabsTrigger value="demographic" data-testid="tab-demographic">Demographic Data</TabsTrigger>
+              <TabsTrigger value="impact" data-testid="tab-impact">Component Impact</TabsTrigger>
+              <TabsTrigger value="transformations" data-testid="tab-transformations">Code Transformations</TabsTrigger>
               <TabsTrigger value="risks" data-testid="tab-risks">Risks</TabsTrigger>
               <TabsTrigger value="cost" data-testid="tab-cost">Cost Analysis</TabsTrigger>
             </TabsList>
@@ -571,6 +602,174 @@ export default function MigrationPlanner() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Component Impact Analysis Tab */}
+            <TabsContent value="impact" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileCode className="h-5 w-5 text-blue-500" />
+                    Impacted Files & Components
+                  </CardTitle>
+                  <CardDescription>
+                    Detailed tracking of which files, functions, and classes contain demographic data and will be affected by migration
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {migrationPlan.componentImpactAnalysis?.impactedFiles && migrationPlan.componentImpactAnalysis.impactedFiles.length > 0 ? (
+                    <>
+                      <div className="flex items-center gap-4 mb-4">
+                        <Badge variant="outline" className="text-lg px-4 py-2">
+                          {migrationPlan.componentImpactAnalysis.impactedFiles.length} Files Impacted
+                        </Badge>
+                        <Badge variant="outline" className="text-lg px-4 py-2">
+                          {migrationPlan.componentImpactAnalysis.impactedFiles.filter(f => f.migrationPriority === 'CRITICAL').length} Critical Priority
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {migrationPlan.componentImpactAnalysis.impactedFiles
+                          .sort((a, b) => {
+                            const priority = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+                            return priority[a.migrationPriority] - priority[b.migrationPriority];
+                          })
+                          .map((file, index) => (
+                          <div key={index} className="border rounded-lg p-4 space-y-2" data-testid={`impacted-file-${index}`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileCode className="h-4 w-4 text-muted-foreground" />
+                                <code className="text-sm font-mono">{file.path}</code>
+                              </div>
+                              <Badge variant={getImpactColor(file.migrationPriority) as any}>
+                                {file.migrationPriority} PRIORITY
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <p className="font-semibold mb-1">Demographic Fields ({file.demographicFields.length})</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {file.demographicFields.slice(0, 5).map((field, i) => (
+                                    <Badge key={i} variant="secondary" className="text-xs">
+                                      {field}
+                                    </Badge>
+                                  ))}
+                                  {file.demographicFields.length > 5 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{file.demographicFields.length - 5} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="font-semibold mb-1">Functions ({file.functions.length})</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {file.functions.slice(0, 3).map((func, i) => (
+                                    <Badge key={i} variant="outline" className="text-xs font-mono">
+                                      {func}()
+                                    </Badge>
+                                  ))}
+                                  {file.functions.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{file.functions.length - 3} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="font-semibold mb-1">Classes ({file.classes.length})</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {file.classes.slice(0, 3).map((cls, i) => (
+                                    <Badge key={i} variant="outline" className="text-xs font-mono">
+                                      {cls}
+                                    </Badge>
+                                  ))}
+                                  {file.classes.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{file.classes.length - 3} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No detailed component impact data available. Upload a project with demographic fields to see detailed tracking.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Code Transformations Tab */}
+            <TabsContent value="transformations" className="space-y-4">
+              {migrationPlan.componentImpactAnalysis?.transformationExamples && migrationPlan.componentImpactAnalysis.transformationExamples.length > 0 ? (
+                migrationPlan.componentImpactAnalysis.transformationExamples.map((example, index) => (
+                  <Card key={index} data-testid={`transformation-example-${index}`}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Code className="h-5 w-5 text-purple-500" />
+                        {example.fieldType} - {example.scenario}
+                      </CardTitle>
+                      <CardDescription>
+                        {example.explanation}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="destructive" className="text-xs">POD - Legacy</Badge>
+                            <span className="text-sm font-medium text-red-600">❌ Insecure</span>
+                          </div>
+                          <pre className="text-xs bg-red-50 dark:bg-red-950 p-4 rounded-lg overflow-x-auto border border-red-200 dark:border-red-800">
+                            <code>{example.beforeCode}</code>
+                          </pre>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="default" className="text-xs bg-green-600">POA - Modern</Badge>
+                            <span className="text-sm font-medium text-green-600">✅ Secure</span>
+                          </div>
+                          <pre className="text-xs bg-green-50 dark:bg-green-950 p-4 rounded-lg overflow-x-auto border border-green-200 dark:border-green-800">
+                            <code>{example.afterCode}</code>
+                          </pre>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-blue-500" />
+                          Security Enhancements
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {example.securityEnhancements.map((enhancement, i) => (
+                            <div key={i} className="flex items-start gap-2 text-sm p-2 bg-blue-50 dark:bg-blue-950 rounded">
+                              <CheckCircle2 className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                              <span>{enhancement}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">
+                      No code transformation examples available. Transformation examples are generated when demographic fields are detected.
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* Risks Tab */}

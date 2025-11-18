@@ -1,6 +1,36 @@
 import OpenAI from 'openai';
 import { OllamaService } from './ollamaService';
 
+// Detailed component tracking for migration impact
+export interface ImpactedFile {
+  path: string;
+  demographicFields: string[];
+  functions: string[];
+  classes: string[];
+  linesOfCode: number;
+  migrationPriority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+export interface ImpactedComponent {
+  type: 'class' | 'function' | 'library';
+  name: string;
+  file: string;
+  demographicFieldsAccessed: string[];
+  dependsOn: string[];
+  usedBy: string[];
+  transformationRequired: boolean;
+}
+
+export interface DemographicFieldDetail {
+  fieldType: string;
+  category: string;
+  filesContaining: string[];
+  functionsAccessing: string[];
+  classesUsing: string[];
+  totalOccurrences: number;
+  complianceRequirements: string[];
+}
+
 // Migration-specific types
 export interface PODAnalysis {
   language: string;
@@ -12,6 +42,7 @@ export interface PODAnalysis {
     total: number;
     categories: string[];
     complianceRisk: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    detailedFindings?: DemographicFieldDetail[];
   };
   qualityMetrics: {
     securityScore: number;
@@ -27,6 +58,8 @@ export interface PODAnalysis {
     medium: number;
     low: number;
   };
+  impactedFiles?: ImpactedFile[];
+  impactedComponents?: ImpactedComponent[];
 }
 
 export interface POARequirements {
@@ -82,11 +115,22 @@ export interface CostAnalysis {
   };
 }
 
+export interface CodeTransformationExample {
+  fieldType: string;
+  scenario: string;
+  beforeCode: string;
+  afterCode: string;
+  explanation: string;
+  securityEnhancements: string[];
+}
+
 export interface DemographicMigrationPlan {
   currentState: {
     totalFields: number;
     issues: string[];
     complianceGaps: string[];
+    impactedFilesCount?: number;
+    impactedComponentsCount?: number;
   };
   targetState: {
     isolationPattern: string;
@@ -99,6 +143,7 @@ export interface DemographicMigrationPlan {
     before: string;
     after: string;
   };
+  transformationExamples?: CodeTransformationExample[];
 }
 
 export interface MigrationSuggestion {
@@ -115,6 +160,11 @@ export interface MigrationSuggestion {
   aiReasoning: string;
   aiModel: string;
   generatedAt: string;
+  componentImpactAnalysis?: {
+    impactedFiles: ImpactedFile[];
+    impactedComponents: ImpactedComponent[];
+    transformationExamples: CodeTransformationExample[];
+  };
 }
 
 export class AIMigrationService {
