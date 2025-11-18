@@ -19,6 +19,7 @@ import TeamBehind from "@/pages/about";
 import ReadmePage from "@/pages/readme";
 import KnowledgeAgent from "@/pages/knowledge-agent";
 import ZenVectorAgent from "@/pages/zenvector-agent";
+import MigrationPlanner from "@/pages/migration-planner";
 import TechnologyFlow from "@/pages/technology-flow";
 import QualityMeasure from "@/pages/quality-measure";
 import DataFlow from "@/pages/data-flow";
@@ -106,6 +107,13 @@ function Router() {
                 {() => (
                   <Layout>
                     <ZenVectorAgent />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/projects/:id/migration-planner">
+                {(params) => (
+                  <Layout>
+                    <MigrationPlanner />
                   </Layout>
                 )}
               </Route>

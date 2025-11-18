@@ -44,6 +44,47 @@ This agent provides comprehensive document scraping (including Confluence integr
 ### ZenVector Agent - Advanced Code Intelligence
 An enhanced AI agent for enterprise-grade code analysis. It integrates ChromaDB for persistent vector storage and HuggingFace CodeBERT for code quality analysis. Langfuse provides LLM monitoring and tracing for all AI operations.
 
+### POD→POA Migration AI Suggester
+An intelligent migration planning system that analyzes POD (Point of Departure - legacy systems) and generates comprehensive POA (Point of Arrival - modern target systems) migration roadmaps. This AI-powered feature leverages existing Code Lens analysis (dependencies, demographic data, quality metrics, security vulnerabilities) to provide:
+
+**Migration Analysis:**
+- Automated POD assessment using dependency graphs, demographic field scanning, ISO-5055 quality metrics, and CWE vulnerability data
+- AI-powered POA architecture recommendations (microservices, cloud-native, serverless)
+- Technology stack suggestions (language upgrades, frameworks, databases, cloud platforms)
+- Migration strategy selection (Strangler Fig, Phased, Big Bang, Lift & Shift) with AI reasoning
+
+**Phased Migration Roadmap:**
+- Multi-phase migration plans (typically 3-4 phases over 6 months)
+- Service-by-service extraction prioritizing compliance-critical components
+- Effort estimation (person-months), timeline, and deliverables per phase
+- Dependency tracking and risk assessment for each phase
+
+**Demographic Data Migration:**
+- Security-first approach for migrating sensitive data (SSN, credit cards, PII)
+- Encryption strategies (AES-256-GCM with cloud KMS, PCI-DSS tokenization)
+- Data isolation patterns (dedicated PII vault microservices)
+- Compliance features for GDPR, HIPAA, PCI-DSS with code transformation examples
+
+**Cost-Benefit Analysis:**
+- POD annual operating cost estimation (on-premise infrastructure, licenses, compliance risk)
+- POA annual operating cost projection (cloud services, pay-as-you-go pricing)
+- Migration investment calculation (development effort, tools, training)
+- ROI break-even analysis and annual savings projections
+
+**AI Model Support:**
+- OpenAI GPT-4o for strategic migration planning and architecture recommendations
+- Ollama local models (Code Llama, Deepseek Coder, Mistral) for privacy-first offline analysis
+- HuggingFace CodeBERT for code pattern matching and transformation suggestions
+- Multi-AI approach combining strategic planning (OpenAI) with tactical execution (local models)
+
+**Risk Management:**
+- Automated risk identification across security, compliance, data loss, performance, and downtime categories
+- Impact assessment (CRITICAL, HIGH, MEDIUM, LOW) with detailed mitigation strategies
+- Breaking cyclic dependencies with event-driven architecture recommendations
+- Zero-downtime migration strategies using gradual traffic shifting
+
+This feature transforms Code Lens from a static analysis tool into a complete migration intelligence platform, providing actionable, AI-driven migration paths from legacy systems to modern cloud-native architectures.
+
 ### Enterprise AI Technology Stack
 The platform integrates advanced AI and ML technologies: IBM Doclinq for PDF processing, LangChain for document handling, LangGraph for workflow orchestration, Langfuse for LLM observability, HuggingFace Models (CodeBERT, DialoGPT, transformers) for local AI, and multi-LLM support (OpenAI, Claude, Gemini, local). ChromaDB serves as the vector database, and Redis is used for performance optimization.
 

@@ -6,6 +6,7 @@ import { loginSchema, insertProjectSchema, githubProjectSchema } from "@shared/s
 import { analyzeJavaProject } from "./services/javaAnalyzer";
 import { analyzeGithubRepository, isValidGithubUrl } from "./services/githubService";
 import { aiAnalysisService, getGlobalUsageStats } from "./services/aiAnalysisService";
+import { aiMigrationService } from "./services/aiMigrationService";
 import { swaggerGenerator } from "./services/swaggerGenerator";
 import { projectStructureAnalyzer } from "./services/projectStructureAnalyzer";
 import swaggerUi from "swagger-ui-express";
@@ -762,6 +763,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating AI analysis:", error);
       res.status(500).json({ message: "Failed to generate AI analysis" });
+    }
+  });
+
+  // Generate POD→POA Migration Plan
+  app.post("/api/projects/:id/migration-plan", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { poaRequirements, aiModel = 'openai' } = req.body;
+      
+      console.log(`Generating migration plan for project ${id} using ${aiModel}...`);
+      
+      // Get project data
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get analysis data
+      const analysisData = project.analysisData;
+      if (!analysisData) {
+        return res.status(400).json({ message: "Project must be analyzed first before generating migration plan" });
+      }
+      
+      // Get demographic scan data
+      const demographicReport = await storage.getDemographicReport(id);
+      
+      // Get quality metrics
+      const qualityMetric = await storage.getQualityMetricByProject(id);
+      
+      // Get CWE vulnerabilities
+      const vulnerabilities = await storage.getCWEVulnerabilitiesByProject(id);
+      const vulnCounts = {
+        critical: vulnerabilities.filter(v => v.severity === 'critical').length,
+        high: vulnerabilities.filter(v => v.severity === 'high').length,
+        medium: vulnerabilities.filter(v => v.severity === 'medium').length,
+        low: vulnerabilities.filter(v => v.severity === 'low').length,
+      };
+      
+      // Build POD analysis from project data
+      const podAnalysis = {
+        language: 'Java', // TODO: detect from project
+        framework: analysisData.classes?.some((c: any) => c.annotations?.includes('@RestController')) ? 'Spring Boot' : 'Java',
+        architecture: 'Monolithic', // TODO: detect from structure
+        database: 'Unknown', // TODO: detect from dependencies
+        dependencies: analysisData.classes?.slice(0, 20).map((c: any) => c.package) || [],
+        demographicFields: {
+          total: demographicReport?.summary?.totalMatches || 0,
+          categories: demographicReport?.coverage?.foundFields || [],
+          complianceRisk: (demographicReport?.summary?.totalMatches || 0) > 30 ? 'CRITICAL' : 
+                         (demographicReport?.summary?.totalMatches || 0) > 15 ? 'HIGH' :
+                         (demographicReport?.summary?.totalMatches || 0) > 5 ? 'MEDIUM' : 'LOW'
+        },
+        qualityMetrics: {
+          securityScore: qualityMetric?.security || 0,
+          maintainability: qualityMetric?.maintainability || 0,
+          cyclomaticComplexity: 10, // TODO: calculate from analysis
+          technicalDebtHours: Math.round((100 - (qualityMetric?.overallScore || 50)) * 10)
+        },
+        cyclicDependencies: 0, // TODO: get from dependency analysis
+        isolatedComponents: 0, // TODO: get from dependency analysis
+        vulnerabilities: vulnCounts
+      };
+      
+      // Generate migration plan using AI
+      const migrationPlan = await aiMigrationService.generateMigrationPath(
+        podAnalysis,
+        poaRequirements || {
+          targetPlatform: 'AWS Cloud',
+          compliance: ['GDPR', 'PCI-DSS', 'HIPAA'],
+          timeline: '6 months',
+          budget: 'MEDIUM'
+        },
+        aiModel
+      );
+      
+      res.json(migrationPlan);
+    } catch (error: any) {
+      console.error("Error generating migration plan:", error);
+      res.status(500).json({ 
+        message: "Failed to generate migration plan",
+        error: error.message 
+      });
     }
   });
 
