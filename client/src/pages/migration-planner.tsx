@@ -119,6 +119,7 @@ export default function MigrationPlanner() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [selectedAIModel, setSelectedAIModel] = useState<string>('openai');
+  const [customPrompt, setCustomPrompt] = useState<string>('');
   
   // Fetch project data
   const { data: project } = useQuery<Project>({
@@ -127,12 +128,13 @@ export default function MigrationPlanner() {
   });
 
   // Mutation to generate migration plan
-  const generatePlanMutation = useMutation<MigrationPlan, Error, string>({
-    mutationFn: async (aiModel: string) => {
+  const generatePlanMutation = useMutation<MigrationPlan, Error, { aiModel: string; customPrompt: string }>({
+    mutationFn: async ({ aiModel, customPrompt }) => {
       const response = await fetch(`/api/projects/${id}/migration-plan`, {
         method: 'POST',
         body: JSON.stringify({
           aiModel,
+          customPrompt,
           poaRequirements: {
             targetPlatform: 'AWS Cloud',
             compliance: ['GDPR', 'PCI-DSS', 'HIPAA'],
@@ -218,11 +220,28 @@ export default function MigrationPlanner() {
               Select an AI model to analyze your codebase and generate a comprehensive migration roadmap
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
+            {/* Custom Prompt Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Custom Migration Requirements (Optional)
+              </label>
+              <textarea
+                placeholder="Enter specific requirements, constraints, or focus areas for migration. For example: 'Focus on microservices architecture' or 'Prioritize database migration strategy' or 'Must support multi-region deployment'..."
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                className="w-full min-h-[100px] p-3 border rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-primary"
+                data-testid="input-custom-prompt"
+              />
+              <p className="text-xs text-muted-foreground">
+                This custom prompt will be included in the AI-generated migration report
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
                 data-testid="button-generate-openai"
-                onClick={() => generatePlanMutation.mutate('openai')}
+                onClick={() => generatePlanMutation.mutate({ aiModel: 'openai', customPrompt })}
                 disabled={isLoading}
                 className="h-auto flex flex-col items-start gap-2 p-4"
                 variant={selectedAIModel === 'openai' ? 'default' : 'outline'}
@@ -238,7 +257,7 @@ export default function MigrationPlanner() {
 
               <Button
                 data-testid="button-generate-codellama"
-                onClick={() => generatePlanMutation.mutate('ollama-codellama')}
+                onClick={() => generatePlanMutation.mutate({ aiModel: 'ollama-codellama', customPrompt })}
                 disabled={isLoading}
                 className="h-auto flex flex-col items-start gap-2 p-4"
                 variant={selectedAIModel === 'ollama-codellama' ? 'default' : 'outline'}
@@ -254,7 +273,7 @@ export default function MigrationPlanner() {
 
               <Button
                 data-testid="button-generate-deepseek"
-                onClick={() => generatePlanMutation.mutate('ollama-deepseek')}
+                onClick={() => generatePlanMutation.mutate({ aiModel: 'ollama-deepseek', customPrompt })}
                 disabled={isLoading}
                 className="h-auto flex flex-col items-start gap-2 p-4"
                 variant={selectedAIModel === 'ollama-deepseek' ? 'default' : 'outline'}

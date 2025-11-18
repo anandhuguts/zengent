@@ -770,9 +770,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects/:id/migration-plan", async (req, res) => {
     try {
       const { id } = req.params;
-      const { poaRequirements, aiModel = 'openai' } = req.body;
+      const { poaRequirements, aiModel = 'openai', customPrompt } = req.body;
       
       console.log(`Generating migration plan for project ${id} using ${aiModel}...`);
+      if (customPrompt) {
+        console.log(`Custom prompt: ${customPrompt.substring(0, 100)}...`);
+      }
       
       // Get project data
       const project = await storage.getProject(id);
@@ -847,7 +850,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timeline: '6 months',
           budget: 'MEDIUM'
         },
-        aiModel
+        aiModel,
+        customPrompt
       );
       
       res.json(migrationPlan);

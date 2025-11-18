@@ -139,11 +139,12 @@ export class AIMigrationService {
   async generateMigrationPath(
     podAnalysis: PODAnalysis,
     poaRequirements: POARequirements,
-    aiModel: 'openai' | 'ollama-codellama' | 'ollama-deepseek' | 'ollama-mistral' = 'openai'
+    aiModel: 'openai' | 'ollama-codellama' | 'ollama-deepseek' | 'ollama-mistral' = 'openai',
+    customPrompt?: string
   ): Promise<MigrationSuggestion> {
     console.log(`Generating migration path using ${aiModel}...`);
 
-    const prompt = this.buildMigrationPrompt(podAnalysis, poaRequirements);
+    const prompt = this.buildMigrationPrompt(podAnalysis, poaRequirements, customPrompt);
     
     let aiResponse: string;
     let actualModel: string;
@@ -213,11 +214,13 @@ export class AIMigrationService {
   /**
    * Build comprehensive migration prompt for AI
    */
-  private buildMigrationPrompt(pod: PODAnalysis, poa: POARequirements): string {
+  private buildMigrationPrompt(pod: PODAnalysis, poa: POARequirements, customPrompt?: string): string {
     return `
 # POD→POA Migration Analysis Request
 
 You are analyzing a legacy system (POD - Point of Departure) and must recommend a migration path to a modern system (POA - Point of Arrival).
+
+${customPrompt ? `\n## Custom Requirements & Focus Areas:\n${customPrompt}\n` : ''}
 
 ## POD (Current System) Analysis
 
