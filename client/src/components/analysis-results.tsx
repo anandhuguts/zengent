@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { type Project, type AnalysisData } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,8 @@ import {
   Leaf,
   Cog,
   GitBranch,
-  Activity
+  Activity,
+  ArrowRightLeft
 } from "lucide-react";
 import type { DiagramType } from "@/types/analysis";
 
@@ -136,6 +138,17 @@ export default function AnalysisResults({ project, onNewAnalysis }: AnalysisResu
                 <Activity className="w-4 h-4 mr-2" />
                 AI Insights
               </Button>
+              <Link href={`/projects/${project.id}/migration-planner`}>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  data-testid="button-migration-planner"
+                >
+                  <ArrowRightLeft className="w-4 h-4 mr-2" />
+                  Migration Planner
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm">
                 <Share2 className="w-4 h-4" />
               </Button>
