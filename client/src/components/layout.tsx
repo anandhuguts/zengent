@@ -22,7 +22,8 @@ import {
   Cpu,
   Award,
   Network,
-  Book
+  Book,
+  Sparkles
 } from "lucide-react";
 import zensarLogo from "@assets/Zensar_composite_logo_whit_ai_1754732936523.png";
 
@@ -128,6 +129,12 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
       href: '/innersource-docs',
       icon: Book,
       current: location === '/innersource-docs'
+    },
+    {
+      name: 'AI Code Refactor Assistant',
+      href: '/ai-code-refactor',
+      icon: Sparkles,
+      current: location === '/ai-code-refactor'
     }
   ];
 

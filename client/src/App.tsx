@@ -26,6 +26,7 @@ import DataFlow from "@/pages/data-flow";
 import CWESecurityScan from "@/pages/cwe-security-scan";
 import FeaturesPage from "@/pages/features";
 import InnersourceDocsPage from "@/pages/innersource-docs";
+import AICodeRefactorPage from "@/pages/ai-code-refactor";
 
 import Layout from "@/components/layout";
 
@@ -151,6 +152,13 @@ function Router() {
                 {() => (
                   <Layout>
                     <InnersourceDocsPage />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/ai-code-refactor">
+                {() => (
+                  <Layout>
+                    <AICodeRefactorPage />
                   </Layout>
                 )}
               </Route>
