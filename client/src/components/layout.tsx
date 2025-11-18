@@ -115,6 +115,12 @@ export default function Layout({ children, showAIConfig, onAIConfigToggle, aiCon
       href: '/about',
       icon: Users,
       current: location === '/about'
+    },
+    {
+      name: 'Platform Features',
+      href: '/features',
+      icon: FileText,
+      current: location === '/features'
     }
   ];
 

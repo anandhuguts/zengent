@@ -24,6 +24,7 @@ import TechnologyFlow from "@/pages/technology-flow";
 import QualityMeasure from "@/pages/quality-measure";
 import DataFlow from "@/pages/data-flow";
 import CWESecurityScan from "@/pages/cwe-security-scan";
+import FeaturesPage from "@/pages/features";
 
 import Layout from "@/components/layout";
 
@@ -135,6 +136,13 @@ function Router() {
                 {() => (
                   <Layout>
                     <CWESecurityScan />
+                  </Layout>
+                )}
+              </Route>
+              <Route path="/features">
+                {() => (
+                  <Layout>
+                    <FeaturesPage />
                   </Layout>
                 )}
               </Route>
