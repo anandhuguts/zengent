@@ -4,29 +4,28 @@ import { setupVite, serveStatic, log } from "./vite";
 
 // Validate optional environment variables
 function validateEnvironment() {
-  // Warn about missing optional variables
-  const optionalVars = ['DATABASE_URL', 'SESSION_SECRET', 'OPENAI_API_KEY'];
-  const missingOptional = optionalVars.filter(varName => !process.env[varName]);
-  
+  const optionalVars = ["DATABASE_URL", "SESSION_SECRET", "OPENAI_API_KEY"];
+  const missingOptional = optionalVars.filter(v => !process.env[v]);
+
   if (missingOptional.length > 0) {
-    console.warn(`⚠️  Missing optional environment variables: ${missingOptional.join(', ')}`);
+    console.warn(`⚠️  Missing optional environment variables: ${missingOptional.join(", ")}`);
     if (!process.env.DATABASE_URL) {
-      console.warn('   Using in-memory storage (data will be lost on restart)');
+      console.warn("   Using in-memory storage (data will be lost on restart)");
     }
   }
 }
 
-// Validate environment in both development and production
 validateEnvironment();
 
 const app = express();
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: false, limit: '100mb' }));
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: false, limit: "100mb" }));
 
+// Request logger
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse: Record<string, any> | undefined;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
@@ -41,11 +40,9 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       log(logLine);
     }
   });
@@ -56,37 +53,33 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Vite (only in dev)
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
-  }).on('error', (err) => {
-    console.error('Server failed to start:', err);
-    process.exit(1);
-  });
+  // Safe Windows host + port
+  const port = parseInt(process.env.PORT || "5000", 10);
+  const host = process.env.HOST || "127.0.0.1"; // avoid Windows ENOTSUP
+
+  server
+    .listen({ port, host }, () => {
+      log(
+        `🚀 Server running in ${process.env.NODE_ENV || "development"} mode on http://${host}:${port}`
+      );
+    })
+    .on("error", (err) => {
+      console.error("Server failed to start:", err);
+      process.exit(1);
+    });
 })();
