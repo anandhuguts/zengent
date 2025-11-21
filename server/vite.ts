@@ -74,7 +74,8 @@ export function serveStatic(app) {
   const __dirname = path.dirname(__filename);
 
   // The frontend build lives in: dist/public
-  const clientPath = path.join(__dirname, "../public");
+const clientPath = path.join(__dirname, "../../dist/public");
+
 
   console.log("Serving static from:", clientPath);
 
